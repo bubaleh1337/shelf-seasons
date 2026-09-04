@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Shelf Seasons">
+  <rect width="64" height="64" rx="17" fill="#263D32"/>
+  <path d="M15 17.5c6.8-2.2 12.5-.9 17 3.5v27c-4.5-4.4-10.2-5.7-17-3.5v-27Z" fill="#F4E8D2"/>
+  <path d="M49 17.5c-6.8-2.2-12.5-.9-17 3.5v27c4.5-4.4 10.2-5.7 17-3.5v-27Z" fill="#E8D4AD"/>
+  <path d="M32 22v26M19 23c4.4-.7 7.7.2 10 2.7M45 23c-4.4-.7-7.7.2-10 2.7" fill="none" stroke="#A85F45" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M41 12c5 1.2 8.2 4.4 9.2 9.7-5.3-.9-8.5-4.1-9.2-9.7Z" fill="#D3B16F"/>
+</svg>
