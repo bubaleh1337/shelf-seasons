@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bookInputSchema } from "@/lib/books/validation";
-import { bookToDto, requireUser, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
+import { bookToDto, requireUser, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
 
 type Context = { params: Promise<{ bookId: string }> };
@@ -30,8 +30,15 @@ export async function PUT(request: NextRequest, context: Context) {
   }
 
   const values = toInsert(userId, parsed.data);
-  const { data: updated, error } = await supabase.from("library_books").update({ ...values, cover_path: coverPath }).eq("id", bookId).eq("user_id", userId).select().single();
-  if (error || !updated) return NextResponse.json({ error: "save_failed" }, { status: 400 });
+  const { status, ...metadata } = values;
+  const { error } = await supabase.from("library_books").update({ ...metadata, cover_path: coverPath }).eq("id", bookId).eq("user_id", userId);
+  if (error) return NextResponse.json({ error: "save_failed" }, { status: 400 });
+  let updated;
+  try {
+    updated = await setBookStatus(supabase, bookId, status ?? "want");
+  } catch {
+    return NextResponse.json({ error: "status_sync_failed" }, { status: 400 });
+  }
   return NextResponse.json({ book: await bookToDto(supabase, updated) });
 }
 

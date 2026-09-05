@@ -191,6 +191,14 @@ export type Database = {
         };
         Returns: string;
       };
+      set_library_book_status: {
+        Args: {
+          p_book_id: string;
+          p_status: Database["public"]["Enums"]["library_status"];
+          p_changed_on?: string | null;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       app_locale: "en" | "ru";

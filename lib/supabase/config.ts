@@ -15,15 +15,21 @@ export function getSupabaseConfig() {
 }
 
 export function getAppOrigin() {
-  const configuredOrigin =
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ?? "http://localhost:3000";
+  const configuredValue =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
+    process.env.VERCEL_URL?.trim() ||
+    "http://localhost:3000";
+  const configuredOrigin = configuredValue.includes("://")
+    ? configuredValue
+    : `https://${configuredValue}`;
   const origin = new URL(configuredOrigin);
 
   if (
     origin.protocol !== "https:" &&
     !(origin.protocol === "http:" && ["localhost", "127.0.0.1"].includes(origin.hostname))
   ) {
-    throw new Error("NEXT_PUBLIC_APP_URL must use HTTPS outside localhost.");
+    throw new Error("The application origin must use HTTPS outside localhost.");
   }
 
   return origin.origin;

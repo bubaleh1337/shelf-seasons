@@ -80,7 +80,7 @@ Exit criteria:
 
 ## Stage 4 — reading log, calendar and streaks
 
-Status: the core vertical slice ships in `0.5.0`: quick/detailed sessions, backdating, real week/month/year views, deletion and streak calculations. Session editing and finish-book transitions remain for the next increment.
+Status: the core vertical slice ships in `0.5.1`: quick/detailed sessions, backdating, real week/month/year views, deletion, streak calculations and synchronized library/run statuses. Session editing and the full finish-book ritual remain for the next increment.
 
 Deliverables:
 

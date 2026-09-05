@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1 — 2026-09-05
+
+- Fixed the Home page so only a book on the Reading shelf can appear as the current book.
+- Added a bilingual empty state when the library has books but none are currently being read.
+- Synchronized library shelf changes with active reading runs and repaired stale runs left by 0.5.0.
+- Added deterministic Vercel build configuration and automatic Vercel production-origin detection.
+- Added regression coverage for completed books, recent current-book selection, status transitions and deployment configuration.
+
 ## 0.5.0 — 2026-09-05
 
 - Added real reading runs and daily reading sessions with ownership-based RLS.

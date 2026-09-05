@@ -1,6 +1,6 @@
 {
   "name": "shelf-seasons",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -12,6 +12,7 @@
     "start": "next start",
     "test": "npm run build && node --check public/sw.js && node --test tests/*.test.mjs",
     "test:connected": "node scripts/check-supabase.mjs",
+    "release:check": "npm run format:check && npm run lint && npm run typecheck && npm test",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "format:check": "node scripts/check-format.mjs"
@@ -40,7 +41,6 @@
     "recharts": "^3.8.0",
     "sharp": "0.34.5",
     "sonner": "^2.0.8",
-    "sharp": "0.34.5",
     "tailwind-merge": "3.6.0",
     "vaul": "^1.1.2",
     "zod": "^3.25.76"

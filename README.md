@@ -32,7 +32,7 @@ Open the local address printed by the development server.
 
 The default address is `http://localhost:3000/ru/app`.
 
-For the reading tracker, apply `supabase/migrations/202609050003_reading_tracker.sql` once after the personal-library migration.
+For the reading tracker, apply `supabase/migrations/202609050003_reading_tracker.sql` once after the personal-library migration, then apply `supabase/migrations/202609050004_library_status_sync.sql`.
 
 Verification:
 
@@ -40,6 +40,7 @@ Verification:
 npm run typecheck
 npm run lint
 npm test
+npm run release:check
 ```
 
 ## Stage 2: development account setup
@@ -72,4 +73,4 @@ Read in this order before implementation work:
 
 ## Current stage
 
-Version 0.5.0 includes the personal library, quick/detailed reading sessions, a real cover calendar and streaks. Series, finish-book rituals and recaps remain later roadmap stages.
+Version 0.5.1 includes the personal library, quick/detailed reading sessions, a real cover calendar, streaks, synchronized reading statuses and Vercel public-beta configuration. Series, finish-book rituals and recaps remain later roadmap stages.

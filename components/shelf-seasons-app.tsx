@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { appCopy } from "@/lib/app-copy";
+import { selectCurrentBook } from "@/lib/books/current";
 import type { LibraryBook, LibraryStatus } from "@/lib/books/types";
 import { calculateStreaks, localDateKey } from "@/lib/reading/dates";
 import type { ReadingSession } from "@/lib/reading/types";
@@ -80,11 +81,11 @@ function Home({ locale, name, books, sessions, timezone, onBookSaved, onSessionS
   const streaks = calculateStreaks(sessions.map((session) => session.readOn), today);
   const monthPrefix = today.slice(0, 7);
   const monthDays = new Set(sessions.filter((session) => session.readOn.startsWith(monthPrefix)).map((session) => session.readOn)).size;
-  const currentBook = books.find((book) => book.status === "reading") ?? books[0];
+  const currentBook = selectCurrentBook(books, sessions);
   return <><PageIntro title={`${c.greeting}${firstName}`} lead={c.homeLead} />
     {books.length === 0 ? <section className="personal-empty-hero"><BookHeart /><h2>{c.emptyHome}</h2><p>{c.emptyHomeLead}</p><BookDialog locale={locale} onSaved={onBookSaved} /></section> : <>
       <section className="reading-home-grid">
-        <article className="reading-now-card"><LibraryBookCover book={currentBook} /><div><p className="eyebrow">{c.reading}</p><h2>{currentBook.title}</h2><p>{currentBook.authors.join(", ") || "—"}</p><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /></div></article>
+        {currentBook ? <article className="reading-now-card"><LibraryBookCover book={currentBook} /><div><p className="eyebrow">{c.reading}</p><h2>{currentBook.title}</h2><p>{currentBook.authors.join(", ") || "—"}</p><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /></div></article> : <article className="reading-now-card reading-now-empty"><span className="reading-empty-icon"><BookOpen /></span><div><p className="eyebrow">{c.reading}</p><h2>{c.noCurrentBook}</h2><p>{c.noCurrentBookLead}</p><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /></div></article>}
         <div className="streak-summary"><article><Flame /><strong>{streaks.current}</strong><span>{c.days}</span><small>{c.currentStreak}</small></article><article><Sparkles /><strong>{streaks.longest}</strong><span>{c.days}</span><small>{c.longestStreak}</small></article><article><CalendarDays /><strong>{monthDays}</strong><span>{c.readingDays}</span><small>{c.thisMonth}</small></article></div>
       </section>
       <section className="recent-section"><div className="section-heading"><h2>{c.library}</h2><Link href={`/${locale}/app/library`}>{c.openLibrary}</Link></div><div className="personal-book-grid">{books.slice(0, 5).map((book) => <SimpleBookCard key={book.id} locale={locale} book={book} />)}</div></section>

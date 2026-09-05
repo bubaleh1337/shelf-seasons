@@ -53,6 +53,26 @@ export function toInsert(userId: string, input: BookInput) {
   } satisfies Database["public"]["Tables"]["library_books"]["Insert"];
 }
 
+export async function setBookStatus(
+  supabase: Client,
+  bookId: string,
+  status: Database["public"]["Enums"]["library_status"],
+) {
+  const { error: statusError } = await supabase.rpc("set_library_book_status", {
+    p_book_id: bookId,
+    p_status: status,
+  });
+  if (statusError) throw statusError;
+
+  const { data: row, error } = await supabase
+    .from("library_books")
+    .select()
+    .eq("id", bookId)
+    .single();
+  if (error || !row) throw error ?? new Error("book_not_found_after_status_update");
+  return row;
+}
+
 export async function storeCover(supabase: Client, userId: string, bookId: string, file: File) {
   if (file.size > 5 * 1024 * 1024) throw new Error("cover_too_large");
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("cover_type");
