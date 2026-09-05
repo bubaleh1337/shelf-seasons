@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.3
+
+- Moved the OAuth code exchange into the browser callback page so Vercel cannot lose the new session cookie between two server redirects.
+- Excluded authentication routes from session-refresh middleware during the PKCE handshake.
+- Added a bilingual, accessible sign-in completion screen and callback regression coverage.
+
 ## 0.5.2
 
 - Fixed Google OAuth session cookies across Vercel redirects.
