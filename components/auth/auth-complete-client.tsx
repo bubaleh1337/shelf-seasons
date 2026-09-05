@@ -7,7 +7,7 @@ import { parseLocale, safeAppPath } from "@/lib/auth/redirect";
 import type { Locale } from "@/lib/shelf-seasons";
 import { createClient } from "@/lib/supabase/client";
 
-export function AuthCallbackClient({ locale }: { locale: Locale }) {
+export function AuthCompleteClient({ locale }: { locale: Locale }) {
   const [failed, setFailed] = useState(false);
   const copy = authCopy[locale];
 
@@ -16,7 +16,10 @@ export function AuthCallbackClient({ locale }: { locale: Locale }) {
     const params = new URLSearchParams(window.location.search);
     const callbackLocale = parseLocale(params.get("locale"));
     const next = safeAppPath(params.get("next"), callbackLocale);
-    const signInUrl = new URL(`/${callbackLocale}/sign-in`, window.location.origin);
+    const signInUrl = new URL(
+      `/${callbackLocale}/sign-in`,
+      window.location.origin,
+    );
 
     async function finishSignIn() {
       const code = params.get("code");

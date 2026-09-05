@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.4
+
+- Removed the callback route/page collision that prevented Vercel from deploying 0.5.3.
+- Split the OAuth callback redirect and browser-side PKCE exchange across separate routes.
+- Added a Windows cleanup script that safely removes only the two obsolete callback files left by archive overlays.
+
 ## 0.5.3
 
 - Moved the OAuth code exchange into the browser callback page so Vercel cannot lose the new session cookie between two server redirects.

@@ -73,4 +73,4 @@ Read in this order before implementation work:
 
 ## Current stage
 
-Version 0.5.3 includes the personal library, multi-provider localized book search, browser-completed Vercel OAuth, quick/detailed reading sessions, a real cover calendar, streaks, synchronized reading statuses and Vercel public-beta configuration. Series, finish-book rituals and recaps remain later roadmap stages.
+Version 0.5.4 includes the personal library, multi-provider localized book search, browser-completed Vercel OAuth without callback route conflicts, quick/detailed reading sessions, a real cover calendar, streaks, synchronized reading statuses and Vercel public-beta configuration. Series, finish-book rituals and recaps remain later roadmap stages.

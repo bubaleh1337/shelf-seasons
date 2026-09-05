@@ -1,13 +1,14 @@
 # Closed public beta on Vercel
 
-Version 0.5.3 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: account export/deletion, legal pages and release monitoring remain on the roadmap.
+Version 0.5.4 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: account export/deletion, legal pages and release monitoring remain on the roadmap.
 
 ## Before deployment
 
-1. Apply `supabase/migrations/202609050004_library_status_sync.sql` once, after migration `003`.
-2. Run `npm run release:check` and push version 0.5.3 to the GitHub `main` branch.
-3. Import `bubaleh1337/shelf-seasons` in Vercel.
-4. Add these Production environment variables in Vercel:
+1. After overlaying the 0.5.4 archive on Windows, run `node .\scripts\update-to-0.5.4.mjs` once to remove obsolete 0.5.3 callback files.
+2. Apply `supabase/migrations/202609050004_library_status_sync.sql` once, after migration `003`.
+3. Run `npm run release:check` and push version 0.5.4 to the GitHub `main` branch.
+4. Import `bubaleh1337/shelf-seasons` in Vercel.
+5. Add these Production environment variables in Vercel:
    - `NEXT_PUBLIC_SUPABASE_URL` = the existing Supabase project URL;
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = the existing publishable key.
 

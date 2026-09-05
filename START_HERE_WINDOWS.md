@@ -1,4 +1,4 @@
-# Shelf Seasons 0.5.3 — дневник чтения на Windows
+# Shelf Seasons 0.5.4 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
