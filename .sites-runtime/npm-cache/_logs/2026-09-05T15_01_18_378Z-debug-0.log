@@ -7,6 +7,6 @@
 6 silly config load:file:C:\Users\developer\AppData\Roaming\npm\etc\npmrc
 7 verbose title npm run dev
 8 verbose argv "run" "dev"
-9 verbose logfile logs-max:10 dir:P:\Projects\shelf-seasons\shelf-seasons\.sites-runtime\npm-cache\_logs\2026-09-05T05_34_57_009Z-
-10 verbose logfile P:\Projects\shelf-seasons\shelf-seasons\.sites-runtime\npm-cache\_logs\2026-09-05T05_34_57_009Z-debug-0.log
+9 verbose logfile logs-max:10 dir:P:\Projects\shelf-seasons\shelf-seasons\.sites-runtime\npm-cache\_logs\2026-09-05T15_01_18_378Z-
+10 verbose logfile P:\Projects\shelf-seasons\shelf-seasons\.sites-runtime\npm-cache\_logs\2026-09-05T15_01_18_378Z-debug-0.log
 11 silly logfile done cleaning log files

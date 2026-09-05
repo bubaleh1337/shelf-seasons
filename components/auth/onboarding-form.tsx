@@ -31,17 +31,7 @@ export function OnboardingForm({
           <option value="ru">Русский</option>
         </select>
       </label>
-      <label>
-        <span>{c.timezone}</span>
-        <input
-          name="timezone"
-          ref={timezoneInput}
-          defaultValue={initialTimezone}
-          required
-          maxLength={64}
-          autoComplete="off"
-        />
-      </label>
+      <input name="timezone" ref={timezoneInput} type="hidden" defaultValue={initialTimezone} />
       <label>
         <span>{c.theme}</span>
         <select name="theme" defaultValue={initialTheme}>

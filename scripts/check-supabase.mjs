@@ -25,18 +25,22 @@ if (!health.ok) {
   process.exit(1);
 }
 
-const profiles = await fetch(`${url}/rest/v1/profiles?select=user_id&limit=1`, {
-  headers,
-  signal: AbortSignal.timeout(15_000),
-});
-if (!profiles.ok) {
-  const payload = await profiles.json().catch(() => ({}));
-  if (profiles.status === 404 && payload?.code === "PGRST205") {
-    console.error("Supabase check failed: apply the Stage 2 migration first.");
-  } else {
-    console.error(`Supabase database check failed with HTTP ${profiles.status}.`);
-  }
+async function checkProtectedTable(table, stage) {
+  const response = await fetch(`${url}/rest/v1/${table}?select=*&limit=1`, {
+    headers,
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (response.ok) return;
+  const payload = await response.json().catch(() => ({}));
+  const isExpectedAnonDenial = response.status === 401 && payload?.code === "42501";
+  if (isExpectedAnonDenial) return;
+  console.error(`Supabase check failed: apply the ${stage} migration first.`);
   process.exit(1);
 }
 
-console.log("Supabase Auth is healthy and the Stage 2 database schema is available.");
+await checkProtectedTable("profiles", "Stage 2 profile");
+await checkProtectedTable("library_books", "Stage 3 personal library");
+await checkProtectedTable("reading_runs", "Stage 4 reading tracker");
+await checkProtectedTable("reading_sessions", "Stage 4 reading tracker");
+
+console.log("Supabase Auth is healthy and the Stage 4 reading tracker schema is available.");

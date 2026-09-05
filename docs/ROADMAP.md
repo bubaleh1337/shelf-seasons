@@ -40,7 +40,7 @@ Exit criteria:
 
 ## Stage 2 — accounts, profiles and security foundation
 
-Status: implementation prepared in `0.3.0`; hosted development configuration and live RLS/OAuth verification remain before completion.
+Status: completed and verified by the owner in the development Supabase project.
 
 Deliverables:
 
@@ -60,6 +60,8 @@ Exit criteria:
 
 ## Stage 3 — personal library
 
+Status: the core vertical slice ships in `0.4.0`: search/manual creation, private custom covers, statuses, filters, edit, archive and delete. Ratings, duplicate warnings and density controls remain for a later Stage 3 increment.
+
 Deliverables:
 
 - book search through Google Books with Open Library cover fallback;
@@ -77,6 +79,8 @@ Exit criteria:
 - provider payloads are normalized and untrusted URLs are handled safely.
 
 ## Stage 4 — reading log, calendar and streaks
+
+Status: the core vertical slice ships in `0.5.0`: quick/detailed sessions, backdating, real week/month/year views, deletion and streak calculations. Session editing and finish-book transitions remain for the next increment.
 
 Deliverables:
 

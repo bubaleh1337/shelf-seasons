@@ -2,7 +2,7 @@
 
 **Your reading life, season by season.**
 
-Shelf Seasons is a cozy bilingual reading journal and visual book tracker. This repository contains the verified Stage 0/1 design foundation plus the Stage 2 account and security foundation on standard Next.js.
+Shelf Seasons is a cozy bilingual reading journal and visual book tracker. This repository contains the verified bilingual design and account foundation plus a real personal library and reading tracker on standard Next.js.
 
 The brand is always **Shelf Seasons**. The technical slug is always `shelf-seasons`.
 
@@ -31,6 +31,8 @@ npm run dev
 Open the local address printed by the development server.
 
 The default address is `http://localhost:3000/ru/app`.
+
+For the reading tracker, apply `supabase/migrations/202609050003_reading_tracker.sql` once after the personal-library migration.
 
 Verification:
 
@@ -68,6 +70,6 @@ Read in this order before implementation work:
 4. `AGENTS.md`
 5. `docs/ROADMAP.md`
 
-## Next stage
+## Current stage
 
-After the Stage 2 development environment is connected and its live RLS tests pass, Stage 3 adds the real personal library: provider search, manual books and private custom covers.
+Version 0.5.0 includes the personal library, quick/detailed reading sessions, a real cover calendar and streaks. Series, finish-book rituals and recaps remain later roadmap stages.

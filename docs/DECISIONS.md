@@ -117,3 +117,9 @@ These decisions are binding until deliberately replaced by a dated decision in t
 **Decision:** agents may prepare code and configuration, but must not purchase a domain, create paid resources, deploy production, rotate secrets or mutate production data without an explicit request.
 
 **Why:** these actions carry cost, external side effects or recovery risk.
+
+## D-019 — timezone is automatic in onboarding
+
+**Decision:** detect the IANA timezone from the browser and store it without asking the user to choose during onboarding. Show the saved value only as an informational setting until travel/timezone editing is implemented.
+
+**Why:** day boundaries still need a timezone, but choosing one is unnecessary friction for almost every new user.

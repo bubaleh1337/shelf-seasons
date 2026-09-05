@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0 — 2026-09-05
+
+- Added real reading runs and daily reading sessions with ownership-based RLS.
+- Added quick check-ins, optional pages/minutes/progress, backdated entries and notes.
+- Added real week, month and year calendar views with book covers and deletable day entries.
+- Added current and longest streaks with the today grace window in the saved timezone.
+- Made provider covers resilient: Russian search is preferred, remote covers are normalized into private storage and failed images always show an accessible fallback.
+- Added a closed-beta Vercel deployment checklist.
+
+## 0.4.0 — 2026-09-05
+
+- Replaced fictional books with each signed-in account's private personal library.
+- Added Google Books search with Open Library fallback and fully manual entry.
+- Added book creation, editing, filtering, archiving and deletion.
+- Added private validated custom-cover uploads with ownership-based storage policies.
+- Removed timezone selection from onboarding and kept automatic detection for future calendar-day boundaries.
+- Replaced misleading demo calendar, series and recap data with honest empty states for signed-in accounts.
+
 ## 0.3.1 — 2026-09-05
 
 - Added a connected Supabase health/schema check for the configured development project.

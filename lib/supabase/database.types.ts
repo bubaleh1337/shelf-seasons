@@ -65,6 +65,108 @@ export type Database = {
           },
         ];
       };
+      library_books: {
+        Row: {
+          id: string;
+          user_id: string;
+          source: Database["public"]["Enums"]["book_source"];
+          provider_id: string | null;
+          title: string;
+          authors: string[];
+          description: string | null;
+          cover_url: string | null;
+          cover_path: string | null;
+          isbn: string | null;
+          published_year: number | null;
+          page_count: number | null;
+          format: Database["public"]["Enums"]["book_format"];
+          status: Database["public"]["Enums"]["library_status"];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          source?: Database["public"]["Enums"]["book_source"];
+          provider_id?: string | null;
+          title: string;
+          authors?: string[];
+          description?: string | null;
+          cover_url?: string | null;
+          cover_path?: string | null;
+          isbn?: string | null;
+          published_year?: number | null;
+          page_count?: number | null;
+          format?: Database["public"]["Enums"]["book_format"];
+          status?: Database["public"]["Enums"]["library_status"];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["library_books"]["Insert"]>;
+        Relationships: [];
+      };
+      reading_runs: {
+        Row: {
+          id: string;
+          user_id: string;
+          book_id: string;
+          status: Database["public"]["Enums"]["run_status"];
+          tracking_mode: Database["public"]["Enums"]["tracking_mode"];
+          started_on: string;
+          finished_on: string | null;
+          is_reread: boolean;
+          current_position: number | null;
+          total_units: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          book_id: string;
+          status?: Database["public"]["Enums"]["run_status"];
+          tracking_mode?: Database["public"]["Enums"]["tracking_mode"];
+          started_on: string;
+          finished_on?: string | null;
+          is_reread?: boolean;
+          current_position?: number | null;
+          total_units?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["reading_runs"]["Insert"]>;
+        Relationships: [];
+      };
+      reading_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          run_id: string;
+          read_on: string;
+          check_in_only: boolean;
+          pages_read: number | null;
+          minutes_read: number | null;
+          resulting_percent: number | null;
+          note: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          run_id: string;
+          read_on: string;
+          check_in_only?: boolean;
+          pages_read?: number | null;
+          minutes_read?: number | null;
+          resulting_percent?: number | null;
+          note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["reading_sessions"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -77,10 +179,27 @@ export type Database = {
         };
         Returns: undefined;
       };
+      log_reading_session: {
+        Args: {
+          p_book_id: string;
+          p_read_on?: string | null;
+          p_check_in_only?: boolean;
+          p_pages_read?: number | null;
+          p_minutes_read?: number | null;
+          p_resulting_percent?: number | null;
+          p_note?: string | null;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       app_locale: "en" | "ru";
       theme_mode: "system" | "light" | "dark";
+      book_source: "manual" | "google_books" | "open_library";
+      book_format: "print" | "ebook" | "audiobook";
+      library_status: "want" | "reading" | "read" | "paused" | "dnf";
+      tracking_mode: "pages" | "percent" | "minutes";
+      run_status: "reading" | "paused" | "completed" | "dnf";
     };
     CompositeTypes: Record<string, never>;
   };

@@ -1,10 +1,10 @@
 # Shelf Seasons planning package
 
-Version: **0.3.0**
+Version: **0.5.0**
 
 Prepared: **2026-09-03**
 
-Status: **Stage 0/1 verified; Stage 2 implementation prepared; connected Supabase verification pending**
+Status: **Stage 0–3 verified; Stage 4 reading-tracker core implemented**
 
 ## Contents
 
