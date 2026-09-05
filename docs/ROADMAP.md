@@ -40,6 +40,8 @@ Exit criteria:
 
 ## Stage 2 — accounts, profiles and security foundation
 
+Status: implementation prepared in `0.3.0`; hosted development configuration and live RLS/OAuth verification remain before completion.
+
 Deliverables:
 
 - separate development and production Supabase projects;

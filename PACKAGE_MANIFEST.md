@@ -1,10 +1,10 @@
 # Shelf Seasons planning package
 
-Version: **0.1.0**
+Version: **0.3.0**
 
 Prepared: **2026-09-03**
 
-Status: **Stage 0/1 implemented; Stage 2 not started**
+Status: **Stage 0/1 verified; Stage 2 implementation prepared; connected Supabase verification pending**
 
 ## Contents
 
@@ -23,6 +23,9 @@ Status: **Stage 0/1 implemented; Stage 2 not started**
 | `docs/DECISIONS.md` | Durable product/architecture decisions |
 | `docs/RELEASE_CHECKLIST.md` | Public-release quality and safety gate |
 | `docs/REFERENCES.md` | Primary implementation documentation |
+| `docs/STAGE_2_SETUP.md` | Supabase dev, Google OAuth and RLS setup checklist |
+| `supabase/migrations/` | Ordered executable database migrations |
+| `supabase/tests/database/` | Database ownership and RLS tests |
 
 ## Canonical identity
 

@@ -16,6 +16,7 @@ import {
   Languages,
   Layers3,
   Library,
+  LogOut,
   Moon,
   Plus,
   Search,
@@ -37,12 +38,15 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { authCopy } from "@/lib/auth/copy";
 import { Book, books, copy, Locale, statusLabel } from "@/lib/shelf-seasons";
 import { cn } from "@/lib/utils";
 
 type Props = {
   locale: Locale;
   section: string;
+  authEnabled?: boolean;
+  readerName?: string;
 };
 
 const navItems = [
@@ -59,7 +63,12 @@ const weekDays = {
   ru: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
 };
 
-export function ShelfSeasonsDemo({ locale, section }: Props) {
+export function ShelfSeasonsDemo({
+  locale,
+  section,
+  authEnabled = false,
+  readerName = "Katya",
+}: Props) {
   const c = copy[locale];
   const activeSection = navItems.some((item) => item.id === section) ? section : "home";
   const [dark, setDark] = useState(false);
@@ -96,8 +105,8 @@ export function ShelfSeasonsDemo({ locale, section }: Props) {
         </nav>
         <LogReadingDialog locale={locale} logged={logged} setLogged={setLogged} triggerClass="sidebar-log" />
         <div className="reader-mini">
-          <span className="reader-avatar" aria-hidden="true">К</span>
-          <span><strong>Katya</strong><small>{locale === "ru" ? "Личная библиотека" : "Personal library"}</small></span>
+          <span className="reader-avatar" aria-hidden="true">{readerName.slice(0, 1).toLocaleUpperCase(locale)}</span>
+          <span><strong>{readerName}</strong><small>{locale === "ru" ? "Личная библиотека" : "Personal library"}</small></span>
         </div>
       </aside>
 
@@ -121,7 +130,7 @@ export function ShelfSeasonsDemo({ locale, section }: Props) {
           {activeSection === "calendar" && <CalendarPage locale={locale} />}
           {activeSection === "series" && <SeriesPage locale={locale} />}
           {activeSection === "recaps" && <RecapsPage locale={locale} />}
-          {activeSection === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} />}
+          {activeSection === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} authEnabled={authEnabled} />}
         </div>
       </main>
 
@@ -350,8 +359,9 @@ function RecapsPage({ locale }: { locale: Locale }) {
   );
 }
 
-function SettingsPage({ locale, dark, toggleTheme }: { locale: Locale; dark: boolean; toggleTheme: (value: boolean) => void }) {
+function SettingsPage({ locale, dark, toggleTheme, authEnabled }: { locale: Locale; dark: boolean; toggleTheme: (value: boolean) => void; authEnabled: boolean }) {
   const c = copy[locale];
+  const accountCopy = authCopy[locale];
   return (
     <>
       <PageIntro title={c.settings} lead={c.settingsLead} />
@@ -359,7 +369,21 @@ function SettingsPage({ locale, dark, toggleTheme }: { locale: Locale; dark: boo
         <section><h2>{c.appearance}</h2><div className="setting-row"><span className="setting-icon">{dark ? <Moon /> : <Sun />}</span><div><strong>{c.darkMode}</strong><p>{c.darkModeDetail}</p></div><Switch checked={dark} onCheckedChange={toggleTheme} aria-label={c.darkMode} /></div></section>
         <section><h2>{c.language}</h2><div className="setting-row"><span className="setting-icon"><Languages /></span><div><strong>{locale === "ru" ? "Русский" : "English"}</strong><p>{c.languageDetail}</p></div><div className="language-links"><Link className={locale === "en" ? "is-active" : ""} href="/en/app/settings">EN</Link><Link className={locale === "ru" ? "is-active" : ""} href="/ru/app/settings">RU</Link></div></div></section>
         <section><h2>{c.timezone}</h2><div className="setting-row"><span className="setting-icon"><Clock3 /></span><div><strong>Asia/Atyrau</strong><p>UTC+05:00</p></div><Button variant="outline">{locale === "ru" ? "Изменить" : "Change"}</Button></div></section>
-        <div className="demo-note"><Sparkles /><div><strong>{c.dataNote}</strong><p>{c.dataNoteDetail}</p></div></div>
+        {authEnabled ? (
+          <section>
+            <h2>{accountCopy.account}</h2>
+            <div className="setting-row">
+              <span className="setting-icon"><LogOut /></span>
+              <div><strong>Shelf Seasons</strong><p>{accountCopy.connected}</p></div>
+              <form action="/auth/sign-out" method="post">
+                <input type="hidden" name="locale" value={locale} />
+                <Button variant="outline" type="submit">{accountCopy.signOut}</Button>
+              </form>
+            </div>
+          </section>
+        ) : (
+          <div className="demo-note"><Sparkles /><div><strong>{c.dataNote}</strong><p>{c.dataNoteDetail}</p></div></div>
+        )}
       </div>
     </>
   );

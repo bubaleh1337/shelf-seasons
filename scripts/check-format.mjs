@@ -2,7 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
-const ignored = new Set([".git", ".next", ".sites-runtime", ".wrangler", "dist", "node_modules"]);
+const ignored = new Set([".git", ".next", "node_modules"]);
 const checkedExtensions = new Set([".css", ".js", ".json", ".md", ".mjs", ".ts", ".tsx", ".yml", ".yaml"]);
 const failures = [];
 

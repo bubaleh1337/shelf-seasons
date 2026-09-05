@@ -2,9 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // Local Cloudflare emulation does not provide the hosted image service.
-    // Serve public covers directly in development; production stays optimized.
-    unoptimized: process.env.NODE_ENV !== "production",
+    // Stage 1 uses a bundled demo cover. Serving it directly keeps local and
+    // production behavior identical and avoids any image-optimizer runtime.
+    unoptimized: true,
   },
 };
 
