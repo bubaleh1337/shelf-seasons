@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-09-05
+
+- Added a connected Supabase health/schema check for the configured development project.
+- Made the regular runtime suite deterministic even when a local Supabase configuration is present.
+- Prepared the Windows handoff for the connected `shelf-seasons-dev` environment.
+
 ## 0.3.0 — 2026-09-05
 
 - Added Supabase SSR client boundaries for standard Next.js 16.

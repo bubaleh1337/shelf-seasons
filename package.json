@@ -1,6 +1,6 @@
 {
   "name": "shelf-seasons",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "test": "npm run build && node --check public/sw.js && node --test tests/*.test.mjs",
+    "test:connected": "node scripts/check-supabase.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "format:check": "node scripts/check-format.mjs"

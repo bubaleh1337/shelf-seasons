@@ -50,6 +50,12 @@ Use a development Supabase project named `shelf-seasons-dev`. Do not connect pro
 4. In Supabase Auth URL configuration, set the Site URL to `http://localhost:3000` and allow `http://localhost:3000/auth/callback`.
 5. Restart `npm run dev`, then open `http://localhost:3000/ru/sign-in`.
 
+After applying the migration, verify the live development project:
+
+```powershell
+npm run test:connected
+```
+
 The Google client secret belongs in Google/Supabase configuration, never in `.env.local` used by Next.js. See `docs/STAGE_2_SETUP.md` for the exact checklist.
 
 ## Product documents

@@ -20,12 +20,19 @@ async function request(route) {
 }
 
 before(async () => {
+  const devEnvironment = {
+    ...process.env,
+    NEXT_TELEMETRY_DISABLED: "1",
+    NEXT_PUBLIC_APP_URL: "",
+    NEXT_PUBLIC_SUPABASE_URL: "",
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
+  };
   server = spawn(
     process.execPath,
     [nextBin, "dev", "--hostname", "127.0.0.1", "--port", String(port)],
     {
       cwd: root,
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" },
+      env: devEnvironment,
       stdio: ["ignore", "pipe", "pipe"],
     },
   );
