@@ -1,6 +1,6 @@
 # Shelf Seasons planning package
 
-Version: **0.5.1**
+Version: **0.5.2**
 
 Prepared: **2026-09-03**
 

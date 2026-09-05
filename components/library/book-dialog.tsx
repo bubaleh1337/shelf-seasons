@@ -34,6 +34,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
   const [showForm, setShowForm] = useState(Boolean(book));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
@@ -42,6 +43,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
       setResults([]);
       setQuery("");
       setError(false);
+      setHasSearched(false);
     }
     setOpen(nextOpen);
   }
@@ -49,12 +51,13 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
   async function searchBooks(event: React.FormEvent) {
     event.preventDefault();
     if (query.trim().length < 2) return;
-    setBusy(true); setError(false);
+    setBusy(true); setError(false); setHasSearched(false);
     try {
       const response = await fetch(`/api/books/search?q=${encodeURIComponent(query.trim())}&locale=${locale}`);
       if (!response.ok) throw new Error();
       const payload = (await response.json()) as { results: BookSearchResult[] };
       setResults(payload.results);
+      setHasSearched(true);
     } catch { setError(true); } finally { setBusy(false); }
   }
 
@@ -88,6 +91,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
           <div className="search-results">
             {results.map((result) => <button type="button" key={`${result.provider}:${result.providerId}`} onClick={() => { setDraft(fromResult(result)); setShowForm(true); }}><LibraryBookCover book={{ ...result, coverUrl: result.coverUrl }} /><span><strong>{result.title}</strong><small>{result.authors.join(", ") || "—"}</small><em>{[result.publishedYear, result.pageCount ? `${result.pageCount} p.` : null].filter(Boolean).join(" · ")}</em></span><span>{c.choose}</span></button>)}
           </div>
+          {hasSearched && !results.length && !error && <p className="search-empty" role="status">{c.noSearchResults}</p>}
           <Button type="button" variant="outline" onClick={() => { setDraft(blank); setShowForm(true); }}><Plus />{c.manual}</Button>
         </div> : <form className="book-editor-form" onSubmit={saveBook}>
           {!book && <button className="back-to-search" type="button" onClick={() => setShowForm(false)}><X />{c.cancel}</button>}

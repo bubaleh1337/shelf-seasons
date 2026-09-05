@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2
+
+- Fixed Google OAuth session cookies across Vercel redirects.
+- Kept OAuth callbacks on the exact hostname where sign-in started.
+- Added multi-pass Google Books search with unrestricted fallback.
+- Ranked matching-language and matching-script book editions first.
+- Added a clear empty search state with manual-entry fallback.
+
 ## 0.5.1 — 2026-09-05
 
 - Fixed the Home page so only a book on the Reading shelf can appear as the current book.

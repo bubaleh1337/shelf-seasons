@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { BookSearchResult } from "@/lib/books/types";
+import {
+  rankAndDedupeResults,
+  type RankedBookSearchResult,
+} from "@/lib/books/search";
 import { requireUser } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,56 +12,130 @@ const yearFrom = (value?: string) => {
   return match ? Number(match[1]) : null;
 };
 
+type GooglePayload = {
+  items?: Array<{
+    id: string;
+    volumeInfo?: {
+      title?: string;
+      authors?: string[];
+      description?: string;
+      publishedDate?: string;
+      pageCount?: number;
+      language?: string;
+      imageLinks?: { thumbnail?: string };
+      industryIdentifiers?: Array<{ type: string; identifier: string }>;
+    };
+  }>;
+};
+
+async function searchGoogle(query: string, language?: "ru" | "en") {
+  const url = new URL("https://www.googleapis.com/books/v1/volumes");
+  url.search = new URLSearchParams({
+    q: query,
+    maxResults: "12",
+    printType: "books",
+    orderBy: "relevance",
+    ...(language ? { langRestrict: language } : {}),
+  }).toString();
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(8_000),
+    next: { revalidate: 3600 },
+  });
+  if (!response.ok) return [];
+  const payload = (await response.json()) as GooglePayload;
+  return (payload.items ?? []).flatMap<RankedBookSearchResult>((item) => {
+    const info = item.volumeInfo;
+    if (!info?.title) return [];
+    return [
+      {
+        provider: "google_books",
+        providerId: item.id,
+        title: info.title,
+        authors: info.authors ?? [],
+        description: info.description ?? null,
+        coverUrl: cleanCover(info.imageLinks?.thumbnail),
+        isbn:
+          info.industryIdentifiers?.find((value) => value.type === "ISBN_13")
+            ?.identifier ?? info.industryIdentifiers?.[0]?.identifier ?? null,
+        publishedYear: yearFrom(info.publishedDate),
+        pageCount: info.pageCount ?? null,
+        language: info.language,
+      },
+    ];
+  });
+}
+
+async function searchOpenLibrary(query: string) {
+  const url = new URL("https://openlibrary.org/search.json");
+  url.search = new URLSearchParams({
+    q: query,
+    limit: "12",
+    fields:
+      "key,title,author_name,first_publish_year,isbn,cover_i,number_of_pages_median,language",
+  }).toString();
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(8_000),
+    next: { revalidate: 3600 },
+  });
+  if (!response.ok) return [];
+  const payload = (await response.json()) as {
+    docs?: Array<{
+      key?: string;
+      title?: string;
+      author_name?: string[];
+      first_publish_year?: number;
+      isbn?: string[];
+      cover_i?: number;
+      number_of_pages_median?: number;
+      language?: string[];
+    }>;
+  };
+  return (payload.docs ?? []).flatMap<RankedBookSearchResult>((book) => {
+    if (!book.key || !book.title) return [];
+    return [
+      {
+        provider: "open_library",
+        providerId: book.key,
+        title: book.title,
+        authors: book.author_name ?? [],
+        description: null,
+        coverUrl: book.cover_i
+          ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+          : null,
+        isbn: book.isbn?.[0] ?? null,
+        publishedYear: book.first_publish_year ?? null,
+        pageCount: book.number_of_pages_median ?? null,
+        language: book.language?.includes("rus")
+          ? "ru"
+          : book.language?.includes("eng")
+            ? "en"
+            : undefined,
+      },
+    ];
+  });
+}
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
-  if (!(await requireUser(supabase))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!(await requireUser(supabase))) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
   const query = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   const locale = request.nextUrl.searchParams.get("locale") === "ru" ? "ru" : "en";
-  if (query.length < 2 || query.length > 200) return NextResponse.json({ results: [] });
-
-  try {
-    const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12&printType=books&orderBy=relevance&langRestrict=${locale}`,
-      { signal: AbortSignal.timeout(8_000), next: { revalidate: 3600 } },
-    );
-    if (response.ok) {
-      const payload = (await response.json()) as {
-        items?: Array<{ id: string; volumeInfo?: { title?: string; authors?: string[]; description?: string; publishedDate?: string; pageCount?: number; imageLinks?: { thumbnail?: string }; industryIdentifiers?: Array<{ type: string; identifier: string }> } }>;
-      };
-      const results: BookSearchResult[] = (payload.items ?? []).flatMap((item) => {
-        const info = item.volumeInfo;
-        if (!info?.title) return [];
-        return [{
-          provider: "google_books",
-          providerId: item.id,
-          title: info.title,
-          authors: info.authors ?? [],
-          description: info.description ?? null,
-          coverUrl: cleanCover(info.imageLinks?.thumbnail),
-          isbn: info.industryIdentifiers?.find((value) => value.type === "ISBN_13")?.identifier ?? info.industryIdentifiers?.[0]?.identifier ?? null,
-          publishedYear: yearFrom(info.publishedDate),
-          pageCount: info.pageCount ?? null,
-        }];
-      });
-      if (results.length) return NextResponse.json({ results });
-    }
-  } catch {
-    // Continue with the fallback provider.
+  if (query.length < 2 || query.length > 200) {
+    return NextResponse.json({ results: [] });
   }
 
-  try {
-    const response = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8`, {
-      signal: AbortSignal.timeout(8_000),
-      next: { revalidate: 3600 },
-    });
-    if (!response.ok) throw new Error("provider_failed");
-    const payload = (await response.json()) as { docs?: Array<{ key?: string; title?: string; author_name?: string[]; first_publish_year?: number; isbn?: string[]; cover_i?: number; number_of_pages_median?: number }> };
-    const results: BookSearchResult[] = (payload.docs ?? []).flatMap((book) => {
-      if (!book.key || !book.title) return [];
-      return [{ provider: "open_library", providerId: book.key, title: book.title, authors: book.author_name ?? [], description: null, coverUrl: book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg` : null, isbn: book.isbn?.[0] ?? null, publishedYear: book.first_publish_year ?? null, pageCount: book.number_of_pages_median ?? null }];
-    });
-    return NextResponse.json({ results });
-  } catch {
-    return NextResponse.json({ error: "search_failed" }, { status: 502 });
-  }
+  const titleQuery = `intitle:\"${query.replaceAll('"', "")}\"`;
+  const attempts = await Promise.allSettled([
+    searchGoogle(titleQuery, locale),
+    searchGoogle(query),
+    searchOpenLibrary(query),
+  ]);
+  const results = attempts.flatMap((attempt) =>
+    attempt.status === "fulfilled" ? attempt.value : [],
+  );
+  return NextResponse.json({
+    results: rankAndDedupeResults(query, locale, results),
+  });
 }

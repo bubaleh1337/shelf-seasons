@@ -1,11 +1,11 @@
 # Closed public beta on Vercel
 
-Version 0.5.1 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: account export/deletion, legal pages and release monitoring remain on the roadmap.
+Version 0.5.2 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: account export/deletion, legal pages and release monitoring remain on the roadmap.
 
 ## Before deployment
 
 1. Apply `supabase/migrations/202609050004_library_status_sync.sql` once, after migration `003`.
-2. Run `npm run release:check` and push version 0.5.1 to the GitHub `main` branch.
+2. Run `npm run release:check` and push version 0.5.2 to the GitHub `main` branch.
 3. Import `bubaleh1337/shelf-seasons` in Vercel.
 4. Add these Production environment variables in Vercel:
    - `NEXT_PUBLIC_SUPABASE_URL` = the existing Supabase project URL;

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseLocale, safeAppPath } from "@/lib/auth/redirect";
-import {
-  getAppOrigin,
-  isSupabaseConfigured,
-} from "@/lib/supabase/config";
-import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createRouteClient } from "@/lib/supabase/route";
 
 export async function GET(request: NextRequest) {
   const locale = parseLocale(request.nextUrl.searchParams.get("locale"));
@@ -16,11 +13,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  const callback = new URL("/auth/callback", getAppOrigin());
+  const callback = new URL("/auth/callback", request.nextUrl.origin);
   callback.searchParams.set("locale", locale);
   callback.searchParams.set("next", next);
 
-  const supabase = await createClient();
+  const { supabase, redirect } = createRouteClient(request);
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -31,8 +28,8 @@ export async function GET(request: NextRequest) {
 
   if (error || !data.url) {
     signInUrl.searchParams.set("error", "oauth_start_failed");
-    return NextResponse.redirect(signInUrl);
+    return redirect(signInUrl);
   }
 
-  return NextResponse.redirect(data.url);
+  return redirect(data.url);
 }
