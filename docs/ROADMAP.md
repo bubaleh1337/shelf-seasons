@@ -80,7 +80,7 @@ Exit criteria:
 
 ## Stage 4 — reading log, calendar and streaks
 
-Status: the core vertical slice ships in `0.5.1`: quick/detailed sessions, backdating, real week/month/year views, deletion, streak calculations and synchronized library/run statuses. Session editing and the full finish-book ritual remain for the next increment.
+Status: completed through `0.6.0`: quick/detailed sessions, backdating, real week/month/year views, deletion, streak calculations, synchronized statuses and the full finish-book ritual.
 
 Deliverables:
 
@@ -99,6 +99,8 @@ Exit criteria:
 - no streak is changed merely by opening the app.
 
 ## Stage 5 — goals, series and finishing rituals
+
+Status: yearly goals and finishing rituals ship in `0.6.0`; manual series remain the next increment.
 
 Deliverables:
 

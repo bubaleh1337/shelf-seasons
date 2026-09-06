@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0
+
+- Added an idempotent finish-book ritual with completion date, optional rating, impression and recap nomination.
+- Added an editable yearly goal calculated from authoritative completed reading runs, with optional reread counting.
+- Made direct “Read” shelf changes create a completed run and refresh the interface from the server.
+- Added owner-bound nomination storage, RLS policies and regression coverage for completion and goal calculations.
+
 ## 0.5.5
 
 - Start Google OAuth in the browser so Supabase stores the PKCE verifier on the same device before leaving for Google.

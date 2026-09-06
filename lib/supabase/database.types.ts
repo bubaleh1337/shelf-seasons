@@ -117,6 +117,8 @@ export type Database = {
           is_reread: boolean;
           current_position: number | null;
           total_units: number | null;
+          rating: number | null;
+          impression: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -131,10 +133,32 @@ export type Database = {
           is_reread?: boolean;
           current_position?: number | null;
           total_units?: number | null;
+          rating?: number | null;
+          impression?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["reading_runs"]["Insert"]>;
+        Relationships: [];
+      };
+      run_nominations: {
+        Row: {
+          id: string;
+          user_id: string;
+          run_id: string;
+          kind: Database["public"]["Enums"]["nomination_kind"];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          run_id: string;
+          kind: Database["public"]["Enums"]["nomination_kind"];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["run_nominations"]["Insert"]>;
         Relationships: [];
       };
       reading_sessions: {
@@ -199,6 +223,16 @@ export type Database = {
         };
         Returns: undefined;
       };
+      finish_reading_run: {
+        Args: {
+          p_book_id: string;
+          p_finished_on: string;
+          p_rating?: number | null;
+          p_impression?: string | null;
+          p_nomination?: Database["public"]["Enums"]["nomination_kind"] | null;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       app_locale: "en" | "ru";
@@ -208,6 +242,7 @@ export type Database = {
       library_status: "want" | "reading" | "read" | "paused" | "dnf";
       tracking_mode: "pages" | "percent" | "minutes";
       run_status: "reading" | "paused" | "completed" | "dnf";
+      nomination_kind: "favorite" | "disappointment";
     };
     CompositeTypes: Record<string, never>;
   };

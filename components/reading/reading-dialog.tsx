@@ -43,8 +43,8 @@ export function ReadingDialog({ locale, books, timezone, onSaved, compact = fals
     try {
       const response = await fetch("/api/reading", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(input) });
       if (!response.ok) throw new Error();
-      const payload = (await response.json()) as { sessionId: string; bookId: string };
-      onSaved({ id: payload.sessionId, runId: "pending", bookId: payload.bookId, readOn, checkInOnly: !detailed, pagesRead: pagesRead ? Number(pagesRead) : null, minutesRead: minutesRead ? Number(minutesRead) : null, resultingPercent: percent ? Number(percent) : null, note: note.trim() || null });
+      const payload = (await response.json()) as { sessionId: string; runId: string; bookId: string };
+      onSaved({ id: payload.sessionId, runId: payload.runId, bookId: payload.bookId, readOn, checkInOnly: !detailed, pagesRead: pagesRead ? Number(pagesRead) : null, minutesRead: minutesRead ? Number(minutesRead) : null, resultingPercent: percent ? Number(percent) : null, note: note.trim() || null });
       setOpen(false);
     } catch { setError(true); } finally { setBusy(false); }
   }

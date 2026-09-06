@@ -20,3 +20,10 @@ test("project commands are portable to Windows PowerShell", async () => {
   assert.equal(packageJson.devDependencies.vinext, undefined);
   assert.equal(packageJson.devDependencies.wrangler, undefined);
 });
+
+test("the 0.6.0 updater only clears the generated Next.js cache", async () => {
+  const updater = await readFile(new URL("../scripts/update-to-0.6.0.mjs", import.meta.url), "utf8");
+  assert.match(updater, /path\.join\(projectRoot, "\.next"\)/);
+  assert.match(updater, /rm\(nextCache, \{ recursive: true, force: true \}\)/);
+  assert.doesNotMatch(updater, /node_modules|\.env\.local|\.git/);
+});

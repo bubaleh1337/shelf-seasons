@@ -1,15 +1,15 @@
-# Shelf Seasons 0.5.5 — дневник чтения на Windows
+# Shelf Seasons 0.6.0 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
 
-## 1. Один раз добавьте исправление статусов в Supabase
+## 1. Один раз добавьте завершение книг и цели в Supabase
 
 1. Откройте **Supabase → SQL Editor → New query**.
 2. Скопируйте туда целиком новый файл
-   `supabase/migrations/202609050004_library_status_sync.sql`.
+   `supabase/migrations/202609060001_completion_and_goals.sql`.
 3. Нажмите **Run**. Запрос должен завершиться без ошибок.
-4. Старые миграции `001`, `002` и `003` повторно не запускайте.
+4. Старые миграции `001`–`004` повторно не запускайте.
 
 ## 2. Распакуйте проект
 
@@ -20,7 +20,7 @@
 
 ```powershell
 Set-Location P:\Projects\shelf-seasons\shelf-seasons
-node .\scripts\update-to-0.5.5.mjs
+.\UPDATE_TO_0.6.0.ps1
 npm ci
 npm run test:connected
 npm run release:check
@@ -29,14 +29,15 @@ npm run dev
 
 Откройте `http://localhost:3000/ru/sign-in` и войдите через Google.
 
-После входа откройте `http://localhost:3000/ru/app`. Добавьте книгу, отметьте
-чтение и проверьте, что её обложка появилась в календаре.
+После входа откройте `http://localhost:3000/ru/app`. Начните читать книгу,
+завершите её с оценкой и проверьте, что она исчезла из блока «Читаю», а цель
+на год обновилась.
 
 ## 4. Отправьте обновление в GitHub
 
 ```powershell
 git add .
-git commit -m "fix: complete Google OAuth session reliably"
+git commit -m "feat: add book completion and yearly goals"
 git push origin main
 ```
 

@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { BookHeart, BookOpen, CalendarDays, ChevronLeft, ChevronRight, Flame, Languages, Layers3, Library, LogOut, Moon, Search, Settings, Sparkles, Sun, Trash2 } from "lucide-react";
+import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flame, Languages, Layers3, Library, LogOut, Moon, Search, Settings, Sparkles, Sun, Trash2 } from "lucide-react";
 import { BookDialog } from "@/components/library/book-dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
 import { ReadingDialog } from "@/components/reading/reading-dialog";
+import { FinishBookDialog } from "@/components/reading/finish-book-dialog";
+import { YearlyGoalCard } from "@/components/reading/yearly-goal-card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -13,7 +15,8 @@ import { appCopy } from "@/lib/app-copy";
 import { selectCurrentBook } from "@/lib/books/current";
 import type { LibraryBook, LibraryStatus } from "@/lib/books/types";
 import { calculateStreaks, localDateKey } from "@/lib/reading/dates";
-import type { ReadingSession } from "@/lib/reading/types";
+import { calculateGoalProgress } from "@/lib/reading/goals";
+import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
 import type { Locale } from "@/lib/shelf-seasons";
 import { cn } from "@/lib/utils";
 
@@ -22,11 +25,14 @@ const nav = [
   { id: "series", icon: Layers3 }, { id: "recaps", icon: Sparkles }, { id: "settings", icon: Settings },
 ] as const;
 
-export function ShelfSeasonsApp({ locale, section, readerName, timezone, initialTheme, initialBooks, initialSessions }: { locale: Locale; section: string; readerName?: string; timezone: string; initialTheme: "system" | "light" | "dark"; initialBooks: LibraryBook[]; initialSessions: ReadingSession[] }) {
+export function ShelfSeasonsApp({ locale, section, readerName, timezone, initialTheme, initialBooks, initialSessions, initialRuns, initialGoal }: { locale: Locale; section: string; readerName?: string; timezone: string; initialTheme: "system" | "light" | "dark"; initialBooks: LibraryBook[]; initialSessions: ReadingSession[]; initialRuns: ReadingRun[]; initialGoal: YearlyGoal | null }) {
   const c = appCopy[locale];
   const active = nav.some((item) => item.id === section) ? section : "home";
   const [books, setBooks] = useState(initialBooks);
   const [sessions, setSessions] = useState(initialSessions);
+  const [runs, setRuns] = useState(initialRuns);
+  const [goal, setGoal] = useState(initialGoal);
+  const [completionNotice, setCompletionNotice] = useState(false);
   const [dark, setDark] = useState(initialTheme === "dark");
 
   useEffect(() => {
@@ -35,10 +41,25 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
   }, [dark, locale]);
 
   const toggleTheme = (value: boolean) => { setDark(value); document.documentElement.dataset.theme = value ? "dark" : "light"; };
-  const saveBook = (saved: LibraryBook) => setBooks((current) => [saved, ...current.filter((book) => book.id !== saved.id)]);
+  async function refreshRuns() {
+    const response = await fetch("/api/reading");
+    if (!response.ok) return;
+    const payload = (await response.json()) as { runs: ReadingRun[] };
+    setRuns(payload.runs);
+  }
+  const saveBook = (saved: LibraryBook) => {
+    setBooks((current) => [saved, ...current.filter((book) => book.id !== saved.id)]);
+    void refreshRuns();
+  };
   const saveSession = (saved: ReadingSession) => {
     setSessions((current) => [saved, ...current.filter((session) => session.id !== saved.id)]);
     setBooks((current) => current.map((book) => book.id === saved.bookId ? { ...book, status: "reading" } : book));
+    setRuns((current) => current.some((run) => run.id === saved.runId) ? current.map((run) => run.id === saved.runId ? { ...run, status: "reading" } : run) : [{ id: saved.runId, bookId: saved.bookId, status: "reading", startedOn: saved.readOn, finishedOn: null, isReread: current.some((run) => run.bookId === saved.bookId && run.status === "completed"), currentPosition: saved.resultingPercent, totalUnits: null, rating: null, impression: null, nomination: null }, ...current]);
+  };
+  const finishRun = (run: ReadingRun) => {
+    setRuns((current) => [run, ...current.filter((item) => item.id !== run.id)]);
+    setBooks((current) => current.map((book) => book.id === run.bookId ? { ...book, status: "read" } : book));
+    setCompletionNotice(true);
   };
   const displayName = readerName?.trim() || "Shelf Seasons";
 
@@ -53,7 +74,7 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
     <main className="shelf-main">
       <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><Link className="locale-switch" href={`/${locale === "ru" ? "en" : "ru"}/app${active === "home" ? "" : `/${active}`}`}><Languages />{locale === "ru" ? "EN" : "RU"}</Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
       <div className={cn("page-wrap", active === "library" && "page-wrap-wide")}>
-        {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} timezone={timezone} onBookSaved={saveBook} onSessionSaved={saveSession} />}
+        {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} />}
         {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} onSaved={saveBook} />}
         {active === "calendar" && <ReadingCalendar locale={locale} books={books} sessions={sessions} timezone={timezone} setSessions={setSessions} onSessionSaved={saveSession} />}
         {active === "series" && <FutureSection title={c.series} lead={c.seriesLead} note={c.comingSoon} />}
@@ -74,7 +95,7 @@ function PageIntro({ title, lead, action }: { title: string; lead: string; actio
   return <header className="page-intro"><div><h1>{title}</h1><p>{lead}</p></div>{action}</header>;
 }
 
-function Home({ locale, name, books, sessions, timezone, onBookSaved, onSessionSaved }: { locale: Locale; name: string; books: LibraryBook[]; sessions: ReadingSession[]; timezone: string; onBookSaved: (book: LibraryBook) => void; onSessionSaved: (session: ReadingSession) => void }) {
+function Home({ locale, name, books, sessions, runs, goal, timezone, completionNotice, onBookSaved, onSessionSaved, onRunFinished, onGoalSaved }: { locale: Locale; name: string; books: LibraryBook[]; sessions: ReadingSession[]; runs: ReadingRun[]; goal: YearlyGoal | null; timezone: string; completionNotice: boolean; onBookSaved: (book: LibraryBook) => void; onSessionSaved: (session: ReadingSession) => void; onRunFinished: (run: ReadingRun) => void; onGoalSaved: (goal: YearlyGoal) => void }) {
   const c = appCopy[locale];
   const firstName = name === "Shelf Seasons" ? "" : `, ${name.split(" ")[0]}`;
   const today = localDateKey(timezone);
@@ -82,12 +103,16 @@ function Home({ locale, name, books, sessions, timezone, onBookSaved, onSessionS
   const monthPrefix = today.slice(0, 7);
   const monthDays = new Set(sessions.filter((session) => session.readOn.startsWith(monthPrefix)).map((session) => session.readOn)).size;
   const currentBook = selectCurrentBook(books, sessions);
+  const currentYear = Number(today.slice(0, 4));
+  const goalProgress = calculateGoalProgress(runs, goal);
   return <><PageIntro title={`${c.greeting}${firstName}`} lead={c.homeLead} />
+    {completionNotice && <div className="success-banner" role="status"><CheckCircle2 />{c.completedMessage}</div>}
     {books.length === 0 ? <section className="personal-empty-hero"><BookHeart /><h2>{c.emptyHome}</h2><p>{c.emptyHomeLead}</p><BookDialog locale={locale} onSaved={onBookSaved} /></section> : <>
       <section className="reading-home-grid">
-        {currentBook ? <article className="reading-now-card"><LibraryBookCover book={currentBook} /><div><p className="eyebrow">{c.reading}</p><h2>{currentBook.title}</h2><p>{currentBook.authors.join(", ") || "—"}</p><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /></div></article> : <article className="reading-now-card reading-now-empty"><span className="reading-empty-icon"><BookOpen /></span><div><p className="eyebrow">{c.reading}</p><h2>{c.noCurrentBook}</h2><p>{c.noCurrentBookLead}</p><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /></div></article>}
+        {currentBook ? <article className="reading-now-card"><LibraryBookCover book={currentBook} /><div><p className="eyebrow">{c.reading}</p><h2>{currentBook.title}</h2><p>{currentBook.authors.join(", ") || "—"}</p><div className="reading-now-actions"><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /><FinishBookDialog locale={locale} book={currentBook} timezone={timezone} onFinished={onRunFinished} /></div></div></article> : <article className="reading-now-card reading-now-empty"><span className="reading-empty-icon"><BookOpen /></span><div><p className="eyebrow">{c.reading}</p><h2>{c.noCurrentBook}</h2><p>{c.noCurrentBookLead}</p><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /></div></article>}
         <div className="streak-summary"><article><Flame /><strong>{streaks.current}</strong><span>{c.days}</span><small>{c.currentStreak}</small></article><article><Sparkles /><strong>{streaks.longest}</strong><span>{c.days}</span><small>{c.longestStreak}</small></article><article><CalendarDays /><strong>{monthDays}</strong><span>{c.readingDays}</span><small>{c.thisMonth}</small></article></div>
       </section>
+      <YearlyGoalCard locale={locale} year={currentYear} goal={goal} progress={goalProgress} onSaved={onGoalSaved} />
       <section className="recent-section"><div className="section-heading"><h2>{c.library}</h2><Link href={`/${locale}/app/library`}>{c.openLibrary}</Link></div><div className="personal-book-grid">{books.slice(0, 5).map((book) => <SimpleBookCard key={book.id} locale={locale} book={book} />)}</div></section>
     </>}
   </>;
