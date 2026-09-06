@@ -2,8 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { bookInputSchema } from "@/lib/books/validation";
 import { bookToDto, requireUser, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
 
 type Context = { params: Promise<{ bookId: string }> };
+
+const statusInputSchema = z.object({ status: z.enum(["want", "reading", "read", "paused", "dnf"]) });
+
+export async function PATCH(request: NextRequest, context: Context) {
+  const { bookId } = await context.params;
+  const supabase = await createClient();
+  const userId = await requireUser(supabase);
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const parsed = statusInputSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "invalid_status" }, { status: 400 });
+  const { data: current } = await supabase.from("library_books").select("id").eq("id", bookId).eq("user_id", userId).maybeSingle();
+  if (!current) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  try {
+    const row = await setBookStatus(supabase, bookId, parsed.data.status);
+    return NextResponse.json({ book: await bookToDto(supabase, row) });
+  } catch {
+    return NextResponse.json({ error: "status_sync_failed" }, { status: 400 });
+  }
+}
 
 export async function PUT(request: NextRequest, context: Context) {
   const { bookId } = await context.params;

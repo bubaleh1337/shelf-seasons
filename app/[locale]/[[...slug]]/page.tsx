@@ -5,6 +5,8 @@ import { ShelfSeasonsApp } from "@/components/shelf-seasons-app";
 import { bookToDto } from "@/lib/books/server";
 import { localDateKey } from "@/lib/reading/dates";
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
+import { seriesEntryToDto, seriesToDto } from "@/lib/series/server";
+import type { BookSeries } from "@/lib/series/types";
 import type { Locale } from "@/lib/shelf-seasons";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -120,5 +122,16 @@ export default async function LocalizedPage({ params, searchParams }: PageProps)
   const { data: goalRow } = await supabase.from("reading_goals").select("year,target_books,include_rereads").eq("user_id", userId).eq("year", currentYear).maybeSingle();
   const initialGoal: YearlyGoal | null = goalRow ? { year: goalRow.year, targetBooks: goalRow.target_books, includeRereads: goalRow.include_rereads } : null;
 
-  return <ShelfSeasonsApp locale={locale} section={slug[1] ?? "home"} readerName={profile.display_name ?? undefined} timezone={profile.timezone} initialTheme={profile.theme} initialBooks={initialBooks} initialSessions={initialSessions} initialRuns={initialRuns} initialGoal={initialGoal} />;
+  const [{ data: seriesRows }, { data: entryRows }] = await Promise.all([
+    supabase.from("series").select().eq("user_id", userId).order("updated_at", { ascending: false }),
+    supabase.from("series_entries").select().eq("user_id", userId).order("sort_order"),
+  ]);
+  const entriesBySeries = new Map<string, ReturnType<typeof seriesEntryToDto>[]>();
+  for (const row of entryRows ?? []) {
+    const entry = seriesEntryToDto(row);
+    entriesBySeries.set(entry.seriesId, [...(entriesBySeries.get(entry.seriesId) ?? []), entry]);
+  }
+  const initialSeries: BookSeries[] = (seriesRows ?? []).map((row) => seriesToDto(row, entriesBySeries.get(row.id)));
+
+  return <ShelfSeasonsApp locale={locale} section={slug[1] ?? "home"} readerName={profile.display_name ?? undefined} timezone={profile.timezone} initialTheme={profile.theme} initialBooks={initialBooks} initialSessions={initialSessions} initialRuns={initialRuns} initialGoal={initialGoal} initialSeries={initialSeries} />;
 }

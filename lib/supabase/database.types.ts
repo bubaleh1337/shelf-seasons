@@ -161,6 +161,58 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["run_nominations"]["Insert"]>;
         Relationships: [];
       };
+      series: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          creator: string | null;
+          description: string | null;
+          status: Database["public"]["Enums"]["series_status"];
+          cover_book_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          creator?: string | null;
+          description?: string | null;
+          status?: Database["public"]["Enums"]["series_status"];
+          cover_book_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["series"]["Insert"]>;
+        Relationships: [];
+      };
+      series_entries: {
+        Row: {
+          id: string;
+          user_id: string;
+          series_id: string;
+          book_id: string | null;
+          placeholder_title: string | null;
+          sort_order: number;
+          position_label: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          series_id: string;
+          book_id?: string | null;
+          placeholder_title?: string | null;
+          sort_order: number;
+          position_label: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["series_entries"]["Insert"]>;
+        Relationships: [];
+      };
       reading_sessions: {
         Row: {
           id: string;
@@ -233,6 +285,13 @@ export type Database = {
         };
         Returns: string;
       };
+      reorder_series_entries: {
+        Args: {
+          p_series_id: string;
+          p_entry_ids: string[];
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       app_locale: "en" | "ru";
@@ -243,6 +302,7 @@ export type Database = {
       tracking_mode: "pages" | "percent" | "minutes";
       run_status: "reading" | "paused" | "completed" | "dnf";
       nomination_kind: "favorite" | "disappointment";
+      series_status: "planned" | "in_progress" | "completed" | "abandoned";
     };
     CompositeTypes: Record<string, never>;
   };

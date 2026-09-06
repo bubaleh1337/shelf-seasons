@@ -43,5 +43,7 @@ await checkProtectedTable("library_books", "Stage 3 personal library");
 await checkProtectedTable("reading_runs", "Stage 4 reading tracker");
 await checkProtectedTable("reading_sessions", "Stage 4 reading tracker");
 await checkProtectedTable("run_nominations", "0.6.0 completion and goals");
+await checkProtectedTable("series", "0.7.0 series");
+await checkProtectedTable("series_entries", "0.7.0 series");
 
-console.log("Supabase Auth is healthy and the 0.6.0 completion schema is available.");
+console.log("Supabase Auth is healthy and the 0.7.0 series schema is available.");

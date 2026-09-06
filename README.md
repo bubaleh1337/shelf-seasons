@@ -32,7 +32,7 @@ Open the local address printed by the development server.
 
 The default address is `http://localhost:3000/ru/app`.
 
-For the reading tracker, apply `supabase/migrations/202609050003_reading_tracker.sql` once after the personal-library migration, then apply `supabase/migrations/202609050004_library_status_sync.sql`. Version 0.6.0 additionally requires `supabase/migrations/202609060001_completion_and_goals.sql`.
+For the reading tracker, apply `supabase/migrations/202609050003_reading_tracker.sql` once after the personal-library migration, then apply `supabase/migrations/202609050004_library_status_sync.sql`. Version 0.6.0 additionally requires `supabase/migrations/202609060001_completion_and_goals.sql`, followed by `supabase/migrations/202609070001_series.sql` for version 0.7.0.
 
 Verification:
 
@@ -73,4 +73,4 @@ Read in this order before implementation work:
 
 ## Current stage
 
-Version 0.6.0 includes the personal library, multi-provider localized book search, reliable Google OAuth, quick/detailed reading sessions, a real cover calendar, streaks, synchronized reading statuses, the book-completion ritual with ratings and impressions, a live yearly goal and Vercel public-beta configuration. Series and recaps remain later roadmap stages.
+Version 0.7.0 includes the personal library, localized book search, reliable Google OAuth, reading sessions, cover calendar, streaks, book completion, yearly goals and user-owned ordered series with placeholders and next-book actions. Recaps remain the next roadmap stage.

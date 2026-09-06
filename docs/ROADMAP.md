@@ -100,7 +100,7 @@ Exit criteria:
 
 ## Stage 5 — goals, series and finishing rituals
 
-Status: yearly goals and finishing rituals ship in `0.6.0`; manual series remain the next increment.
+Status: completed through `0.7.0`: yearly goals, finishing rituals, manual ordered series, placeholders, progress and next-book actions.
 
 Deliverables:
 

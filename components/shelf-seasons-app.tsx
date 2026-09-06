@@ -8,6 +8,7 @@ import { LibraryBookCover } from "@/components/library/book-cover";
 import { ReadingDialog } from "@/components/reading/reading-dialog";
 import { FinishBookDialog } from "@/components/reading/finish-book-dialog";
 import { YearlyGoalCard } from "@/components/reading/yearly-goal-card";
+import { SeriesPage } from "@/components/series/series-page";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -17,6 +18,7 @@ import type { LibraryBook, LibraryStatus } from "@/lib/books/types";
 import { calculateStreaks, localDateKey } from "@/lib/reading/dates";
 import { calculateGoalProgress } from "@/lib/reading/goals";
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
+import type { BookSeries } from "@/lib/series/types";
 import type { Locale } from "@/lib/shelf-seasons";
 import { cn } from "@/lib/utils";
 
@@ -25,13 +27,14 @@ const nav = [
   { id: "series", icon: Layers3 }, { id: "recaps", icon: Sparkles }, { id: "settings", icon: Settings },
 ] as const;
 
-export function ShelfSeasonsApp({ locale, section, readerName, timezone, initialTheme, initialBooks, initialSessions, initialRuns, initialGoal }: { locale: Locale; section: string; readerName?: string; timezone: string; initialTheme: "system" | "light" | "dark"; initialBooks: LibraryBook[]; initialSessions: ReadingSession[]; initialRuns: ReadingRun[]; initialGoal: YearlyGoal | null }) {
+export function ShelfSeasonsApp({ locale, section, readerName, timezone, initialTheme, initialBooks, initialSessions, initialRuns, initialGoal, initialSeries }: { locale: Locale; section: string; readerName?: string; timezone: string; initialTheme: "system" | "light" | "dark"; initialBooks: LibraryBook[]; initialSessions: ReadingSession[]; initialRuns: ReadingRun[]; initialGoal: YearlyGoal | null; initialSeries: BookSeries[] }) {
   const c = appCopy[locale];
   const active = nav.some((item) => item.id === section) ? section : "home";
   const [books, setBooks] = useState(initialBooks);
   const [sessions, setSessions] = useState(initialSessions);
   const [runs, setRuns] = useState(initialRuns);
   const [goal, setGoal] = useState(initialGoal);
+  const [seriesItems, setSeriesItems] = useState(initialSeries);
   const [completionNotice, setCompletionNotice] = useState(false);
   const [dark, setDark] = useState(initialTheme === "dark");
 
@@ -61,6 +64,8 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
     setBooks((current) => current.map((book) => book.id === run.bookId ? { ...book, status: "read" } : book));
     setCompletionNotice(true);
   };
+  const saveSeries = (saved: BookSeries) => setSeriesItems((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
+  const deleteSeries = (seriesId: string) => setSeriesItems((current) => current.filter((item) => item.id !== seriesId));
   const displayName = readerName?.trim() || "Shelf Seasons";
 
   return <div className="shelf-app" lang={locale}>
@@ -73,11 +78,11 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
     </aside>
     <main className="shelf-main">
       <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><Link className="locale-switch" href={`/${locale === "ru" ? "en" : "ru"}/app${active === "home" ? "" : `/${active}`}`}><Languages />{locale === "ru" ? "EN" : "RU"}</Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
-      <div className={cn("page-wrap", active === "library" && "page-wrap-wide")}>
+      <div className={cn("page-wrap", (active === "library" || active === "series") && "page-wrap-wide")}>
         {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} />}
         {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} onSaved={saveBook} />}
         {active === "calendar" && <ReadingCalendar locale={locale} books={books} sessions={sessions} timezone={timezone} setSessions={setSessions} onSessionSaved={saveSession} />}
-        {active === "series" && <FutureSection title={c.series} lead={c.seriesLead} note={c.comingSoon} />}
+        {active === "series" && <SeriesPage locale={locale} books={books} items={seriesItems} onSaved={saveSeries} onDeleted={deleteSeries} onBookSaved={saveBook} />}
         {active === "recaps" && <FutureSection title={c.recaps} lead={c.recapsLead} note={c.comingSoon} />}
         {active === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} timezone={timezone} />}
       </div>

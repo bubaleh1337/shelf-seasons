@@ -192,7 +192,7 @@ updated_at timestamptz not null default now()
 id uuid primary key
 user_id uuid not null references profiles(user_id) on delete cascade
 series_id uuid not null references series(id) on delete cascade
-book_id uuid null references library_books(id) on delete set null
+book_id uuid null references library_books(id) on delete cascade
 placeholder_title text null
 sort_order numeric(12,4) not null
 position_label text not null
@@ -206,6 +206,8 @@ Constraints:
 - owner matches series and book owner;
 - unique `(series_id, sort_order)`;
 - duplicate book in the same series is rejected unless a later use case proves it necessary.
+
+Deleting a library book removes only its linked series entry. The series and every other volume remain intact.
 
 Reordering should use a trusted transaction/RPC to avoid temporary unique collisions.
 

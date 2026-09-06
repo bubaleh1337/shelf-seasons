@@ -1,12 +1,12 @@
 # Closed public beta on Vercel
 
-Version 0.6.0 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: account export/deletion, legal pages and release monitoring remain on the roadmap.
+Version 0.7.0 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: account export/deletion, legal pages and release monitoring remain on the roadmap.
 
 ## Before deployment
 
-1. After overlaying the 0.6.0 archive on Windows, run `.\UPDATE_TO_0.6.0.ps1` once to remove the generated Next.js cache from the previous source version.
-2. Apply `supabase/migrations/202609060001_completion_and_goals.sql` once, after migration `004`.
-3. Run `npm run release:check` and push version 0.6.0 to the GitHub `main` branch.
+1. After overlaying the 0.7.0 archive on Windows, run `.\UPDATE_TO_0.7.0.ps1` once to remove the generated Next.js cache from the previous source version.
+2. Apply `supabase/migrations/202609070001_series.sql` once, after the 0.6.0 migration.
+3. Run `npm run release:check` and push version 0.7.0 to the GitHub `main` branch.
 4. Import `bubaleh1337/shelf-seasons` in Vercel.
 5. Add these Production environment variables in Vercel:
    - `NEXT_PUBLIC_SUPABASE_URL` = the existing Supabase project URL;

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0
+
+- Added user-owned book series with bilingual creation, editing and deletion flows.
+- Added ordered linked books and future-volume placeholders with accessible move controls.
+- Added automatic read progress, next-volume display and a one-click start-next-book action.
+- Added composite ownership constraints, RLS policies and a trusted atomic reorder function.
+
 ## 0.6.0
 
 - Added an idempotent finish-book ritual with completion date, optional rating, impression and recap nomination.
