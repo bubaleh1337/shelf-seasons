@@ -50,6 +50,8 @@ In Supabase **Authentication → URL Configuration**:
 - Site URL: `http://localhost:3000`
 - Redirect URL: `http://localhost:3000/auth/callback`
 
+For the Vercel beta, replace Site URL with `https://shelf-seasons.vercel.app` and keep both production and localhost callback URLs in the Redirect URLs list.
+
 The application callback only restores paths under the selected locale's `/app` route. External and protocol-relative return paths are rejected.
 
 ## 4. Verify locally

@@ -1,37 +1,35 @@
 # Запуск Shelf Seasons на Windows 11
 
-В архиве находится рабочая версия `0.5.4`: исправленный вход через Google на Vercel без конфликта маршрутов, личная библиотека, улучшенный поиск русских изданий, отметки чтения, календарь, серии дней, корректная синхронизация статусов и конфигурация Vercel. Создавать новый чат или заново вставлять мастер-промпт не нужно.
+В архиве находится версия `0.5.5`: Google OAuth запускается в браузере, чтобы PKCE-cookie сохранялась до перехода в Google, а серверный callback создаёт сессию перед открытием защищённого приложения. Также включены личная библиотека, поиск русских изданий, отметки чтения, календарь и синхронизация статусов.
 
 ## 1. Распакуй проект
 
-Распакуй архив `shelf-seasons-0.5.4-vercel-oauth-clean-update.zip` в:
+Распакуй архив `shelf-seasons-0.5.5-google-oauth-session-fix.zip` в:
 
 ```text
-P:\Projects\shelf-seasons
+P:\Projects\shelf-seasons\shelf-seasons
 ```
 
 Проверь, что `package.json` находится именно здесь:
 
 ```text
-P:\Projects\shelf-seasons\package.json
+P:\Projects\shelf-seasons\shelf-seasons\package.json
 ```
 
-а не во второй вложенной папке `shelf-seasons\shelf-seasons`.
-
-Если архив распаковывается поверх версии 0.5.3, сразу после замены файлов выполни:
+После замены файлов выполни:
 
 ```powershell
-node .\scripts\update-to-0.5.4.mjs
+node .\scripts\update-to-0.5.5.mjs
 ```
 
-Скрипт удалит только два устаревших callback-файла, которые иначе остаются после обычной распаковки и создают конфликт маршрутов Vercel.
+Скрипт удалит только три устаревших файла OAuth из версии 0.5.4. `.env.local` и пользовательские файлы он не затрагивает.
 
 ## 2. Установи зависимости
 
 Открой Windows PowerShell:
 
 ```powershell
-Set-Location P:\Projects\shelf-seasons
+Set-Location P:\Projects\shelf-seasons\shelf-seasons
 npm ci
 ```
 

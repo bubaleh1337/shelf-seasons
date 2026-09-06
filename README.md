@@ -16,7 +16,7 @@ The brand is always **Shelf Seasons**. The technical slug is always `shelf-seaso
 - `/[locale]/app/recaps` — monthly reading recap
 - `/[locale]/app/settings` — language, timezone and theme demo
 
-Without `.env.local`, the visual shell continues to run safely in demo mode. With a configured development Supabase project, `/en/app` and `/ru/app` are protected, Google OAuth uses server-side cookie sessions, and a new account completes bilingual onboarding.
+Without `.env.local`, the visual shell continues to run safely in demo mode. With a configured development Supabase project, `/en/app` and `/ru/app` are protected, Google OAuth stores its PKCE verifier in the browser and completes a server-side cookie session, and a new account completes bilingual onboarding.
 
 ## Windows PowerShell
 
@@ -73,4 +73,4 @@ Read in this order before implementation work:
 
 ## Current stage
 
-Version 0.5.4 includes the personal library, multi-provider localized book search, browser-completed Vercel OAuth without callback route conflicts, quick/detailed reading sessions, a real cover calendar, streaks, synchronized reading statuses and Vercel public-beta configuration. Series, finish-book rituals and recaps remain later roadmap stages.
+Version 0.5.5 includes the personal library, multi-provider localized book search, reliable browser-started Google OAuth with a server callback, quick/detailed reading sessions, a real cover calendar, streaks, synchronized reading statuses and Vercel public-beta configuration. Series, finish-book rituals and recaps remain later roadmap stages.

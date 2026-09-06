@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.5
+
+- Start Google OAuth in the browser so Supabase stores the PKCE verifier on the same device before leaving for Google.
+- Complete the OAuth code exchange in the server callback and attach the new session cookies to the protected-app redirect.
+- Added precise production and localhost URL configuration instructions plus safe cleanup for obsolete 0.5.4 OAuth files.
+
 ## 0.5.4
 
 - Removed the callback route/page collision that prevented Vercel from deploying 0.5.3.

@@ -7,6 +7,7 @@ export const authCopy = {
     signInLead:
       "Keep your shelves, reading days and yearly memories together — privately and across devices.",
     google: "Continue with Google",
+    googlePending: "Opening Google…",
     privacy: "Only your basic Google profile is used to create your account.",
     setupTitle: "Connect Supabase to enable accounts",
     setupLead:
@@ -39,6 +40,7 @@ export const authCopy = {
     signInLead:
       "Полки, дни чтения и книжные воспоминания сохраняются приватно и доступны на разных устройствах.",
     google: "Продолжить с Google",
+    googlePending: "Открываем Google…",
     privacy: "Для создания аккаунта используется только основная информация профиля Google.",
     setupTitle: "Подключи Supabase, чтобы включить аккаунты",
     setupLead:

@@ -1,4 +1,4 @@
-# Shelf Seasons 0.5.4 — дневник чтения на Windows
+# Shelf Seasons 0.5.5 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
@@ -19,7 +19,8 @@
 ## 3. Запустите проверку
 
 ```powershell
-Set-Location P:\Projects\shelf-seasons
+Set-Location P:\Projects\shelf-seasons\shelf-seasons
+node .\scripts\update-to-0.5.5.mjs
 npm ci
 npm run test:connected
 npm run release:check
@@ -35,7 +36,7 @@ npm run dev
 
 ```powershell
 git add .
-git commit -m "fix: synchronize reading status and prepare Vercel"
+git commit -m "fix: complete Google OAuth session reliably"
 git push origin main
 ```
 

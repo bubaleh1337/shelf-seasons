@@ -4,44 +4,44 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("OAuth start attaches the PKCE verifier cookie to its redirect", async () => {
-  const google = await read("app/auth/google/route.ts");
-  const routeClient = await read("lib/supabase/route.ts");
+test("OAuth starts in the browser so the PKCE verifier stays on the same device", async () => {
+  const button = await read("components/auth/google-sign-in-button.tsx");
+  const signInPage = await read("components/auth/auth-pages.tsx");
 
-  assert.match(google, /createRouteClient\(request\)/);
-  assert.match(google, /return redirect\(data\.url\)/);
-  assert.match(routeClient, /response\.cookies\.set\(name, value, options\)/);
+  assert.match(button, /^"use client";/);
+  assert.match(button, /createClient\(\)/);
+  assert.match(button, /signInWithOAuth\(/);
+  assert.match(button, /new URL\("\/auth\/callback", window\.location\.origin\)/);
+  assert.match(button, /redirectTo: callback\.toString\(\)/);
+  assert.match(signInPage, /<GoogleSignInButton/);
+  assert.doesNotMatch(signInPage, /action="\/auth\/google"/);
 });
 
-test("the browser completes PKCE before navigating to a protected page", async () => {
+test("the server callback exchanges the code and attaches session cookies before redirecting", async () => {
   const callbackRoute = await read("app/auth/callback/route.ts");
-  const complete = await read("components/auth/auth-complete-client.tsx");
+  const routeClient = await read("lib/supabase/route.ts");
   const rootProxy = await read("proxy.ts");
 
-  assert.match(callbackRoute, /new URL\("\/auth\/complete"/);
-  assert.match(callbackRoute, /completeUrl\.searchParams\.set\("code", code\)/);
-  assert.match(complete, /^"use client";/);
-  assert.match(complete, /exchangeCodeForSession\(code\)/);
-  assert.match(complete, /if \(error \|\| !data\.session\)/);
-  assert.match(complete, /window\.location\.replace/);
+  assert.match(callbackRoute, /exchangeCodeForSession\(code\)/);
+  assert.match(callbackRoute, /return redirect\(new URL\(next, request\.nextUrl\.origin\)\)/);
+  assert.match(routeClient, /response\.cookies\.set\(name, value, options\)/);
   assert.match(rootProxy, /pathname\.startsWith\("\/auth\/"\)/);
 });
 
 test("OAuth uses the exact request origin for Vercel aliases and localhost", async () => {
-  const google = await read("app/auth/google/route.ts");
+  const button = await read("components/auth/google-sign-in-button.tsx");
   const callback = await read("app/auth/callback/route.ts");
-  const complete = await read("components/auth/auth-complete-client.tsx");
-  assert.match(google, /new URL\("\/auth\/callback", request\.nextUrl\.origin\)/);
+  assert.match(button, /window\.location\.origin/);
   assert.match(callback, /request\.nextUrl\.origin/);
-  assert.match(complete, /window\.location\.origin/);
 });
 
-test("the Windows updater removes only the obsolete conflicting callback files", async () => {
-  const updater = await read("UPDATE_TO_0.5.4.ps1");
-  const cleanup = await read("scripts/update-to-0.5.4.mjs");
-  assert.match(updater, /scripts\\update-to-0\.5\.4\.mjs/);
-  assert.match(cleanup, /"callback", "page\.tsx"/);
-  assert.match(cleanup, /"auth-callback-client\.tsx"/);
+test("the Windows updater removes only obsolete OAuth implementation files", async () => {
+  const updater = await read("UPDATE_TO_0.5.5.ps1");
+  const cleanup = await read("scripts/update-to-0.5.5.mjs");
+  assert.match(updater, /scripts\\update-to-0\.5\.5\.mjs/);
+  assert.match(cleanup, /"complete", "page\.tsx"/);
+  assert.match(cleanup, /"google", "route\.tsx"|"google", "route\.ts"/);
+  assert.match(cleanup, /"auth-complete-client\.tsx"/);
   assert.match(cleanup, /error\?\.code !== "ENOENT"/);
   assert.doesNotMatch(`${updater}\n${cleanup}`, /-Recurse|rmSync|rmdir/);
 });
