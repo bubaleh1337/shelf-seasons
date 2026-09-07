@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   if (error || !runId) return NextResponse.json({ error: "finish_failed" }, { status: 400 });
 
   const [{ data: row }, { data: nomination }] = await Promise.all([
-    supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,impression").eq("id", runId).eq("user_id", userId).single(),
+    supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,impression,reading_language").eq("id", runId).eq("user_id", userId).single(),
     supabase.from("run_nominations").select("kind").eq("run_id", runId).eq("user_id", userId).maybeSingle(),
   ]);
   if (!row) return NextResponse.json({ error: "finish_failed" }, { status: 400 });
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
     rating: row.rating === null ? null : Number(row.rating),
     impression: row.impression,
     nomination: nomination?.kind ?? null,
+    readingLanguage: row.reading_language,
   };
   return NextResponse.json({ run });
 }

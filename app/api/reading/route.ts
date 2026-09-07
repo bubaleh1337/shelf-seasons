@@ -8,7 +8,7 @@ export async function GET() {
   const userId = await requireUser(supabase);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const [{ data: rows }, { data: nominations }] = await Promise.all([
-    supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,impression").eq("user_id", userId).order("created_at", { ascending: false }),
+    supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,impression,reading_language").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("run_nominations").select("run_id,kind").eq("user_id", userId),
   ]);
   const nominationMap = new Map((nominations ?? []).map((item) => [item.run_id, item.kind]));
@@ -24,6 +24,7 @@ export async function GET() {
     rating: row.rating === null ? null : Number(row.rating),
     impression: row.impression,
     nomination: nominationMap.get(row.id) ?? null,
+    readingLanguage: row.reading_language,
   })) });
 }
 

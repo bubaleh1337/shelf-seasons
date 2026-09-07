@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bookInputSchema } from "@/lib/books/validation";
-import { bookToDto, requireUser, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
+import { bookToDto, requireUser, resolveProviderCover, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -19,10 +19,11 @@ export async function POST(request: NextRequest) {
   let savedRow = row;
   let storedCoverPath: string | null = null;
   if (!(cover instanceof File) || cover.size === 0) {
-    if (parsed.data.coverUrl) {
+    const remoteCoverUrl = await resolveProviderCover(parsed.data);
+    if (remoteCoverUrl) {
       try {
-        storedCoverPath = await storeRemoteCover(supabase, userId, row.id, parsed.data.coverUrl);
-        const { data: updated } = await supabase.from("library_books").update({ cover_path: storedCoverPath }).eq("id", row.id).eq("user_id", userId).select().single();
+        storedCoverPath = await storeRemoteCover(supabase, userId, row.id, remoteCoverUrl);
+        const { data: updated } = await supabase.from("library_books").update({ cover_path: storedCoverPath, cover_url: remoteCoverUrl }).eq("id", row.id).eq("user_id", userId).select().single();
         savedRow = updated ?? row;
       } catch {
         // Provider covers are optional. The persistent fallback keeps the book usable.

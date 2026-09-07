@@ -47,4 +47,20 @@ await checkProtectedTable("series", "0.7.0 series");
 await checkProtectedTable("series_entries", "0.7.0 series");
 await checkProtectedTable("recap_selections", "0.8.0 recaps");
 
-console.log("Supabase Auth is healthy and the 0.8.0 recap schema is available.");
+const schemaResponse = await fetch(`${url}/rest/v1/`, {
+  headers: { ...headers, Accept: "application/openapi+json" },
+  signal: AbortSignal.timeout(15_000),
+});
+if (!schemaResponse.ok) {
+  console.error("Supabase check failed: the REST schema could not be read.");
+  process.exit(1);
+}
+const schema = await schemaResponse.json();
+const libraryColumns = schema?.definitions?.library_books?.properties ?? {};
+const runColumns = schema?.definitions?.reading_runs?.properties ?? {};
+if (!("season" in libraryColumns) || !("reading_language" in libraryColumns) || !("reading_language" in runColumns)) {
+  console.error("Supabase check failed: apply the 0.10.0 seasons and languages migration first.");
+  process.exit(1);
+}
+
+console.log("Supabase Auth is healthy and the 0.10.0 seasons and languages schema is available.");

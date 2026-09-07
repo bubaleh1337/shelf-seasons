@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { rankAndDedupeResults } from "../lib/books/search.ts";
+import { providerLanguageToReadingLanguage, rankAndDedupeResults } from "../lib/books/search.ts";
 
 const result = (providerId, title, language, coverUrl = null) => ({
   provider: "google_books",
@@ -23,11 +23,17 @@ test("Russian title matches rank ahead of an English original", () => {
   assert.equal(ranked[0].providerId, "russian");
 });
 
-test("provider duplicates are removed and internal language is not exposed", () => {
+test("provider duplicates are removed and edition language is exposed", () => {
   const ranked = rankAndDedupeResults("Убийства и кексики", "ru", [
     result("same", "Убийства и кексики", "ru"),
     result("same", "Убийства и кексики", "ru"),
   ]);
   assert.equal(ranked.length, 1);
-  assert.equal("language" in ranked[0], false);
+  assert.equal(ranked[0].language, "ru");
+});
+
+test("provider languages map to reading language choices", () => {
+  assert.equal(providerLanguageToReadingLanguage("rus"), "ru");
+  assert.equal(providerLanguageToReadingLanguage("en"), "en");
+  assert.equal(providerLanguageToReadingLanguage("de"), "other");
 });

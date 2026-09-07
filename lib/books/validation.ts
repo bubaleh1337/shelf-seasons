@@ -27,6 +27,11 @@ export const bookInputSchema = z.object({
   pageCount: nullableInteger,
   format: z.enum(["print", "ebook", "audiobook"]),
   status: z.enum(["want", "reading", "read", "paused", "dnf"]),
+  readingLanguage: z.enum(["ru", "en", "other"]).default("other"),
+  season: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? null : value),
+    z.enum(["spring", "summer", "autumn", "winter"]).nullable(),
+  ),
   provider: z.enum(["manual", "google_books", "open_library"]).default("manual"),
   providerId: nullableText(500),
   removeCover: z.preprocess((value) => value === true || value === "true", z.boolean()).default(false),

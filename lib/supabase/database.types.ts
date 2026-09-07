@@ -81,6 +81,8 @@ export type Database = {
           page_count: number | null;
           format: Database["public"]["Enums"]["book_format"];
           status: Database["public"]["Enums"]["library_status"];
+          reading_language: Database["public"]["Enums"]["reading_language"];
+          season: Database["public"]["Enums"]["book_season"] | null;
           created_at: string;
           updated_at: string;
         };
@@ -99,6 +101,8 @@ export type Database = {
           page_count?: number | null;
           format?: Database["public"]["Enums"]["book_format"];
           status?: Database["public"]["Enums"]["library_status"];
+          reading_language?: Database["public"]["Enums"]["reading_language"];
+          season?: Database["public"]["Enums"]["book_season"] | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -119,6 +123,7 @@ export type Database = {
           total_units: number | null;
           rating: number | null;
           impression: string | null;
+          reading_language: Database["public"]["Enums"]["reading_language"];
           created_at: string;
           updated_at: string;
         };
@@ -135,6 +140,7 @@ export type Database = {
           total_units?: number | null;
           rating?: number | null;
           impression?: string | null;
+          reading_language?: Database["public"]["Enums"]["reading_language"];
           created_at?: string;
           updated_at?: string;
         };
@@ -335,6 +341,8 @@ export type Database = {
       series_status: "planned" | "in_progress" | "completed" | "abandoned";
       recap_period_type: "month" | "year";
       recap_category: "favorite_book" | "biggest_disappointment" | "favorite_cover" | "favorite_series";
+      book_season: "spring" | "summer" | "autumn" | "winter";
+      reading_language: "ru" | "en" | "other";
     };
     CompositeTypes: Record<string, never>;
   };

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bookInputSchema } from "@/lib/books/validation";
-import { bookToDto, requireUser, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
+import { bookToDto, requireUser, resolveProviderCover, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
@@ -37,20 +37,23 @@ export async function PUT(request: NextRequest, context: Context) {
   if (!current) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   let coverPath = current.cover_path;
+  const remoteCoverUrl = await resolveProviderCover(parsed.data);
   const cover = form.get("cover");
   try {
     if (parsed.data.removeCover && coverPath) {
       await supabase.storage.from("book-covers").remove([coverPath]);
       coverPath = null;
-      if (parsed.data.coverUrl) coverPath = await storeRemoteCover(supabase, userId, bookId, parsed.data.coverUrl);
+      if (remoteCoverUrl) coverPath = await storeRemoteCover(supabase, userId, bookId, remoteCoverUrl);
     }
     if (cover instanceof File && cover.size > 0) coverPath = await storeCover(supabase, userId, bookId, cover);
+    else if (!coverPath && remoteCoverUrl) coverPath = await storeRemoteCover(supabase, userId, bookId, remoteCoverUrl);
   } catch {
     return NextResponse.json({ error: "cover_failed" }, { status: 400 });
   }
 
   const values = toInsert(userId, parsed.data);
   const { status, ...metadata } = values;
+  if (remoteCoverUrl) metadata.cover_url = remoteCoverUrl;
   const { error } = await supabase.from("library_books").update({ ...metadata, cover_path: coverPath }).eq("id", bookId).eq("user_id", userId);
   if (error) return NextResponse.json({ error: "save_failed" }, { status: 400 });
   let updated;

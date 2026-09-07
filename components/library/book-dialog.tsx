@@ -6,23 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
 import { appCopy } from "@/lib/app-copy";
+import { providerLanguageToReadingLanguage } from "@/lib/books/search";
 import type { BookSearchResult, LibraryBook } from "@/lib/books/types";
+import { seasons } from "@/lib/seasons";
 import type { Locale } from "@/lib/shelf-seasons";
 
 type Draft = {
   title: string; authors: string; description: string; coverUrl: string; isbn: string;
   publishedYear: string; pageCount: string; format: LibraryBook["format"]; status: LibraryBook["status"];
+  readingLanguage: LibraryBook["readingLanguage"]; season: NonNullable<LibraryBook["season"]> | "";
   provider: "manual" | "google_books" | "open_library"; providerId: string; removeCover: boolean;
 };
 
-const blank: Draft = { title: "", authors: "", description: "", coverUrl: "", isbn: "", publishedYear: "", pageCount: "", format: "print", status: "want", provider: "manual", providerId: "", removeCover: false };
+const blank: Draft = { title: "", authors: "", description: "", coverUrl: "", isbn: "", publishedYear: "", pageCount: "", format: "print", status: "want", readingLanguage: "other", season: "", provider: "manual", providerId: "", removeCover: false };
 
 function fromBook(book: LibraryBook): Draft {
-  return { title: book.title, authors: book.authors.join(", "), description: book.description ?? "", coverUrl: book.defaultCoverUrl ?? "", isbn: book.isbn ?? "", publishedYear: book.publishedYear?.toString() ?? "", pageCount: book.pageCount?.toString() ?? "", format: book.format, status: book.status, provider: "manual", providerId: "", removeCover: false };
+  return { title: book.title, authors: book.authors.join(", "), description: book.description ?? "", coverUrl: book.defaultCoverUrl ?? "", isbn: book.isbn ?? "", publishedYear: book.publishedYear?.toString() ?? "", pageCount: book.pageCount?.toString() ?? "", format: book.format, status: book.status, readingLanguage: book.readingLanguage, season: book.season ?? "", provider: "manual", providerId: "", removeCover: false };
 }
 
 function fromResult(book: BookSearchResult): Draft {
-  return { title: book.title, authors: book.authors.join(", "), description: book.description ?? "", coverUrl: book.coverUrl ?? "", isbn: book.isbn ?? "", publishedYear: book.publishedYear?.toString() ?? "", pageCount: book.pageCount?.toString() ?? "", format: "print", status: "want", provider: book.provider, providerId: book.providerId, removeCover: false };
+  return { title: book.title, authors: book.authors.join(", "), description: book.description ?? "", coverUrl: book.coverUrl ?? "", isbn: book.isbn ?? "", publishedYear: book.publishedYear?.toString() ?? "", pageCount: book.pageCount?.toString() ?? "", format: "print", status: "want", readingLanguage: providerLanguageToReadingLanguage(book.language), season: "", provider: book.provider, providerId: book.providerId, removeCover: false };
 }
 
 export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale; book?: LibraryBook; onSaved: (book: LibraryBook) => void; trigger?: React.ReactNode }) {
@@ -70,6 +73,8 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
       form.set("providerId", draft.providerId);
       form.set("coverUrl", draft.coverUrl);
       form.set("removeCover", String(draft.removeCover));
+      form.set("readingLanguage", draft.readingLanguage);
+      form.set("season", draft.season);
       const response = await fetch(book ? `/api/books/${book.id}` : "/api/books", { method: book ? "PUT" : "POST", body: form });
       if (!response.ok) throw new Error();
       const payload = (await response.json()) as { book: LibraryBook };
@@ -100,6 +105,8 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
             <label className="span-two"><span>{c.authors}</span><input name="authors" maxLength={1000} value={draft.authors} onChange={(event) => field("authors", event.target.value)} placeholder={c.authorsHint} /></label>
             <label><span>{c.status}</span><select name="status" value={draft.status} onChange={(event) => field("status", event.target.value)}>{(["want", "reading", "read", "paused", "dnf"] as const).map((value) => <option key={value} value={value}>{c[value]}</option>)}</select></label>
             <label><span>{c.format}</span><select name="format" value={draft.format} onChange={(event) => field("format", event.target.value)}>{(["print", "ebook", "audiobook"] as const).map((value) => <option key={value} value={value}>{c[value]}</option>)}</select></label>
+            <label><span>{c.readingLanguage}</span><select name="readingLanguage" value={draft.readingLanguage} onChange={(event) => field("readingLanguage", event.target.value)}>{(["ru", "en", "other"] as const).map((value) => <option key={value} value={value}>{c[`language_${value}`]}</option>)}</select></label>
+            <label><span>{c.seasonShelf}</span><select name="season" value={draft.season} onChange={(event) => field("season", event.target.value)}><option value="">{c.noSeason}</option>{seasons.map((value) => <option key={value} value={value}>{c[value]}</option>)}</select></label>
             <label><span>{c.year}</span><input name="publishedYear" type="number" min="1000" max="2200" value={draft.publishedYear} onChange={(event) => field("publishedYear", event.target.value)} /></label>
             <label><span>{c.pages}</span><input name="pageCount" type="number" min="1" max="100000" value={draft.pageCount} onChange={(event) => field("pageCount", event.target.value)} /></label>
             <label className="span-two"><span>{c.isbn}</span><input name="isbn" maxLength={32} value={draft.isbn} onChange={(event) => field("isbn", event.target.value)} /></label>

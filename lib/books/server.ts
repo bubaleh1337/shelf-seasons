@@ -32,6 +32,8 @@ export async function bookToDto(supabase: Client, row: BookRow): Promise<Library
     pageCount: row.page_count,
     format: row.format,
     status: row.status,
+    readingLanguage: row.reading_language,
+    season: row.season,
     createdAt: row.created_at,
   };
 }
@@ -50,6 +52,8 @@ export function toInsert(userId: string, input: BookInput) {
     page_count: input.pageCount ?? null,
     format: input.format,
     status: input.status,
+    reading_language: input.readingLanguage,
+    season: input.season,
   } satisfies Database["public"]["Tables"]["library_books"]["Insert"];
 }
 
@@ -113,4 +117,25 @@ export async function storeRemoteCover(supabase: Client, userId: string, bookId:
   const type = response.headers.get("content-type")?.split(";")[0];
   if (!type || !["image/jpeg", "image/png", "image/webp"].includes(type)) throw new Error("cover_type");
   return storeCoverBytes(supabase, userId, bookId, Buffer.from(await response.arrayBuffer()));
+}
+
+type GoogleVolume = { volumeInfo?: { imageLinks?: { extraLarge?: string; large?: string; medium?: string; small?: string; thumbnail?: string; smallThumbnail?: string } } };
+type CoverReference = Pick<BookInput, "coverUrl" | "provider" | "providerId" | "isbn">;
+
+export async function resolveProviderCover(input: CoverReference) {
+  if (input.coverUrl) return input.coverUrl.replace(/^http:/, "https:");
+  if (input.provider === "google_books" && input.providerId) {
+    try {
+      const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(input.providerId)}`, { signal: AbortSignal.timeout(7_000) });
+      if (response.ok) {
+        const info = ((await response.json()) as GoogleVolume).volumeInfo;
+        const cover = info?.imageLinks?.extraLarge ?? info?.imageLinks?.large ?? info?.imageLinks?.medium ?? info?.imageLinks?.small ?? info?.imageLinks?.thumbnail ?? info?.imageLinks?.smallThumbnail;
+        if (cover) return cover.replace(/^http:/, "https:");
+      }
+    } catch {
+      // Continue to the ISBN fallback.
+    }
+  }
+  if (input.isbn) return `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(input.isbn)}-L.jpg?default=false`;
+  return null;
 }

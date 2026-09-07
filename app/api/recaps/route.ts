@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [{ data: runRows, error: runsError }, { data: sessionRows, error: sessionsError }, { data: seriesRows, error: seriesError }, { data: entryRows, error: entriesError }, { data: selectionRows, error: selectionsError }] = await Promise.all([
-      supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating").eq("user_id", userId).eq("status", "completed").gte("finished_on", bounds.start).lt("finished_on", bounds.end).order("finished_on", { ascending: false }),
+      supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,reading_language").eq("user_id", userId).eq("status", "completed").gte("finished_on", bounds.start).lt("finished_on", bounds.end).order("finished_on", { ascending: false }),
       supabase.from("reading_sessions").select("id,run_id,read_on,check_in_only,pages_read,minutes_read,resulting_percent").eq("user_id", userId).gte("read_on", bounds.start).lt("read_on", bounds.end).order("read_on"),
       supabase.from("series").select().eq("user_id", userId).order("name"),
       supabase.from("series_entries").select().eq("user_id", userId).order("sort_order"),
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     const runs: ReadingRun[] = (runRows ?? []).map((run) => ({
       id: run.id, bookId: run.book_id, status: run.status, startedOn: run.started_on, finishedOn: run.finished_on,
       isReread: run.is_reread, currentPosition: run.current_position, totalUnits: run.total_units,
-      rating: run.rating === null ? null : Number(run.rating), impression: null, nomination: nominationMap.get(run.id) ?? null,
+      rating: run.rating === null ? null : Number(run.rating), impression: null, nomination: nominationMap.get(run.id) ?? null, readingLanguage: run.reading_language,
     }));
     const runBookMap = new Map(runs.map((run) => [run.id, run.bookId]));
     const sessions: ReadingSession[] = (sessionRows ?? []).flatMap((session) => {
@@ -83,6 +83,11 @@ export async function GET(request: NextRequest) {
       rereads: runs.filter((run) => run.isReread).length, ...metrics,
       goal: recapGoalProgress(runs, goal), books: candidates,
       series: recapSeriesCandidates(series, runs.map((run) => run.bookId)), selections,
+      languageCounts: {
+        ru: runs.filter((run) => run.readingLanguage === "ru").length,
+        en: runs.filter((run) => run.readingLanguage === "en").length,
+        other: runs.filter((run) => run.readingLanguage === "other").length,
+      },
     };
     return NextResponse.json({ summary });
   } catch {

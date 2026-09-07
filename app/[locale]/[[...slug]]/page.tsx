@@ -106,11 +106,11 @@ export default async function LocalizedPage({ params, searchParams }: PageProps)
     .order("created_at", { ascending: false });
   const initialBooks = await Promise.all((rows ?? []).map((row) => bookToDto(supabase, row)));
   const [{ data: runs }, { data: nominations }] = await Promise.all([
-    supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,impression").eq("user_id", userId).order("created_at", { ascending: false }),
+    supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,impression,reading_language").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("run_nominations").select("run_id,kind").eq("user_id", userId),
   ]);
   const nominationMap = new Map((nominations ?? []).map((item) => [item.run_id, item.kind]));
-  const initialRuns: ReadingRun[] = (runs ?? []).map((run) => ({ id: run.id, bookId: run.book_id, status: run.status, startedOn: run.started_on, finishedOn: run.finished_on, isReread: run.is_reread, currentPosition: run.current_position, totalUnits: run.total_units, rating: run.rating === null ? null : Number(run.rating), impression: run.impression, nomination: nominationMap.get(run.id) ?? null }));
+  const initialRuns: ReadingRun[] = (runs ?? []).map((run) => ({ id: run.id, bookId: run.book_id, status: run.status, startedOn: run.started_on, finishedOn: run.finished_on, isReread: run.is_reread, currentPosition: run.current_position, totalUnits: run.total_units, rating: run.rating === null ? null : Number(run.rating), impression: run.impression, nomination: nominationMap.get(run.id) ?? null, readingLanguage: run.reading_language }));
   const runBooks = new Map(initialRuns.map((run) => [run.id, run.bookId]));
   const { data: sessionRows } = await supabase.from("reading_sessions").select("id,run_id,read_on,check_in_only,pages_read,minutes_read,resulting_percent,note").eq("user_id", userId).order("read_on", { ascending: false }).limit(1000);
   const initialSessions: ReadingSession[] = (sessionRows ?? []).flatMap((session) => {

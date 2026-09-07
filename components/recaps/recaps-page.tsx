@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, Clock3, Image, Layers3, LoaderCircle, Repeat2, Sparkles, Trophy } from "lucide-react";
+import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, Clock3, Image, Languages, Layers3, LoaderCircle, Repeat2, Sparkles, Trophy } from "lucide-react";
 import { LibraryBookCover } from "@/components/library/book-cover";
 import { Button } from "@/components/ui/button";
 import { appCopy } from "@/lib/app-copy";
@@ -90,6 +90,7 @@ function RecapContent({ locale, summary, onSaved }: { locale: Locale; summary: R
       <Metric icon={Clock3} value={summary.minutesRead} label={c.minutesUnit} detail={summary.sessionsWithMinutes ? c.recordedSessions.replace("{count}", String(summary.sessionsWithMinutes)) : c.noDetailedSessions} />
       {summary.goal && <Metric icon={Trophy} value={`${summary.goal.completed} / ${summary.goal.target}`} label={c.yearlyGoal} detail={summary.goal.includeRereads ? c.goalIncludesRereads : c.goalExcludesRereads} />}
     </section>
+    <section className="recap-languages" aria-label={c.readingLanguages}><div><Languages /><span><strong>{c.readingLanguages}</strong><small>{summary.completedCount} {c.completedBooks}</small></span></div><dl><div><dt>RU</dt><dd><strong>{summary.languageCounts.ru}</strong>{c.booksInRussian}</dd></div><div><dt>EN</dt><dd><strong>{summary.languageCounts.en}</strong>{c.booksInEnglish}</dd></div><div><dt>•••</dt><dd><strong>{summary.languageCounts.other}</strong>{c.booksInOtherLanguages}</dd></div></dl></section>
     {summary.books.length > 0 && <section className="recap-section"><div className="section-heading"><div><span>{c.completedInPeriod}</span><h2>{c.coverMosaic}</h2></div><strong>{summary.completedCount}</strong></div><div className="recap-book-grid">{summary.books.map((candidate) => <article key={candidate.runId}><LibraryBookCover book={candidate.book} /><span>{candidate.isReread ? c.reread : formatShortDate(locale, candidate.finishedOn)}</span><strong>{candidate.book.title}</strong><small>{candidate.book.authors.join(", ")}</small>{candidate.rating !== null && <small aria-label={c.ratingOptional}>★ {candidate.rating}</small>}</article>)}</div></section>}
     <section className="recap-section"><div className="section-heading"><div><span>{c.yourSelections}</span><h2>{c.rememberThisPeriod}</h2></div></div><p className="recap-section-lead">{c.selectionsLead}</p><div className="recap-selection-grid">
       <BookSelection locale={locale} category="favorite_book" title={c.favoriteBook} icon={Trophy} candidates={summary.books} value={summary.selections.favorite_book} summary={summary} onSaved={onSaved} />

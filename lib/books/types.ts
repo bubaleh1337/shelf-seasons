@@ -2,6 +2,8 @@ import type { Database } from "@/lib/supabase/database.types";
 
 export type LibraryStatus = Database["public"]["Enums"]["library_status"];
 export type BookFormat = Database["public"]["Enums"]["book_format"];
+export type ReadingLanguage = Database["public"]["Enums"]["reading_language"];
+export type BookSeason = Database["public"]["Enums"]["book_season"];
 
 export type LibraryBook = {
   id: string;
@@ -15,6 +17,8 @@ export type LibraryBook = {
   pageCount: number | null;
   format: BookFormat;
   status: LibraryStatus;
+  readingLanguage: ReadingLanguage;
+  season: BookSeason | null;
   createdAt: string;
 };
 
@@ -28,4 +32,5 @@ export type BookSearchResult = {
   isbn: string | null;
   publishedYear: number | null;
   pageCount: number | null;
+  language: string | null;
 };

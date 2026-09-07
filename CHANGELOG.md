@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.0
+
+- Added four illustrated seasonal shelves and a subtle automatic spring, summer, autumn or winter application palette.
+- Added reading language to books and immutable reading-run history, plus RU/EN/other counts in recaps.
+- Added translated-title discovery for Russian searches and stronger Google Books/Open Library cover recovery.
+- Rebuilt calendar day cards so book title and author remain readable alongside the cover.
+- Added an always-visible Add book action to Home and seasonal/language badges throughout the library.
+
 ## 0.9.0
 
 - Added immediate pending feedback to desktop and mobile navigation.

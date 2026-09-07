@@ -2,7 +2,7 @@ import type { BookSearchResult } from "./types";
 import type { Locale } from "../shelf-seasons";
 
 export type RankedBookSearchResult = BookSearchResult & {
-  language?: string;
+  language: string | null;
 };
 
 const normalize = (value: string) =>
@@ -34,8 +34,8 @@ function scoreResult(
   }
 
   if (usesCyrillic(query) === usesCyrillic(result.title)) score += 30;
-  if (result.language === locale) score += 20;
-  if (result.coverUrl) score += 3;
+  if (result.language === locale || (locale === "ru" && result.language === "rus") || (locale === "en" && result.language === "eng")) score += 20;
+  if (result.coverUrl) score += 12;
   return score;
 }
 
@@ -66,5 +66,12 @@ export function rankAndDedupeResults(
       isbn: result.isbn,
       publishedYear: result.publishedYear,
       pageCount: result.pageCount,
+      language: result.language,
     }));
+}
+
+export function providerLanguageToReadingLanguage(language: string | null | undefined) {
+  if (language === "ru" || language === "rus") return "ru" as const;
+  if (language === "en" || language === "eng") return "en" as const;
+  return "other" as const;
 }

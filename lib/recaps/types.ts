@@ -41,4 +41,5 @@ export type RecapSummary = {
   books: RecapBookCandidate[];
   series: RecapSeriesCandidate[];
   selections: RecapSelections;
+  languageCounts: { ru: number; en: number; other: number };
 };

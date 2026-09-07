@@ -22,6 +22,7 @@ export type ReadingRun = {
   rating: number | null;
   impression: string | null;
   nomination: "favorite" | "disappointment" | null;
+  readingLanguage: "ru" | "en" | "other";
 };
 
 export type YearlyGoal = {

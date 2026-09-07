@@ -21,6 +21,7 @@ import { calculateStreaks, localDateKey } from "@/lib/reading/dates";
 import { calculateGoalProgress } from "@/lib/reading/goals";
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
 import type { BookSeries } from "@/lib/series/types";
+import { seasons, seasonFromDateKey, seasonSymbol, type BookSeason } from "@/lib/seasons";
 import type { Locale } from "@/lib/shelf-seasons";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +44,19 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dataset.theme = dark ? "dark" : "light";
-  }, [dark, locale]);
+    document.documentElement.dataset.season = seasonFromDateKey(localDateKey(timezone));
+  }, [dark, locale, timezone]);
+
+  useEffect(() => {
+    const repairKey = "shelf-seasons-cover-repair-0.10.0";
+    if (!initialBooks.some((book) => !book.coverUrl) || window.sessionStorage.getItem(repairKey)) return;
+    window.sessionStorage.setItem(repairKey, "1");
+    void fetch("/api/books/repair-covers", { method: "POST" }).then(async (response) => {
+      if (!response.ok) throw new Error("cover_repair_failed");
+      const payload = (await response.json()) as { books: LibraryBook[] };
+      if (payload.books.length) setBooks((current) => current.map((book) => payload.books.find((repaired) => repaired.id === book.id) ?? book));
+    }).catch(() => window.sessionStorage.removeItem(repairKey));
+  }, [initialBooks]);
 
   const toggleTheme = (value: boolean) => { setDark(value); document.documentElement.dataset.theme = value ? "dark" : "light"; };
   async function refreshRuns() {
@@ -59,7 +72,7 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
   const saveSession = (saved: ReadingSession) => {
     setSessions((current) => [saved, ...current.filter((session) => session.id !== saved.id)]);
     setBooks((current) => current.map((book) => book.id === saved.bookId ? { ...book, status: "reading" } : book));
-    setRuns((current) => current.some((run) => run.id === saved.runId) ? current.map((run) => run.id === saved.runId ? { ...run, status: "reading" } : run) : [{ id: saved.runId, bookId: saved.bookId, status: "reading", startedOn: saved.readOn, finishedOn: null, isReread: current.some((run) => run.bookId === saved.bookId && run.status === "completed"), currentPosition: saved.resultingPercent, totalUnits: null, rating: null, impression: null, nomination: null }, ...current]);
+    setRuns((current) => current.some((run) => run.id === saved.runId) ? current.map((run) => run.id === saved.runId ? { ...run, status: "reading" } : run) : [{ id: saved.runId, bookId: saved.bookId, status: "reading", startedOn: saved.readOn, finishedOn: null, isReread: current.some((run) => run.bookId === saved.bookId && run.status === "completed"), currentPosition: saved.resultingPercent, totalUnits: null, rating: null, impression: null, nomination: null, readingLanguage: books.find((book) => book.id === saved.bookId)?.readingLanguage ?? "other" }, ...current]);
   };
   const finishRun = (run: ReadingRun) => {
     setRuns((current) => [run, ...current.filter((item) => item.id !== run.id)]);
@@ -121,7 +134,7 @@ function Home({ locale, name, books, sessions, runs, goal, timezone, completionN
   const currentBook = selectCurrentBook(books, sessions);
   const currentYear = Number(today.slice(0, 4));
   const goalProgress = calculateGoalProgress(runs, goal);
-  return <><PageIntro title={`${c.greeting}${firstName}`} lead={c.homeLead} />
+  return <><PageIntro title={`${c.greeting}${firstName}`} lead={c.homeLead} action={<BookDialog locale={locale} onSaved={onBookSaved} />} />
     {completionNotice && <div className="success-banner" role="status"><CheckCircle2 />{c.completedMessage}</div>}
     {books.length === 0 ? <section className="personal-empty-hero"><BookHeart /><h2>{c.emptyHome}</h2><p>{c.emptyHomeLead}</p><BookDialog locale={locale} onSaved={onBookSaved} /></section> : <>
       <section className="reading-home-grid">
@@ -138,6 +151,7 @@ function PersonalLibrary({ locale, books, setBooks, onSaved }: { locale: Locale;
   const c = appCopy[locale];
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | LibraryStatus>("all");
+  const [view, setView] = useState<"library" | "seasons">("library");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const filtered = useMemo(() => books.filter((book) => `${book.title} ${book.authors.join(" ")}`.toLocaleLowerCase(locale).includes(query.toLocaleLowerCase(locale)) && (filter === "all" || book.status === filter)), [books, filter, locale, query]);
@@ -152,21 +166,27 @@ function PersonalLibrary({ locale, books, setBooks, onSaved }: { locale: Locale;
   async function archive(book: LibraryBook) {
     setBusyId(book.id); setError(false);
     const form = new FormData();
-    form.set("title", book.title); form.set("authors", book.authors.join(", ")); form.set("description", book.description ?? ""); form.set("coverUrl", book.defaultCoverUrl ?? ""); form.set("isbn", book.isbn ?? ""); form.set("publishedYear", book.publishedYear?.toString() ?? ""); form.set("pageCount", book.pageCount?.toString() ?? ""); form.set("format", book.format); form.set("status", "paused"); form.set("provider", "manual"); form.set("providerId", ""); form.set("removeCover", "false");
+    form.set("title", book.title); form.set("authors", book.authors.join(", ")); form.set("description", book.description ?? ""); form.set("coverUrl", book.defaultCoverUrl ?? ""); form.set("isbn", book.isbn ?? ""); form.set("publishedYear", book.publishedYear?.toString() ?? ""); form.set("pageCount", book.pageCount?.toString() ?? ""); form.set("format", book.format); form.set("status", "paused"); form.set("readingLanguage", book.readingLanguage); form.set("season", book.season ?? ""); form.set("provider", "manual"); form.set("providerId", ""); form.set("removeCover", "false");
     try { const response = await fetch(`/api/books/${book.id}`, { method: "PUT", body: form }); if (!response.ok) throw new Error(); const payload = (await response.json()) as { book: LibraryBook }; onSaved(payload.book); }
     catch { setError(true); } finally { setBusyId(null); }
   }
 
   return <><PageIntro title={c.library} lead={c.libraryLead} action={<BookDialog locale={locale} onSaved={onSaved} />} />
+    <div className="library-view-switch" aria-label={c.seasonalShelves}><button type="button" className={view === "library" ? "is-active" : ""} onClick={() => setView("library")}>{c.libraryView}</button><button type="button" className={view === "seasons" ? "is-active" : ""} onClick={() => setView("seasons")}>{c.seasonalView}</button></div>
     <div className="library-tools"><label className="search-field"><Search /><span className="sr-only">{c.searchLibrary}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={c.searchLibrary} /></label><div className="filter-row">{(["all", "reading", "want", "read", "paused", "dnf"] as const).map((value) => <button type="button" key={value} className={cn("filter-chip", filter === value && "is-active")} onClick={() => setFilter(value)}>{c[value]}</button>)}</div></div>
     <div className="library-count">{filtered.length} {c.books}</div>{error && <p className="form-error" role="alert">{c.error}</p>}
-    {filtered.length ? <div className="personal-book-grid">{filtered.map((book) => <article className="personal-book-card" key={book.id}><SimpleBookCard locale={locale} book={book} /><div className="book-card-actions"><BookDialog locale={locale} book={book} onSaved={onSaved} trigger={<Button size="sm" variant="outline">{c.edit}</Button>} /><Button size="sm" variant="ghost" onClick={() => archive(book)} disabled={busyId === book.id}>{c.archive}</Button><Button size="sm" variant="ghost" className="delete-book" onClick={() => remove(book)} disabled={busyId === book.id}>{c.delete}</Button></div></article>)}</div> : <div className="empty-state"><BookHeart /><h2>{books.length ? c.noMatches : c.emptyHome}</h2>{books.length === 0 && <BookDialog locale={locale} onSaved={onSaved} />}</div>}
+    {view === "seasons" ? <SeasonalShelves locale={locale} books={filtered} onSaved={onSaved} /> : filtered.length ? <div className="personal-book-grid">{filtered.map((book) => <article className="personal-book-card" key={book.id}><SimpleBookCard locale={locale} book={book} /><div className="book-card-actions"><BookDialog locale={locale} book={book} onSaved={onSaved} trigger={<Button size="sm" variant="outline">{c.edit}</Button>} /><Button size="sm" variant="ghost" onClick={() => archive(book)} disabled={busyId === book.id}>{c.archive}</Button><Button size="sm" variant="ghost" className="delete-book" onClick={() => remove(book)} disabled={busyId === book.id}>{c.delete}</Button></div></article>)}</div> : <div className="empty-state"><BookHeart /><h2>{books.length ? c.noMatches : c.emptyHome}</h2>{books.length === 0 && <BookDialog locale={locale} onSaved={onSaved} />}</div>}
   </>;
+}
+
+function SeasonalShelves({ locale, books, onSaved }: { locale: Locale; books: LibraryBook[]; onSaved: (book: LibraryBook) => void }) {
+  const c = appCopy[locale];
+  return <section className="seasonal-library"><div className="seasonal-library-intro"><Sparkles /><div><h2>{c.seasonalShelves}</h2><p>{c.seasonalLead}</p></div></div>{seasons.map((season) => { const shelfBooks = books.filter((book) => book.season === season); return <article className="seasonal-shelf" data-shelf-season={season} key={season}><header><span>{seasonSymbol(season)}</span><div><h3>{c[season]}</h3><small>{shelfBooks.length} {c.books}</small></div></header><div className="seasonal-shelf-books">{shelfBooks.length ? shelfBooks.map((book) => <div className="seasonal-book" key={book.id}><SimpleBookCard locale={locale} book={book} /><BookDialog locale={locale} book={book} onSaved={onSaved} trigger={<Button size="sm" variant="outline">{c.edit}</Button>} /></div>) : <p>{c.seasonalEmpty}</p>}</div><div className="shelf-board" aria-hidden="true" /></article>; })}</section>;
 }
 
 function SimpleBookCard({ locale, book }: { locale: Locale; book: LibraryBook }) {
   const c = appCopy[locale];
-  return <div className="simple-book-card"><LibraryBookCover book={book} /><span className={`status-text status-${book.status}`}>{c[book.status]}</span><h3>{book.title}</h3><p>{book.authors.join(", ") || "—"}</p></div>;
+  return <div className="simple-book-card"><LibraryBookCover book={book} /><div className="book-badges"><span className={`status-text status-${book.status}`}>{c[book.status]}</span><span className="language-badge">{book.readingLanguage === "other" ? "•••" : book.readingLanguage.toLocaleUpperCase()}</span>{book.season && <span className="season-badge" title={c[book.season]}>{seasonSymbol(book.season as BookSeason)}</span>}</div><h3>{book.title}</h3><p>{book.authors.join(", ") || "—"}</p></div>;
 }
 
 function ReadingCalendar({ locale, books, sessions, timezone, setSessions, onSessionSaved }: { locale: Locale; books: LibraryBook[]; sessions: ReadingSession[]; timezone: string; setSessions: React.Dispatch<React.SetStateAction<ReadingSession[]>>; onSessionSaved: (session: ReadingSession) => void }) {
@@ -219,20 +239,21 @@ function MonthCalendar({ locale, month, today, sessionsByDate, bookMap, onSelect
   const offset = (first.getUTCDay() + 6) % 7;
   const weekdays = locale === "ru" ? ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"] : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const cells = Array.from({ length: Math.ceil((offset + total) / 7) * 7 }, (_, index) => index - offset + 1);
-  return <div className="real-month-grid">{weekdays.map((day) => <div className="real-weekday" key={day}>{day}</div>)}{cells.map((day, index) => {
+  return <div className="calendar-scroll"><div className="real-month-grid">{weekdays.map((day) => <div className="real-weekday" key={day}>{day}</div>)}{cells.map((day, index) => {
     if (day < 1 || day > total) return <div className="real-day is-empty" key={`empty-${index}`} />;
     const date = `${month}-${String(day).padStart(2, "0")}`;
     const entries = sessionsByDate.get(date) ?? [];
-    const covers = [...new Set(entries.map((entry) => entry.bookId))].slice(0, 2).map((id) => bookMap.get(id)).filter((book): book is LibraryBook => Boolean(book));
-    return <button type="button" key={date} className={cn("real-day", date === today && "is-today", entries.length > 0 && "has-reading")} onClick={() => onSelect(date)}><span>{day}</span><div className="day-covers">{covers.map((book) => <LibraryBookCover key={book.id} book={book} />)}{entries.length > 2 && <b>+{entries.length - 2}</b>}</div></button>;
-  })}</div>;
+    const dayBooks = [...new Set(entries.map((entry) => entry.bookId))].map((id) => bookMap.get(id)).filter((book): book is LibraryBook => Boolean(book));
+    const book = dayBooks[0];
+    return <button type="button" key={date} className={cn("real-day", date === today && "is-today", entries.length > 0 && "has-reading")} onClick={() => onSelect(date)}><span>{day}</span>{book && <div className="calendar-book-chip"><LibraryBookCover book={book} /><span><strong>{book.title}</strong><small>{book.authors[0] ?? "—"}</small></span>{dayBooks.length > 1 && <b>+{dayBooks.length - 1}</b>}</div>}</button>;
+  })}</div></div>;
 }
 
 function WeekCalendar({ locale, today, sessionsByDate, bookMap, onSelect }: { locale: Locale; today: string; sessionsByDate: Map<string, ReadingSession[]>; bookMap: Map<string, LibraryBook>; onSelect: (date: string) => void }) {
   const base = new Date(`${today}T12:00:00Z`);
   const monday = new Date(base);
   monday.setUTCDate(base.getUTCDate() - ((base.getUTCDay() + 6) % 7));
-  return <div className="real-week-grid">{Array.from({ length: 7 }, (_, index) => { const date = new Date(monday); date.setUTCDate(monday.getUTCDate() + index); const key = date.toISOString().slice(0, 10); const entries = sessionsByDate.get(key) ?? []; const book = entries[0] ? bookMap.get(entries[0].bookId) : undefined; return <button type="button" key={key} className={cn(key === today && "is-today")} onClick={() => onSelect(key)}><span>{new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-US", { weekday: "short", timeZone: "UTC" }).format(date)}</span><strong>{date.getUTCDate()}</strong>{book ? <LibraryBookCover book={book} /> : <i />}</button>; })}</div>;
+  return <div className="real-week-grid">{Array.from({ length: 7 }, (_, index) => { const date = new Date(monday); date.setUTCDate(monday.getUTCDate() + index); const key = date.toISOString().slice(0, 10); const entries = sessionsByDate.get(key) ?? []; const book = entries[0] ? bookMap.get(entries[0].bookId) : undefined; return <button type="button" key={key} className={cn(key === today && "is-today")} onClick={() => onSelect(key)}><span>{new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-US", { weekday: "short", timeZone: "UTC" }).format(date)}</span><strong>{date.getUTCDate()}</strong>{book ? <><LibraryBookCover book={book} /><small>{book.title}</small></> : <i />}</button>; })}</div>;
 }
 
 function YearCalendar({ locale, year, sessions }: { locale: Locale; year: number; sessions: ReadingSession[] }) {
