@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- Added deterministic live and final monthly/yearly recap screens from real reading runs and sessions.
+- Added completed-book mosaics, unique books, rereads, reading days, period streaks, detailed page/time totals, active weeks and yearly goal results.
+- Added editable favorite book, disappointment, favorite cover and favorite series selections.
+- Added database eligibility validation, ownership RLS and explicit exclusion of private notes and impressions from recap responses.
+
 ## 0.7.0
 
 - Added user-owned book series with bilingual creation, editing and deletion flows.

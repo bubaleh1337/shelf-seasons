@@ -34,3 +34,9 @@ test("the 0.7.0 updater only clears the generated Next.js cache", async () => {
   assert.match(updater, /rm\(nextCache, \{ recursive: true, force: true \}\)/);
   assert.doesNotMatch(updater, /node_modules|\.env\.local|\.git/);
 });
+
+test("the 0.8.0 updater only clears the generated Next.js cache", async () => {
+  const script = await readFile(new URL("../scripts/update-to-0.8.0.mjs", import.meta.url), "utf8");
+  assert.match(script, /path\.join\(projectRoot, "\.next"\)/);
+  assert.doesNotMatch(script, /node_modules|\.git|\.env\.local/);
+});

@@ -119,6 +119,8 @@ Exit criteria:
 
 ## Stage 6 — recaps and account control
 
+Status: recaps completed in `0.8.0`; JSON export, account deletion and notification preferences remain for the next Stage 6 increment.
+
 Deliverables:
 
 - monthly and yearly recap screens;

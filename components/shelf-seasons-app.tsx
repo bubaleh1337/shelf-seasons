@@ -8,6 +8,7 @@ import { LibraryBookCover } from "@/components/library/book-cover";
 import { ReadingDialog } from "@/components/reading/reading-dialog";
 import { FinishBookDialog } from "@/components/reading/finish-book-dialog";
 import { YearlyGoalCard } from "@/components/reading/yearly-goal-card";
+import { RecapsPage } from "@/components/recaps/recaps-page";
 import { SeriesPage } from "@/components/series/series-page";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -78,12 +79,12 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
     </aside>
     <main className="shelf-main">
       <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><Link className="locale-switch" href={`/${locale === "ru" ? "en" : "ru"}/app${active === "home" ? "" : `/${active}`}`}><Languages />{locale === "ru" ? "EN" : "RU"}</Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
-      <div className={cn("page-wrap", (active === "library" || active === "series") && "page-wrap-wide")}>
+      <div className={cn("page-wrap", (active === "library" || active === "series" || active === "recaps") && "page-wrap-wide")}>
         {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} />}
         {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} onSaved={saveBook} />}
         {active === "calendar" && <ReadingCalendar locale={locale} books={books} sessions={sessions} timezone={timezone} setSessions={setSessions} onSessionSaved={saveSession} />}
         {active === "series" && <SeriesPage locale={locale} books={books} items={seriesItems} onSaved={saveSeries} onDeleted={deleteSeries} onBookSaved={saveBook} />}
-        {active === "recaps" && <FutureSection title={c.recaps} lead={c.recapsLead} note={c.comingSoon} />}
+        {active === "recaps" && <RecapsPage locale={locale} timezone={timezone} />}
         {active === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} timezone={timezone} />}
       </div>
     </main>
@@ -226,10 +227,6 @@ function WeekCalendar({ locale, today, sessionsByDate, bookMap, onSelect }: { lo
 
 function YearCalendar({ locale, year, sessions }: { locale: Locale; year: number; sessions: ReadingSession[] }) {
   return <div className="real-year-grid">{Array.from({ length: 12 }, (_, month) => { const prefix = `${year}-${String(month + 1).padStart(2, "0")}`; const days = new Set(sessions.filter((session) => session.readOn.startsWith(prefix)).map((session) => session.readOn)).size; return <article key={prefix}><strong>{new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-US", { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(year, month, 1)))}</strong><span>{days}</span></article>; })}</div>;
-}
-
-function FutureSection({ title, lead, note }: { title: string; lead: string; note: string }) {
-  return <><PageIntro title={title} lead={lead} /><div className="empty-state future-empty"><Sparkles /><h2>{note}</h2></div></>;
 }
 
 function SettingsPage({ locale, dark, toggleTheme, timezone }: { locale: Locale; dark: boolean; toggleTheme: (value: boolean) => void; timezone: string }) {

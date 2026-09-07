@@ -161,6 +161,32 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["run_nominations"]["Insert"]>;
         Relationships: [];
       };
+      recap_selections: {
+        Row: {
+          id: string;
+          user_id: string;
+          period_type: Database["public"]["Enums"]["recap_period_type"];
+          period_start: string;
+          category: Database["public"]["Enums"]["recap_category"];
+          run_id: string | null;
+          series_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          period_type: Database["public"]["Enums"]["recap_period_type"];
+          period_start: string;
+          category: Database["public"]["Enums"]["recap_category"];
+          run_id?: string | null;
+          series_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["recap_selections"]["Insert"]>;
+        Relationships: [];
+      };
       series: {
         Row: {
           id: string;
@@ -303,6 +329,8 @@ export type Database = {
       run_status: "reading" | "paused" | "completed" | "dnf";
       nomination_kind: "favorite" | "disappointment";
       series_status: "planned" | "in_progress" | "completed" | "abandoned";
+      recap_period_type: "month" | "year";
+      recap_category: "favorite_book" | "biggest_disappointment" | "favorite_cover" | "favorite_series";
     };
     CompositeTypes: Record<string, never>;
   };

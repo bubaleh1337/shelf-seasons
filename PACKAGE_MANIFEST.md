@@ -1,10 +1,10 @@
 # Shelf Seasons planning package
 
-Version: **0.5.5**
+Version: **0.8.0**
 
 Prepared: **2026-09-03**
 
-Status: **Stage 0–3 verified; Stage 4 reading-tracker core and Vercel beta configuration implemented**
+Status: **Stage 0–5 verified; Stage 6 monthly/yearly recaps implemented**
 
 ## Contents
 
