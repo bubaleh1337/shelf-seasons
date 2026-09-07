@@ -9,9 +9,10 @@ type SignInProps = {
   locale: Locale;
   configured: boolean;
   hasError?: boolean;
+  accountDeleted?: boolean;
 };
 
-export function SignInPage({ locale, configured, hasError }: SignInProps) {
+export function SignInPage({ locale, configured, hasError, accountDeleted }: SignInProps) {
   const c = authCopy[locale];
 
   return (
@@ -35,6 +36,7 @@ export function SignInPage({ locale, configured, hasError }: SignInProps) {
 
       <section className="auth-panel">
         <div className="auth-card">
+          {accountDeleted && <p className="auth-success" role="status"><CheckCircle2 />{c.accountDeleted}</p>}
           {hasError && <p className="auth-error" role="alert">{c.authError}</p>}
           {configured ? (
             <>

@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flame, Languages, Layers3, Library, LogOut, Moon, Search, Settings, Sparkles, Sun, Trash2 } from "lucide-react";
+import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flame, Languages, Layers3, Library, LoaderCircle, LogOut, Moon, Search, Settings, Sparkles, Sun, Trash2, type LucideIcon } from "lucide-react";
+import { AccountControls } from "@/components/account/account-controls";
 import { BookDialog } from "@/components/library/book-dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
 import { ReadingDialog } from "@/components/reading/reading-dialog";
@@ -72,7 +73,7 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
   return <div className="shelf-app" lang={locale}>
     <aside className="shelf-sidebar" aria-label={c.personalLibrary}>
       <Brand />
-      <nav className="sidebar-nav">{nav.map(({ id, icon: Icon }) => <Link key={id} href={`/${locale}/app${id === "home" ? "" : `/${id}`}`} className={cn("nav-link", active === id && "is-active")} aria-current={active === id ? "page" : undefined}><Icon /><span>{c[id]}</span></Link>)}</nav>
+      <nav className="sidebar-nav">{nav.map(({ id, icon }) => <AppNavLink key={id} locale={locale} id={id} icon={icon} label={c[id]} active={active === id} />)}</nav>
       <ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={saveSession} />
       <BookDialog locale={locale} onSaved={saveBook} />
       <div className="reader-mini"><span className="reader-avatar">{displayName.slice(0, 1).toLocaleUpperCase(locale)}</span><span><strong>{displayName}</strong><small>{c.personalLibrary}</small></span></div>
@@ -85,12 +86,21 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
         {active === "calendar" && <ReadingCalendar locale={locale} books={books} sessions={sessions} timezone={timezone} setSessions={setSessions} onSessionSaved={saveSession} />}
         {active === "series" && <SeriesPage locale={locale} books={books} items={seriesItems} onSaved={saveSeries} onDeleted={deleteSeries} onBookSaved={saveBook} />}
         {active === "recaps" && <RecapsPage locale={locale} timezone={timezone} />}
-        {active === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} timezone={timezone} />}
+        {active === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} />}
       </div>
     </main>
-    <nav className="mobile-nav" aria-label={c.personalLibrary}>{nav.slice(0, 5).map(({ id, icon: Icon }) => <Link key={id} href={`/${locale}/app${id === "home" ? "" : `/${id}`}`} className={cn("mobile-nav-link", active === id && "is-active")}><Icon /><span>{c[id]}</span></Link>)}</nav>
+    <nav className="mobile-nav" aria-label={c.personalLibrary}>{nav.slice(0, 5).map(({ id, icon }) => <AppNavLink key={id} locale={locale} id={id} icon={icon} label={c[id]} active={active === id} mobile />)}</nav>
     <div className="mobile-log-wrap"><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={saveSession} compact /></div>
   </div>;
+}
+
+function AppNavLink({ locale, id, icon: Icon, label, active, mobile = false }: { locale: Locale; id: (typeof nav)[number]["id"]; icon: LucideIcon; label: string; active: boolean; mobile?: boolean }) {
+  return <Link href={`/${locale}/app${id === "home" ? "" : `/${id}`}`} className={cn(mobile ? "mobile-nav-link" : "nav-link", active && "is-active")} aria-current={active ? "page" : undefined}><NavLinkContent locale={locale} icon={Icon} label={label} /></Link>;
+}
+
+function NavLinkContent({ locale, icon: Icon, label }: { locale: Locale; icon: LucideIcon; label: string }) {
+  const { pending } = useLinkStatus();
+  return <>{pending && <span className="route-progress" aria-hidden="true" />}{pending ? <LoaderCircle className="route-spinner" aria-hidden="true" /> : <Icon aria-hidden="true" />}<span>{label}</span>{pending && <span className="route-pending-indicator sr-only" role="status">{appCopy[locale].openingSection.replace("{section}", label)}</span>}</>;
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
@@ -229,12 +239,12 @@ function YearCalendar({ locale, year, sessions }: { locale: Locale; year: number
   return <div className="real-year-grid">{Array.from({ length: 12 }, (_, month) => { const prefix = `${year}-${String(month + 1).padStart(2, "0")}`; const days = new Set(sessions.filter((session) => session.readOn.startsWith(prefix)).map((session) => session.readOn)).size; return <article key={prefix}><strong>{new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-US", { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(year, month, 1)))}</strong><span>{days}</span></article>; })}</div>;
 }
 
-function SettingsPage({ locale, dark, toggleTheme, timezone }: { locale: Locale; dark: boolean; toggleTheme: (value: boolean) => void; timezone: string }) {
+function SettingsPage({ locale, dark, toggleTheme }: { locale: Locale; dark: boolean; toggleTheme: (value: boolean) => void }) {
   const c = appCopy[locale];
   return <><PageIntro title={c.settings} lead={c.personalLibrary} /><div className="settings-panel">
     <section><h2>{c.appearance}</h2><div className="setting-row"><span className="setting-icon">{dark ? <Moon /> : <Sun />}</span><div><strong>{c.darkMode}</strong></div><Switch checked={dark} onCheckedChange={toggleTheme} /></div></section>
     <section><h2>{c.language}</h2><div className="setting-row"><span className="setting-icon"><Languages /></span><div><strong>{locale === "ru" ? "Русский" : "English"}</strong></div><div className="language-links"><Link className={locale === "en" ? "is-active" : ""} href="/en/app/settings">EN</Link><Link className={locale === "ru" ? "is-active" : ""} href="/ru/app/settings">RU</Link></div></div></section>
-    <section><h2>{c.timezone}</h2><div className="setting-row"><span className="setting-icon"><CalendarDays /></span><div><strong>{timezone}</strong><p>{c.timezoneAuto}</p></div></div></section>
     <section><h2>{c.account}</h2><div className="setting-row"><span className="setting-icon"><LogOut /></span><div><strong>Shelf Seasons</strong><p>{c.signedIn}</p></div><form action="/auth/sign-out" method="post"><input type="hidden" name="locale" value={locale} /><Button variant="outline" type="submit">{c.signOut}</Button></form></div></section>
+    <AccountControls locale={locale} />
   </div></>;
 }

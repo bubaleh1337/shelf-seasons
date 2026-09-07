@@ -1,0 +1,8 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import { accountExportFilename, buildAccountExport } from "../lib/account/export.ts";
+import { isValidDeleteConfirmation } from "../lib/account/validation.ts";
+test("account export is complete and versioned", () => { const data = buildAccountExport({ id: "reader" }, { profile: {}, libraryBooks: [], readingRuns: [], readingSessions: [], readingGoals: [], runNominations: [], series: [], seriesEntries: [], recapSelections: [] }); assert.equal(data.schemaVersion, 1); assert.match(accountExportFilename(new Date("2026-09-07T00:00:00Z")), /2026-09-07/); });
+test("account deletion requires exact confirmation and authenticated ownership", async () => { assert.equal(isValidDeleteConfirmation("Shelf Seasons"), true); assert.equal(isValidDeleteConfirmation("shelf seasons"), false); const route = await readFile(new URL("../app/api/account/delete/route.ts", import.meta.url), "utf8"); const sql = await readFile(new URL("../supabase/migrations/202609070003_account_controls.sql", import.meta.url), "utf8"); assert.match(route, /requireUser\(supabase\)/); assert.match(sql, /auth\.uid\(\)/); assert.match(sql, /where id = current_user_id/); });
+test("navigation acknowledges taps while routes load", async () => { const app = await readFile(new URL("../components/shelf-seasons-app.tsx", import.meta.url), "utf8"); const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8"); assert.match(app, /useLinkStatus/); assert.match(app, /route-pending-indicator/); assert.match(css, /:has\(\.route-pending-indicator\)/); assert.match(css, /@keyframes route-progress/); });

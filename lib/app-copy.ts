@@ -2,7 +2,7 @@ import type { Locale } from "@/lib/shelf-seasons";
 
 export const appCopy = {
   en: {
-    home: "Home", library: "Library", calendar: "Calendar", series: "Series", recaps: "Recaps", settings: "Settings",
+    home: "Home", library: "Library", calendar: "Calendar", series: "Series", recaps: "Recaps", settings: "Settings", openingSection: "Opening {section}…",
     personalLibrary: "Personal library", greeting: "Good afternoon", homeLead: "A quiet place for your reading life.",
     emptyHome: "Your reading story starts with the first book.", emptyHomeLead: "Add a book to fill your shelves and unlock reading history.",
     noCurrentBook: "No book in progress", noCurrentBookLead: "Choose a book when you are ready to start reading.",
@@ -28,7 +28,7 @@ export const appCopy = {
     recapPeriod: "Recap period", monthRecap: "Month", yearRecap: "Year", previousPeriod: "Previous period", nextPeriod: "Next period", loadingRecap: "Gathering your reading memories…", recapUnavailable: "The recap could not be loaded", tryAgain: "Try again", liveRecap: "Live recap", finalRecap: "Final recap", recapHeroTitle: "Your season in books", recapHeroLead: "A calm look at the books and reading days that shaped this period.", emptyRecapTitle: "This season is still unwritten", emptyRecapLead: "Finish a book or log a reading day and your recap will begin to grow.", completedBooks: "completed", bestPeriodStreak: "best streak", recapStatistics: "Reading statistics", uniqueBooks: "unique books", rereads: "rereads", mostActiveWeek: "most active week", noData: "No data yet", recordedSessions: "Based on {count} detailed entries", noDetailedSessions: "No detailed entries", goalIncludesRereads: "Rereads included", goalExcludesRereads: "Rereads excluded", completedInPeriod: "Completed in this period", coverMosaic: "Books of the season", reread: "Reread", yourSelections: "Your selections", rememberThisPeriod: "What will you remember?", selectionsLead: "Selections are optional and can be changed at any time.", favoriteBook: "Favorite book", biggestDisappointment: "Biggest disappointment", favoriteCover: "Favorite cover", favoriteSeries: "Favorite series progress", notSelected: "Not selected", saveSelection: "Save selection", selectionSaved: "Saved", noEligibleChoices: "No eligible choices in this period yet.", recapPrivacy: "Private notes and impressions are never shown in recaps.", unknownAuthor: "Unknown author",
   },
   ru: {
-    home: "Главная", library: "Библиотека", calendar: "Календарь", series: "Серии", recaps: "Итоги", settings: "Настройки",
+    home: "Главная", library: "Библиотека", calendar: "Календарь", series: "Серии", recaps: "Итоги", settings: "Настройки", openingSection: "Открываем раздел «{section}»…",
     personalLibrary: "Личная библиотека", greeting: "Добрый день", homeLead: "Спокойное место для твоей книжной жизни.",
     emptyHome: "Твоя история чтения начинается с первой книги.", emptyHomeLead: "Добавь книгу, чтобы наполнить полки и открыть историю чтения.",
     noCurrentBook: "Сейчас ничего не читается", noCurrentBookLead: "Выбери книгу, когда захочешь начать чтение.",

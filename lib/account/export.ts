@@ -1,0 +1,4 @@
+export const ACCOUNT_EXPORT_SCHEMA_VERSION = 1;
+export type AccountExportCollections = { profile: unknown; libraryBooks: unknown[]; readingRuns: unknown[]; readingSessions: unknown[]; readingGoals: unknown[]; runNominations: unknown[]; series: unknown[]; seriesEntries: unknown[]; recapSelections: unknown[] };
+export function buildAccountExport(user: { id: string; email?: string }, collections: AccountExportCollections) { return { schemaVersion: ACCOUNT_EXPORT_SCHEMA_VERSION, exportedAt: new Date().toISOString(), application: "Shelf Seasons", account: { id: user.id, email: user.email ?? null }, ...collections, notes: ["Custom cover image files are not embedded. Their storage paths and source URLs remain in libraryBooks."] }; }
+export function accountExportFilename(date = new Date()) { return `shelf-seasons-export-${date.toISOString().slice(0, 10)}.json`; }

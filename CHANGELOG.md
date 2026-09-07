@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0
+
+- Added immediate pending feedback to desktop and mobile navigation.
+- Added JSON account export and protected self-service account deletion.
+- Added a visible app version and removed the technical timezone row.
+- Removed the obsolete generated Sites runtime cache from future Git tracking.
+
 ## 0.8.0
 
 - Added deterministic live and final monthly/yearly recap screens from real reading runs and sessions.

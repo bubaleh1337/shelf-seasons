@@ -318,6 +318,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      delete_own_account: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
     };
     Enums: {
       app_locale: "en" | "ru";

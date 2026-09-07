@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /out/
+/.sites-runtime/
 
 # misc
 .DS_Store

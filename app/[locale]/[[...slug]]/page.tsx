@@ -46,6 +46,7 @@ export default async function LocalizedPage({ params, searchParams }: PageProps)
         locale={locale}
         configured={isSupabaseConfigured}
         hasError={typeof query.error === "string"}
+        accountDeleted={query.deleted === "1"}
       />
     );
   }
