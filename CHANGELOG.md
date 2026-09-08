@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.0
+
+- Added a bilingual developer card with direct email and Telegram contacts.
+- Added a Buy Me a Coffee support button using the project's public donation page.
+- Added compact desktop sidebar contact actions and a mobile Settings shortcut so the contact card is reachable on every supported screen size.
+- Protected external links against opener access and kept all contact actions keyboard accessible.
+
 ## 0.11.0
 
 - Replaced the fixed emoji motif with calm, scroll-bound seasonal artwork that decorates the page without covering interface copy.

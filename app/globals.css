@@ -94,17 +94,28 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 @keyframes route-progress { 0% { transform: translateX(-110%); } 100% { transform: translateX(340%); } }
 .sidebar-log { width: 100%; min-height: 46px; margin-top: 26px; border: 0; border-radius: 12px; color: #283a31; background: #e9d9bd; box-shadow: 0 10px 24px rgba(0,0,0,.12); }
 .sidebar-log:hover { background: #f4e7d1; }
-.reader-mini { display: flex; align-items: center; gap: 11px; margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.12); }
+.reader-mini { display: flex; align-items: center; gap: 11px; margin-top: 12px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); }
 .reader-mini > span:last-child { display: grid; }
 .reader-mini strong { font-size: .9rem; }
 .reader-mini small { color: rgba(247,240,231,.58); font-size: .73rem; }
 .reader-avatar { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border-radius: 50%; color: #2c3b32; background: #d9c6a5; font-family: Georgia, serif; font-weight: 700; }
+.sidebar-developer-links { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 7px; margin-top: auto; }
+.sidebar-donate { display: flex; min-width: 0; min-height: 42px; align-items: center; gap: 9px; padding: 9px 11px; border: 1px solid rgba(255,255,255,.16); border-radius: 11px; color: #fff4dc; background: rgba(255,255,255,.08); font-size: .75rem; font-weight: 750; }
+.sidebar-donate:hover { background: rgba(255,255,255,.14); }
+.sidebar-donate svg { width: 18px; flex: 0 0 auto; }
+.sidebar-donate span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-contact-icons { display: flex; gap: 4px; }
+.sidebar-contact-icons a { display: grid; width: 34px; height: 42px; place-items: center; border-radius: 10px; color: rgba(247,240,231,.78); background: rgba(255,255,255,.06); }
+.sidebar-contact-icons a:hover { color: #fff; background: rgba(255,255,255,.13); }
+.sidebar-contact-icons svg { width: 16px; }
 
 .shelf-main { min-height: 100vh; margin-left: 250px; }
 .topbar { display: flex; height: 72px; align-items: center; justify-content: flex-end; padding: 0 34px; border-bottom: 1px solid color-mix(in srgb,var(--border),transparent 32%); background: color-mix(in srgb,var(--page),transparent 8%); backdrop-filter: blur(12px); }
 .mobile-brand { display: none; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 .locale-switch, .theme-button { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); border-radius: 12px; color: var(--ink-soft); background: var(--surface); font-weight: 750; }
+.mobile-settings-link { display: none; }
+.mobile-settings-link.is-active { border-color: color-mix(in srgb,var(--green),transparent 35%); color: var(--green-deep); background: var(--green-soft); }
 .locale-switch { padding: 0 13px; font-size: .78rem; }
 .locale-switch svg, .theme-button svg { width: 18px; height: 18px; }
 .theme-button { width: 44px; cursor: pointer; }
@@ -400,6 +411,22 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .language-links { display: flex; padding: 3px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-quiet); }
 .language-links a { display: grid; min-width: 42px; min-height: 36px; place-items: center; border-radius: 7px; font-size: .75rem; font-weight: 800; }
 .language-links a.is-active { color: var(--primary-foreground); background: var(--primary); }
+.developer-section { background: linear-gradient(128deg,color-mix(in srgb,var(--season-soft,var(--green-soft)),var(--surface) 45%),var(--surface) 72%); }
+.developer-card { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 18px 22px; }
+.developer-heading { display: flex; min-width: 0; align-items: center; gap: 14px; }
+.developer-heading p { margin: 3px 0 0; color: var(--ink-soft); font-size: .8rem; }
+.donate-button { display: grid; grid-template-columns: auto 1fr; min-height: 54px; align-items: center; column-gap: 9px; padding: 8px 15px; border: 1px solid color-mix(in srgb,#ffdd00,#8c6b00 22%); border-radius: 13px; color: #251f18; background: #ffdd00; box-shadow: 0 8px 20px rgba(119,85,0,.16); font-size: .8rem; font-weight: 850; }
+.donate-button:hover { background: #ffe43a; transform: translateY(-1px); }
+.donate-button svg { grid-row: 1 / 3; width: 21px; }
+.donate-button small { font-size: .63rem; font-weight: 700; opacity: .68; }
+.developer-contact-grid { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.developer-contact-grid > a { display: flex; min-width: 0; min-height: 64px; align-items: center; gap: 11px; padding: 11px 13px; border: 1px solid var(--border); border-radius: 13px; background: color-mix(in srgb,var(--surface),transparent 4%); }
+.developer-contact-grid > a:hover { border-color: color-mix(in srgb,var(--green),transparent 42%); background: var(--green-soft); }
+.developer-contact-grid > a > span:first-child { display: grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: var(--green-deep); background: var(--green-soft); }
+.developer-contact-grid svg { width: 17px; }
+.developer-contact-grid > a > span:last-child { display: grid; min-width: 0; }
+.developer-contact-grid small { color: var(--ink-soft); font-size: .64rem; }
+.developer-contact-grid strong { overflow: hidden; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
 .demo-note { display: flex; gap: 13px; margin: 22px 28px 28px; padding: 16px; border: 1px solid color-mix(in srgb,var(--gold),transparent 60%); border-radius: 14px; color: var(--gold); background: color-mix(in srgb,var(--gold),transparent 91%); }
 .demo-note svg { width: 20px; flex: 0 0 auto; }
 .demo-note strong { color: var(--ink); }
@@ -481,7 +508,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .auth-page { grid-template-columns: 1fr; } .auth-story { min-height: 48vh; padding: 28px 24px; } .auth-story-copy { padding: 70px 0 38px; } .auth-panel { min-height: auto; padding: 28px 18px 52px; }
   .shelf-sidebar { display: none; } .shelf-main { margin-left: 0; padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
   .topbar { position: sticky; top: 0; z-index: 20; height: 64px; justify-content: space-between; padding: 0 18px; }
-  .mobile-brand { display: block; } .brand-compact > span:last-child { display: none; }
+  .mobile-brand { display: block; } .brand-compact > span:last-child { display: none; } .mobile-settings-link { display: inline-flex; }
   .page-wrap, .page-wrap-wide { width: min(100% - 32px,720px); padding: 26px 0 60px; }
   .page-intro { align-items: flex-start; } .page-intro h1 { font-size: 2.15rem; }
   .mobile-nav { position: fixed; right: 0; bottom: 0; left: 0; z-index: 40; display: grid; grid-template-columns: repeat(5,1fr); min-height: calc(66px + env(safe-area-inset-bottom)); padding: 7px 5px env(safe-area-inset-bottom); border-top: 1px solid var(--border); background: color-mix(in srgb,var(--surface),transparent 4%); backdrop-filter: blur(16px); }
@@ -533,6 +560,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .recap-privacy { align-items: flex-start; padding: 0 8px; }
   .favorite-card { gap: 16px; padding: 16px; } .favorite-card .cover-feature { width: 90px; } .favorite-card h2 { font-size: 1.45rem; } .quote { font-size: .86rem; }
   .settings-panel section { padding: 22px 18px; } .setting-row { grid-template-columns: auto 1fr; } .setting-row > :last-child { grid-column: 2; justify-self: start; }
+  .developer-card { grid-template-columns: 1fr; } .donate-button { width: 100%; } .developer-contact-grid { grid-template-columns: 1fr; }
   .account-action { grid-template-columns: auto 1fr; } .account-action > button, .account-action > [data-slot="alert-dialog-trigger"] { grid-column: 2; justify-self: start; } .account-privacy, .account-success, .app-version { margin-left: 50px; }
   .demo-note { margin: 18px; } .entry-fields { grid-template-columns: 1fr; } .entry-fields label:first-child { grid-column: auto; }
 }

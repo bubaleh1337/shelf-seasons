@@ -225,3 +225,10 @@ Avoid:
 - Shelf order begins with the current season and continues chronologically through the following three seasons.
 - The whole shelf is a keyboard-accessible control. Opening it reveals an identifiable cover grid with titles, authors and edit actions.
 - The shelf scene may show a clipped representative run of spines; every assigned book remains available in the dialog.
+
+## 13. Developer support
+
+- Developer contacts live in Settings as a calm utility card, separate from account and destructive actions.
+- Buy Me a Coffee uses its recognizable yellow as a single intentional brand accent; it must not recolor the rest of Shelf Seasons.
+- Desktop sidebar actions stay compact. Mobile users reach the same card through the Settings shortcut in the top bar.
+- External donation and Telegram links open in a new tab with `noopener noreferrer`; email uses a direct `mailto:` link.

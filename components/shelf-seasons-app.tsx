@@ -2,7 +2,7 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flame, Languages, Layers3, Library, LoaderCircle, LogOut, Moon, Search, Settings, Sparkles, Sun, Trash2, type LucideIcon } from "lucide-react";
+import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Coffee, Flame, Languages, Layers3, Library, LoaderCircle, LogOut, Mail, Moon, Search, Send, Settings, Sparkles, Sun, Trash2, type LucideIcon } from "lucide-react";
 import { AccountControls } from "@/components/account/account-controls";
 import { BookDialog } from "@/components/library/book-dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
@@ -31,6 +31,12 @@ const nav = [
   { id: "home", icon: BookOpen }, { id: "library", icon: Library }, { id: "calendar", icon: CalendarDays },
   { id: "series", icon: Layers3 }, { id: "recaps", icon: Sparkles }, { id: "settings", icon: Settings },
 ] as const;
+
+const developerLinks = {
+  donate: "https://buymeacoffee.com/kate.asmdef",
+  email: "mailto:ekaterina.pyshkova@gmail.com",
+  telegram: "https://t.me/kemisayega",
+} as const;
 
 export function ShelfSeasonsApp({ locale, section, readerName, timezone, initialTheme, initialBooks, initialSessions, initialRuns, initialGoal, initialSeries }: { locale: Locale; section: string; readerName?: string; timezone: string; initialTheme: "system" | "light" | "dark"; initialBooks: LibraryBook[]; initialSessions: ReadingSession[]; initialRuns: ReadingRun[]; initialGoal: YearlyGoal | null; initialSeries: BookSeries[] }) {
   const c = appCopy[locale];
@@ -92,11 +98,12 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
       <nav className="sidebar-nav">{nav.map(({ id, icon }) => <AppNavLink key={id} locale={locale} id={id} icon={icon} label={c[id]} active={active === id} />)}</nav>
       <ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={saveSession} />
       <BookDialog locale={locale} onSaved={saveBook} />
+      <SidebarDeveloperLinks locale={locale} />
       <div className="reader-mini"><span className="reader-avatar">{displayName.slice(0, 1).toLocaleUpperCase(locale)}</span><span><strong>{displayName}</strong><small>{c.personalLibrary}</small></span></div>
     </aside>
     <main className="shelf-main">
       <SeasonalPageBackdrop season={currentSeason} />
-      <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><Link className="locale-switch" href={`/${locale === "ru" ? "en" : "ru"}/app${active === "home" ? "" : `/${active}`}`}><Languages />{locale === "ru" ? "EN" : "RU"}</Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
+      <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><Link className="locale-switch" href={`/${locale === "ru" ? "en" : "ru"}/app${active === "home" ? "" : `/${active}`}`}><Languages />{locale === "ru" ? "EN" : "RU"}</Link><Link className={cn("theme-button mobile-settings-link", active === "settings" && "is-active")} href={`/${locale}/app/settings`} aria-label={c.settings}><UtilityLinkIcon icon={Settings} label={c.settings} /></Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
       <div className={cn("page-wrap", (active === "library" || active === "series" || active === "recaps") && "page-wrap-wide")}>
         {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} />}
         {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} currentSeason={currentSeason} onSaved={saveBook} />}
@@ -118,6 +125,19 @@ function AppNavLink({ locale, id, icon: Icon, label, active, mobile = false }: {
 function NavLinkContent({ locale, icon: Icon, label }: { locale: Locale; icon: LucideIcon; label: string }) {
   const { pending } = useLinkStatus();
   return <>{pending && <span className="route-progress" aria-hidden="true" />}{pending ? <LoaderCircle className="route-spinner" aria-hidden="true" /> : <Icon aria-hidden="true" />}<span>{label}</span>{pending && <span className="route-pending-indicator sr-only" role="status">{appCopy[locale].openingSection.replace("{section}", label)}</span>}</>;
+}
+
+function UtilityLinkIcon({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+  const { pending } = useLinkStatus();
+  return <>{pending && <span className="route-progress" aria-hidden="true" />}{pending ? <LoaderCircle className="route-spinner" aria-hidden="true" /> : <Icon aria-hidden="true" />}<span className="sr-only">{label}</span></>;
+}
+
+function SidebarDeveloperLinks({ locale }: { locale: Locale }) {
+  const c = appCopy[locale];
+  return <div className="sidebar-developer-links" aria-label={c.developerContacts}>
+    <a className="sidebar-donate" href={developerLinks.donate} target="_blank" rel="noopener noreferrer"><Coffee /><span>{c.supportProject}</span></a>
+    <span className="sidebar-contact-icons"><a href={developerLinks.email} aria-label={c.emailDeveloper} title={c.emailDeveloper}><Mail /></a><a href={developerLinks.telegram} target="_blank" rel="noopener noreferrer" aria-label={c.telegramDeveloper} title={c.telegramDeveloper}><Send /></a></span>
+  </div>;
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
@@ -265,6 +285,19 @@ function SettingsPage({ locale, dark, toggleTheme }: { locale: Locale; dark: boo
     <section><h2>{c.appearance}</h2><div className="setting-row"><span className="setting-icon">{dark ? <Moon /> : <Sun />}</span><div><strong>{c.darkMode}</strong></div><Switch checked={dark} onCheckedChange={toggleTheme} /></div></section>
     <section><h2>{c.language}</h2><div className="setting-row"><span className="setting-icon"><Languages /></span><div><strong>{locale === "ru" ? "Русский" : "English"}</strong></div><div className="language-links"><Link className={locale === "en" ? "is-active" : ""} href="/en/app/settings">EN</Link><Link className={locale === "ru" ? "is-active" : ""} href="/ru/app/settings">RU</Link></div></div></section>
     <section><h2>{c.account}</h2><div className="setting-row"><span className="setting-icon"><LogOut /></span><div><strong>Shelf Seasons</strong><p>{c.signedIn}</p></div><form action="/auth/sign-out" method="post"><input type="hidden" name="locale" value={locale} /><Button variant="outline" type="submit">{c.signOut}</Button></form></div></section>
+    <DeveloperSection locale={locale} />
     <AccountControls locale={locale} />
   </div></>;
+}
+
+function DeveloperSection({ locale }: { locale: Locale }) {
+  const c = appCopy[locale];
+  return <section className="developer-section"><h2>{c.developer}</h2><div className="developer-card">
+    <div className="developer-heading"><span className="setting-icon"><Coffee /></span><div><strong>{c.developerName}</strong><p>{c.developerLead}</p></div></div>
+    <a className="donate-button" href={developerLinks.donate} target="_blank" rel="noopener noreferrer"><Coffee />{c.supportProject}<small>Buy Me a Coffee</small></a>
+    <div className="developer-contact-grid">
+      <a href={developerLinks.email}><span><Mail /></span><span><small>Email</small><strong>ekaterina.pyshkova@gmail.com</strong></span></a>
+      <a href={developerLinks.telegram} target="_blank" rel="noopener noreferrer"><span><Send /></span><span><small>Telegram</small><strong>@kemisayega</strong></span></a>
+    </div>
+  </div></section>;
 }
