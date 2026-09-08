@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { seasonFromDateKey, seasonSymbol } from "../lib/seasons.ts";
+import { orderedSeasons, seasonFromDateKey, seasonSymbol } from "../lib/seasons.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -11,6 +11,13 @@ test("calendar months resolve to northern hemisphere seasons", () => {
   assert.equal(seasonFromDateKey("2026-10-31"), "autumn");
   assert.equal(seasonFromDateKey("2026-12-01"), "winter");
   assert.equal(seasonSymbol("autumn"), "🍂");
+});
+
+test("seasonal shelves always begin with the current season and continue chronologically", () => {
+  assert.deepEqual(orderedSeasons("spring"), ["spring", "summer", "autumn", "winter"]);
+  assert.deepEqual(orderedSeasons("summer"), ["summer", "autumn", "winter", "spring"]);
+  assert.deepEqual(orderedSeasons("autumn"), ["autumn", "winter", "spring", "summer"]);
+  assert.deepEqual(orderedSeasons("winter"), ["winter", "spring", "summer", "autumn"]);
 });
 
 test("season and reading-language migration preserves ownership and history", async () => {
@@ -24,12 +31,25 @@ test("season and reading-language migration preserves ownership and history", as
 });
 
 test("personal app exposes seasonal shelves, readable calendar titles and home add action", async () => {
-  const source = await read("components/shelf-seasons-app.tsx");
+  const [source, shelves, wallpaper, css] = await Promise.all([
+    read("components/shelf-seasons-app.tsx"),
+    read("components/library/seasonal-shelves.tsx"),
+    read("components/seasonal/seasonal-art.tsx"),
+    read("app/globals.css"),
+  ]);
   assert.match(source, /<SeasonalShelves/);
+  assert.match(source, /<SeasonalPageBackdrop/);
   assert.match(source, /calendar-book-chip/);
   assert.match(source, /<strong>\{book\.title\}<\/strong>/);
   assert.match(source, /PageIntro title=\{`\$\{c\.greeting\}/);
   assert.match(source, /action=\{<BookDialog locale=\{locale\} onSaved=\{onBookSaved\}/);
+  assert.match(shelves, /orderedSeasons\(currentSeason\)/);
+  assert.match(shelves, /DialogTrigger asChild/);
+  assert.match(shelves, /shelf-book-spine/);
+  assert.match(shelves, /<ShelfOrnaments season=\{season\}/);
+  assert.match(wallpaper, /seasonal-backdrop/);
+  assert.doesNotMatch(css, /\.shelf-main::before\s*\{[^}]*position:\s*fixed/);
+  assert.match(css, /\.seasonal-backdrop\s*\{[^}]*position:\s*absolute/);
 });
 
 test("book search resolves translated titles and cover storage has provider fallback", async () => {

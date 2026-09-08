@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.0
+
+- Replaced the fixed emoji motif with calm, scroll-bound seasonal artwork that decorates the page without covering interface copy.
+- Rebuilt seasonal collections as physical wooden shelves with illustrated spring, summer, autumn and winter objects.
+- Displayed books spine-first on each shelf and moved the full cover grid and edit actions into an accessible shelf dialog.
+- Ordered shelves from the reader's current season and continued through the following seasons chronologically.
+
 ## 0.10.0
 
 - Added four illustrated seasonal shelves and a subtle automatic spring, summer, autumn or winter application palette.

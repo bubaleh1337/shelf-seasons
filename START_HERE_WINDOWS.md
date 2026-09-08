@@ -1,15 +1,14 @@
-# Shelf Seasons 0.8.0 — дневник чтения на Windows
+# Shelf Seasons 0.11.0 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
 
-## 1. Один раз добавьте итоги в Supabase
+## 1. Проверьте миграции Supabase
 
 1. Откройте **Supabase → SQL Editor → New query**.
-2. Скопируйте туда целиком новый файл
-   `supabase/migrations/202609070002_recaps.sql`.
-3. Нажмите **Run**. Запрос должен завершиться без ошибок.
-4. Старые миграции до `202609070001_series.sql` повторно не запускайте.
+2. Если миграции прошлых версий ещё не запускались, примените их по порядку из
+   `supabase/migrations`.
+3. Для обновления с версии 0.10.0 на 0.11.0 новая SQL-миграция не нужна.
 
 ## 2. Распакуйте проект
 
@@ -20,23 +19,22 @@
 
 ```powershell
 Set-Location P:\Projects\shelf-seasons\shelf-seasons
-.\UPDATE_TO_0.8.0.ps1
+.\UPDATE_TO_0.11.0.ps1
 npm ci
-npm run test:connected
 npm run release:check
 npm run dev
 ```
 
 Откройте `http://localhost:3000/ru/sign-in` и войдите через Google.
 
-После входа откройте `http://localhost:3000/ru/app/recaps`. Переключите месяц и
-год, затем сохраните один из доступных личных выборов и обновите страницу.
+После входа откройте Библиотеку и проверьте сезонные полки. Текущий сезон должен
+идти первым; нажатие на полку открывает плитку её книг.
 
 ## 4. Отправьте обновление в GitHub
 
 ```powershell
-git add .
-git commit -m "feat: add monthly and yearly recaps"
+git add -A
+git commit -m "feat: redesign seasonal shelves"
 git push origin main
 ```
 

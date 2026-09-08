@@ -32,10 +32,10 @@
   --shadow: 0 20px 52px rgba(0,0,0,.28); --book-shadow: 0 16px 28px rgba(0,0,0,.44); color-scheme: dark;
 }
 
-:root[data-season="spring"] { --season-main: #63866b; --season-soft: #e4eedf; --season-accent: #d792a8; --season-sky: #dcebf0; --season-motif: "✿  ❀  ·  ✿"; }
-:root[data-season="summer"] { --season-main: #467b70; --season-soft: #e4eee2; --season-accent: #d8a64d; --season-sky: #d7eced; --season-motif: "☀  ·  ✦  ☀"; }
-:root[data-season="autumn"] { --season-main: #6a4a36; --season-soft: #eee0cf; --season-accent: #b85f3c; --season-sky: #e7d5bf; --season-motif: "🍂  ·  🍁  🍂"; }
-:root[data-season="winter"] { --season-main: #4d6370; --season-soft: #e1e9eb; --season-accent: #7895a6; --season-sky: #dce7ee; --season-motif: "❄  ·  ✧  ❄"; }
+:root[data-season="spring"] { --season-main: #63866b; --season-soft: #e4eedf; --season-accent: #d792a8; --season-sky: #dcebf0; }
+:root[data-season="summer"] { --season-main: #467b70; --season-soft: #e4eee2; --season-accent: #d8a64d; --season-sky: #d7eced; }
+:root[data-season="autumn"] { --season-main: #6a4a36; --season-soft: #eee0cf; --season-accent: #b85f3c; --season-sky: #e7d5bf; }
+:root[data-season="winter"] { --season-main: #4d6370; --season-soft: #e1e9eb; --season-accent: #7895a6; --season-sky: #dce7ee; }
 :root[data-season] { --primary: var(--season-main); --green: var(--season-main); --green-soft: var(--season-soft); --terracotta: var(--season-accent); }
 :root[data-theme="dark"][data-season] { --season-soft: color-mix(in srgb,var(--season-main),#171513 62%); --primary: color-mix(in srgb,var(--season-main),white 38%); --primary-foreground: #171513; --green: var(--primary); --green-soft: var(--season-soft); }
 
@@ -61,10 +61,20 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .auth-success { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; padding: 11px 12px; border-radius: 10px; color: var(--green-deep); background: var(--green-soft); font-size: .82rem; font-weight: 700; }
 .auth-success svg { width: 18px; height: 18px; flex: 0 0 auto; }
 
-.shelf-app { min-height: 100vh; background: radial-gradient(circle at 86% 8%,color-mix(in srgb,var(--season-sky,#e8e1d7),transparent 45%),transparent 27%),var(--page); }
-.shelf-main { position: relative; }
-.shelf-main::before { position: fixed; top: 88px; right: 28px; z-index: 0; color: color-mix(in srgb,var(--season-accent,#a85f45),transparent 72%); content: var(--season-motif,"✦"); font-size: 1.15rem; letter-spacing: .75rem; pointer-events: none; }
-.shelf-main > * { position: relative; z-index: 1; }
+.shelf-app { min-height: 100vh; background: var(--page); }
+.shelf-main { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(ellipse at 96% 4%,color-mix(in srgb,var(--season-sky,#e8e1d7),transparent 24%),transparent 36%),radial-gradient(ellipse at 4% 94%,color-mix(in srgb,var(--season-soft,#eee6da),transparent 18%),transparent 38%),var(--page); }
+.shelf-main > *:not(.seasonal-backdrop) { position: relative; z-index: 1; }
+.seasonal-backdrop { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.seasonal-wallpaper { position: absolute; width: clamp(340px,38vw,640px); height: auto; color: var(--season-main); opacity: .34; }
+.seasonal-wallpaper-top { top: 250px; right: -165px; }
+.seasonal-wallpaper-bottom { bottom: 120px; left: -200px; transform: rotate(180deg); opacity: .2; }
+.season-line,.season-snow { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 5; }
+.season-fill { fill: color-mix(in srgb,var(--season-main),transparent 36%); }
+.season-accent-fill,.season-flower { fill: color-mix(in srgb,var(--season-accent),transparent 28%); }
+.season-soft-fill { fill: color-mix(in srgb,var(--season-sky),transparent 18%); }
+.season-sun { fill: color-mix(in srgb,var(--season-accent),transparent 28%); }
+.season-sun-ring { fill: none; stroke: color-mix(in srgb,var(--season-accent),transparent 48%); stroke-width: 4; }
+:root[data-theme="dark"] .seasonal-wallpaper { opacity: .18; }
 .shelf-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; display: flex; width: 250px; flex-direction: column; padding: 30px 22px 24px; color: #f7f0e7; background: linear-gradient(165deg,color-mix(in srgb,var(--season-main,#263d32),#17241d 24%),#263d32 78%); border-right: 1px solid rgba(255,255,255,.08); }
 :root[data-theme="dark"] .shelf-sidebar { background: #151d19; }
 .brand { display: flex; align-items: center; gap: 12px; font-family: "Fraunces", Georgia, serif; font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
@@ -597,29 +607,109 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .library-view-switch { display: flex; width: fit-content; gap: 4px; margin: -10px 0 20px; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
 .library-view-switch button { min-height: 38px; padding: 7px 14px; border: 0; border-radius: 9px; color: var(--ink-soft); background: transparent; cursor: pointer; font-size: .76rem; font-weight: 800; }
 .library-view-switch button.is-active { color: var(--primary-foreground); background: var(--primary); }
-.seasonal-library { display: grid; gap: 22px; }
-.seasonal-library-intro { display: flex; align-items: center; gap: 13px; padding: 17px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
-.seasonal-library-intro > svg { width: 26px; color: var(--terracotta); }
-.seasonal-library-intro h2 { margin: 0; font-family: "Fraunces",Georgia,serif; font-size: 1.35rem; }
-.seasonal-library-intro p { margin: 3px 0 0; color: var(--ink-soft); font-size: .78rem; }
-.seasonal-shelf { --shelf-main: #70846d; --shelf-soft: #e7eee0; --shelf-art: "✿"; position: relative; overflow: hidden; padding: 24px 24px 0; border: 1px solid color-mix(in srgb,var(--shelf-main),transparent 58%); border-radius: 22px; background: radial-gradient(circle at 92% 12%,color-mix(in srgb,var(--shelf-main),transparent 77%),transparent 26%),linear-gradient(135deg,var(--shelf-soft),var(--surface) 62%); box-shadow: var(--shadow); }
-.seasonal-shelf[data-shelf-season="spring"] { --shelf-main: #71977b; --shelf-soft: #edf3e8; --shelf-art: "✿  ❀  ✿"; }
-.seasonal-shelf[data-shelf-season="summer"] { --shelf-main: #4f8b83; --shelf-soft: #e8f1e5; --shelf-art: "☀  ✦  ☀"; }
-.seasonal-shelf[data-shelf-season="autumn"] { --shelf-main: #9a5d3c; --shelf-soft: #f0e2cf; --shelf-art: "🍂  🍁  🍂"; }
-.seasonal-shelf[data-shelf-season="winter"] { --shelf-main: #668293; --shelf-soft: #e7eef2; --shelf-art: "❄  ✧  ❄"; }
-:root[data-theme="dark"] .seasonal-shelf { --shelf-soft: color-mix(in srgb,var(--shelf-main),#1d1917 76%); }
-.seasonal-shelf::after { position: absolute; top: 18px; right: 22px; color: color-mix(in srgb,var(--shelf-main),transparent 48%); content: var(--shelf-art); letter-spacing: .55rem; }
-.seasonal-shelf > header { display: flex; align-items: center; gap: 11px; }
-.seasonal-shelf > header > span { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 13px; color: #fff; background: var(--shelf-main); }
-.seasonal-shelf h3 { margin: 0; font-family: "Fraunces",Georgia,serif; font-size: 1.5rem; }
-.seasonal-shelf header small { color: var(--ink-soft); }
-.seasonal-shelf-books { display: flex; min-height: 172px; align-items: flex-end; gap: 17px; overflow-x: auto; padding: 22px 4px 0; }
-.seasonal-shelf-books > p { align-self: center; margin: 0; color: var(--ink-soft); font-size: .82rem; }
-.seasonal-book { width: 112px; flex: 0 0 112px; }
-.seasonal-book .simple-book-card > .personal-cover { width: 88px; margin: 0 auto; }
-.seasonal-book .book-badges,.seasonal-book .simple-book-card > h3,.seasonal-book .simple-book-card > p { display: none; }
-.seasonal-book > button { width: 100%; min-height: 34px; margin-top: 9px; font-size: .67rem; }
-.shelf-board { height: 14px; margin: 13px -25px 0; border-top: 1px solid color-mix(in srgb,var(--shelf-main),black 12%); background: linear-gradient(#9b7152,#6f4c35); box-shadow: 0 -7px 18px rgba(65,42,27,.17),inset 0 3px rgba(255,255,255,.16); }
+.seasonal-library { display: grid; gap: 34px; }
+.seasonal-library-intro { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border: 1px solid color-mix(in srgb,var(--season-main),transparent 65%); border-radius: 16px; background: color-mix(in srgb,var(--surface),var(--season-soft) 20%); box-shadow: 0 12px 30px rgba(60,42,28,.05); }
+.seasonal-library-intro > .season-icon { width: 30px; flex: 0 0 auto; color: var(--terracotta); }
+.seasonal-library-intro h2 { margin: 0; font-family: "Fraunces",Georgia,serif; font-size: 1.45rem; }
+.seasonal-library-intro p { margin: 3px 0 0; color: var(--ink-soft); font-size: .82rem; }
+.season-icon { width: 24px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.seasonal-shelf { --shelf-main: #70846d; --shelf-soft: #e7eee0; display: grid; gap: 12px; }
+.seasonal-shelf[data-shelf-season="spring"] { --shelf-main: #71977b; --shelf-soft: #edf3e8; --shelf-accent: #d692aa; }
+.seasonal-shelf[data-shelf-season="summer"] { --shelf-main: #4f8b83; --shelf-soft: #e8f1e5; --shelf-accent: #d6a947; }
+.seasonal-shelf[data-shelf-season="autumn"] { --shelf-main: #9a5d3c; --shelf-soft: #f0e2cf; --shelf-accent: #bd6945; }
+.seasonal-shelf[data-shelf-season="winter"] { --shelf-main: #668293; --shelf-soft: #e7eef2; --shelf-accent: #8cabc0; }
+:root[data-theme="dark"] .seasonal-shelf { --shelf-soft: color-mix(in srgb,var(--shelf-main),#1d1917 80%); }
+.seasonal-shelf-heading { display: flex; align-items: center; gap: 11px; padding-inline: 4px; }
+.seasonal-shelf-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 13px; color: #fff; background: var(--shelf-main); box-shadow: inset 0 -3px rgba(0,0,0,.1); }
+.seasonal-shelf-heading h3 { margin: 0; font-family: "Fraunces",Georgia,serif; font-size: 1.55rem; }
+.seasonal-shelf-heading small { display: block; color: var(--ink-soft); font-size: .74rem; }
+.current-season-label { margin-left: auto; padding: 6px 10px; border: 1px solid color-mix(in srgb,var(--shelf-main),transparent 58%); border-radius: 999px; color: var(--shelf-main); background: color-mix(in srgb,var(--shelf-soft),var(--surface) 24%); font-size: .68rem; font-weight: 850; }
+.physical-shelf { position: relative; display: grid; width: 100%; min-height: 286px; padding: 0 12px 35px; border: 0; color: var(--ink); background: transparent; cursor: pointer; text-align: left; }
+.physical-shelf:focus-visible { border-radius: 18px; }
+.shelf-scene { position: relative; display: flex; min-width: 0; min-height: 220px; align-items: flex-end; justify-content: space-between; gap: 16px; overflow: hidden; padding: 22px 26px 0; border: 1px solid color-mix(in srgb,var(--shelf-main),transparent 58%); border-bottom: 0; border-radius: 23px 23px 2px 2px; background: radial-gradient(circle at 82% 20%,color-mix(in srgb,var(--shelf-accent),transparent 76%),transparent 26%),linear-gradient(115deg,var(--shelf-soft),color-mix(in srgb,var(--surface),var(--shelf-soft) 28%) 70%); box-shadow: inset 0 -18px 28px rgba(66,45,28,.07),0 16px 34px rgba(66,45,28,.09); transition: transform .18s ease,box-shadow .18s ease; }
+.shelf-scene::before { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg,rgba(255,255,255,.14),transparent 22%,transparent 76%,rgba(255,255,255,.1)),repeating-linear-gradient(90deg,transparent 0 78px,color-mix(in srgb,var(--shelf-main),transparent 94%) 79px 80px); content: ""; }
+.physical-shelf:hover .shelf-scene { transform: translateY(-3px); box-shadow: inset 0 -18px 28px rgba(66,45,28,.08),0 20px 38px rgba(66,45,28,.13); }
+.shelf-book-spines { position: relative; z-index: 2; display: flex; min-width: 0; max-width: calc(100% - 170px); height: 180px; flex: 1 1 auto; align-items: flex-end; gap: 3px; overflow: hidden; }
+.shelf-book-spine { position: relative; display: grid; width: 34px; height: 164px; flex: 0 0 34px; place-items: center; overflow: hidden; border: 1px solid rgba(48,37,30,.28); border-radius: 4px 5px 2px 2px; color: #fffaf2; background: #546b5b; box-shadow: inset 4px 0 rgba(255,255,255,.1),inset -3px 0 rgba(0,0,0,.08),3px 4px 7px rgba(48,35,24,.14); }
+.shelf-book-spine::after { position: absolute; right: 4px; bottom: 8px; left: 4px; height: 2px; border-radius: 2px; background: rgba(255,242,211,.55); content: ""; }
+.shelf-book-spine > span { max-height: 138px; overflow: hidden; font-family: "Fraunces",Georgia,serif; font-size: .66rem; font-weight: 700; line-height: 1; text-overflow: ellipsis; white-space: nowrap; writing-mode: vertical-rl; transform: rotate(180deg); }
+.shelf-book-spine.spine-style-1 { height: 174px; background: #775665; }
+.shelf-book-spine.spine-style-2 { width: 29px; height: 151px; flex-basis: 29px; background: #a25f43; }
+.shelf-book-spine.spine-style-3 { height: 168px; background: #3f6370; }
+.shelf-book-spine.spine-style-4 { width: 39px; flex-basis: 39px; background: #8a713f; }
+.shelf-book-spine.spine-style-5 { height: 157px; background: #53606f; }
+.empty-shelf-sign { align-self: flex-end; display: flex; max-width: 255px; min-height: 78px; align-items: center; gap: 11px; margin-bottom: 22px; padding: 14px 17px; border: 1px dashed color-mix(in srgb,var(--shelf-main),transparent 42%); border-radius: 12px; color: color-mix(in srgb,var(--shelf-main),var(--ink) 30%); background: color-mix(in srgb,var(--surface),transparent 18%); font-size: .74rem; font-weight: 750; }
+.empty-shelf-sign svg { width: 22px; flex: 0 0 auto; }
+.shelf-ornaments { position: relative; z-index: 2; width: 170px; flex: 0 0 170px; overflow: visible; }
+.decor-line,.decor-snow { fill: none; stroke: var(--shelf-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
+.decor-wood { fill: #a87855; stroke: #74513a; stroke-width: 2; }
+.decor-petal { fill: color-mix(in srgb,var(--shelf-accent),white 22%); }
+.decor-accent,.decor-sun { fill: var(--shelf-accent); stroke: color-mix(in srgb,var(--shelf-accent),black 16%); stroke-width: 2; }
+.decor-wood,.decor-ceramic,.decor-petal,.decor-accent,.decor-sun,.decor-lamp,.decor-pumpkin,.decor-leaf,.decor-tree,.decor-mug,.decor-snow,.decor-globe { filter: drop-shadow(0 4px 3px rgba(56,38,24,.13)); }
+.decor-ceramic,.decor-mug { fill: color-mix(in srgb,var(--shelf-main),white 18%); stroke: color-mix(in srgb,var(--shelf-main),black 14%); stroke-width: 2; }
+.decor-lamp { fill: #7f6047; stroke: #62452f; stroke-width: 2; }
+.decor-glow { fill: color-mix(in srgb,var(--shelf-accent),transparent 80%); }
+.decor-pumpkin { fill: #bb6b42; stroke: #8d4f31; stroke-width: 2; }
+.decor-leaf { fill: #9f6d34; }
+.decor-tree { fill: color-mix(in srgb,var(--shelf-main),#274539 36%); stroke: color-mix(in srgb,var(--shelf-main),black 16%); stroke-width: 2; }
+.decor-globe { fill: color-mix(in srgb,#dcecf3,transparent 20%); stroke: #6f8998; stroke-width: 2; }
+.wooden-shelf-board { position: relative; z-index: 3; display: block; height: 30px; margin: -2px -12px 0; border: 1px solid #65432e; border-radius: 5px 5px 13px 13px; background: linear-gradient(180deg,#b58460 0 14%,#90613f 15% 61%,#72482f 62% 100%); box-shadow: 0 10px 15px rgba(54,33,20,.22),inset 0 2px rgba(255,255,255,.22); }
+.wooden-shelf-board::before { position: absolute; inset: 7px 4% auto; height: 1px; background: repeating-linear-gradient(90deg,rgba(74,43,25,.25) 0 24px,transparent 25px 47px); content: ""; }
+.wooden-shelf-board > span::before,.wooden-shelf-board > span::after { position: absolute; top: 27px; width: 30px; height: 17px; border-radius: 0 0 7px 7px; background: linear-gradient(90deg,#6b432c,#946341,#65402b); box-shadow: 0 5px 8px rgba(54,33,20,.18); content: ""; }
+.wooden-shelf-board > span::before { left: 9%; }
+.wooden-shelf-board > span::after { right: 9%; }
+.shelf-open-hint { position: absolute; right: 28px; bottom: 0; z-index: 4; display: flex; min-height: 34px; align-items: center; gap: 4px; padding: 5px 9px; border-radius: 9px; color: var(--shelf-main); background: color-mix(in srgb,var(--surface),transparent 5%); box-shadow: 0 4px 12px rgba(42,30,22,.1); font-size: .69rem; font-weight: 850; }
+.shelf-open-hint svg { width: 15px; }
+.season-shelf-dialog { width: min(930px,calc(100vw - 24px)); max-width: 930px; max-height: min(90vh,900px); overflow-y: auto; border-color: var(--border); border-radius: 22px; background: var(--surface); }
+.season-dialog-title { display: flex; align-items: center; gap: 13px; text-align: left; }
+.season-dialog-title > span { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 13px; color: var(--primary-foreground); background: var(--primary); }
+.season-dialog-title [data-slot="dialog-title"] { font-family: "Fraunces",Georgia,serif; font-size: 1.7rem; }
+.season-dialog-title [data-slot="dialog-description"] { margin-top: 3px; color: var(--ink-soft); }
+.season-shelf-book-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 28px 18px; margin-top: 5px; }
+.season-shelf-book-card { min-width: 0; }
+.season-shelf-book-card h3 { margin: 8px 0 2px; overflow: hidden; font-family: "Fraunces",Georgia,serif; font-size: .96rem; line-height: 1.15; text-overflow: ellipsis; }
+.season-shelf-book-card > p { margin: 0; overflow: hidden; color: var(--ink-soft); font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+.season-shelf-book-card > button { width: 100%; min-height: 38px; margin-top: 9px; }
+.season-dialog-empty { display: grid; min-height: 250px; place-items: center; align-content: center; gap: 13px; color: var(--ink-soft); text-align: center; }
+.season-dialog-empty > svg { width: 38px; }
+.season-dialog-empty p { margin: 0; }
+@media (max-width: 820px) {
+  .seasonal-wallpaper { width: 430px; opacity: .25; }
+  .seasonal-wallpaper-top { top: 350px; right: -210px; }
+  .seasonal-wallpaper-bottom { bottom: 170px; left: -245px; }
+  .season-shelf-book-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 560px) {
+  .seasonal-library { gap: 28px; }
+  .seasonal-library-intro { align-items: flex-start; padding: 15px 16px; }
+  .seasonal-library-intro h2 { font-size: 1.3rem; }
+  .seasonal-library-intro p { font-size: .75rem; }
+  .seasonal-shelf-heading h3 { font-size: 1.4rem; }
+  .physical-shelf { min-height: 250px; padding-inline: 5px; }
+  .shelf-scene { min-height: 190px; gap: 8px; padding: 16px 14px 0; border-radius: 18px 18px 2px 2px; }
+  .shelf-book-spines { max-width: calc(100% - 103px); height: 158px; }
+  .shelf-book-spine { width: 29px; height: 145px; flex-basis: 29px; }
+  .shelf-book-spine.spine-style-1 { height: 153px; }
+  .shelf-book-spine.spine-style-2 { width: 25px; height: 134px; flex-basis: 25px; }
+  .shelf-book-spine.spine-style-3 { height: 149px; }
+  .shelf-book-spine.spine-style-4 { width: 33px; flex-basis: 33px; }
+  .shelf-book-spine.spine-style-5 { height: 139px; }
+  .shelf-book-spine > span { max-height: 120px; font-size: .59rem; }
+  .shelf-ornaments { width: 103px; flex-basis: 103px; }
+  .empty-shelf-sign { min-height: 65px; margin-bottom: 18px; padding: 10px 11px; font-size: .66rem; }
+  .wooden-shelf-board { margin-inline: -5px; }
+  .shelf-open-hint { right: 14px; }
+  .season-shelf-dialog { padding: 20px 16px; }
+  .season-dialog-title [data-slot="dialog-title"] { font-size: 1.45rem; }
+  .season-shelf-book-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px 13px; }
+  .season-shelf-book-card > button { font-size: .7rem; }
+}
+@media (max-width: 360px) {
+  .current-season-label { padding-inline: 8px; font-size: .62rem; }
+  .shelf-scene { padding-inline: 10px; }
+  .shelf-ornaments { width: 92px; flex-basis: 92px; }
+  .shelf-book-spines { max-width: calc(100% - 92px); }
+}
 .future-empty { min-height: 430px; border: 1px dashed var(--border); border-radius: 24px; background: var(--surface); }
 .book-editor-dialog { width: min(760px,calc(100vw - 24px)); max-width: 760px; max-height: min(90vh,850px); overflow-y: auto; border-color: var(--border); border-radius: 22px; background: var(--surface); }
 .book-editor-dialog [data-slot="dialog-title"] { font-family: "Fraunces",Georgia,serif; font-size: 1.75rem; }

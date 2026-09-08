@@ -216,3 +216,12 @@ Avoid:
 - status is not conveyed only by color;
 - minimum touch target 44×44 px;
 - test keyboard-only and 200% zoom.
+
+## 12. Seasonal atmosphere and shelves
+
+- Current-season artwork belongs to the scrolling page background and never uses fixed-position motifs over content.
+- Background illustration stays decorative, low-contrast and outside the primary text area.
+- Seasonal collections use a physical wooden-shelf metaphor with upright book spines and small illustrated objects.
+- Shelf order begins with the current season and continues chronologically through the following three seasons.
+- The whole shelf is a keyboard-accessible control. Opening it reveals an identifiable cover grid with titles, authors and edit actions.
+- The shelf scene may show a clipped representative run of spines; every assigned book remains available in the dialog.

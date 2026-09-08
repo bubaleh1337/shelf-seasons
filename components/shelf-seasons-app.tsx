@@ -6,10 +6,12 @@ import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRi
 import { AccountControls } from "@/components/account/account-controls";
 import { BookDialog } from "@/components/library/book-dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
+import { SeasonalShelves } from "@/components/library/seasonal-shelves";
 import { ReadingDialog } from "@/components/reading/reading-dialog";
 import { FinishBookDialog } from "@/components/reading/finish-book-dialog";
 import { YearlyGoalCard } from "@/components/reading/yearly-goal-card";
 import { RecapsPage } from "@/components/recaps/recaps-page";
+import { SeasonalPageBackdrop } from "@/components/seasonal/seasonal-art";
 import { SeriesPage } from "@/components/series/series-page";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,7 +23,7 @@ import { calculateStreaks, localDateKey } from "@/lib/reading/dates";
 import { calculateGoalProgress } from "@/lib/reading/goals";
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
 import type { BookSeries } from "@/lib/series/types";
-import { seasons, seasonFromDateKey, seasonSymbol, type BookSeason } from "@/lib/seasons";
+import { seasonFromDateKey, seasonSymbol, type BookSeason } from "@/lib/seasons";
 import type { Locale } from "@/lib/shelf-seasons";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +42,13 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
   const [seriesItems, setSeriesItems] = useState(initialSeries);
   const [completionNotice, setCompletionNotice] = useState(false);
   const [dark, setDark] = useState(initialTheme === "dark");
+  const currentSeason = seasonFromDateKey(localDateKey(timezone));
 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dataset.theme = dark ? "dark" : "light";
-    document.documentElement.dataset.season = seasonFromDateKey(localDateKey(timezone));
-  }, [dark, locale, timezone]);
+    document.documentElement.dataset.season = currentSeason;
+  }, [currentSeason, dark, locale]);
 
   useEffect(() => {
     const repairKey = "shelf-seasons-cover-repair-0.10.0";
@@ -92,10 +95,11 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
       <div className="reader-mini"><span className="reader-avatar">{displayName.slice(0, 1).toLocaleUpperCase(locale)}</span><span><strong>{displayName}</strong><small>{c.personalLibrary}</small></span></div>
     </aside>
     <main className="shelf-main">
+      <SeasonalPageBackdrop season={currentSeason} />
       <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><Link className="locale-switch" href={`/${locale === "ru" ? "en" : "ru"}/app${active === "home" ? "" : `/${active}`}`}><Languages />{locale === "ru" ? "EN" : "RU"}</Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
       <div className={cn("page-wrap", (active === "library" || active === "series" || active === "recaps") && "page-wrap-wide")}>
         {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} />}
-        {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} onSaved={saveBook} />}
+        {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} currentSeason={currentSeason} onSaved={saveBook} />}
         {active === "calendar" && <ReadingCalendar locale={locale} books={books} sessions={sessions} timezone={timezone} setSessions={setSessions} onSessionSaved={saveSession} />}
         {active === "series" && <SeriesPage locale={locale} books={books} items={seriesItems} onSaved={saveSeries} onDeleted={deleteSeries} onBookSaved={saveBook} />}
         {active === "recaps" && <RecapsPage locale={locale} timezone={timezone} />}
@@ -147,7 +151,7 @@ function Home({ locale, name, books, sessions, runs, goal, timezone, completionN
   </>;
 }
 
-function PersonalLibrary({ locale, books, setBooks, onSaved }: { locale: Locale; books: LibraryBook[]; setBooks: React.Dispatch<React.SetStateAction<LibraryBook[]>>; onSaved: (book: LibraryBook) => void }) {
+function PersonalLibrary({ locale, books, setBooks, currentSeason, onSaved }: { locale: Locale; books: LibraryBook[]; setBooks: React.Dispatch<React.SetStateAction<LibraryBook[]>>; currentSeason: BookSeason; onSaved: (book: LibraryBook) => void }) {
   const c = appCopy[locale];
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | LibraryStatus>("all");
@@ -175,13 +179,8 @@ function PersonalLibrary({ locale, books, setBooks, onSaved }: { locale: Locale;
     <div className="library-view-switch" aria-label={c.seasonalShelves}><button type="button" className={view === "library" ? "is-active" : ""} onClick={() => setView("library")}>{c.libraryView}</button><button type="button" className={view === "seasons" ? "is-active" : ""} onClick={() => setView("seasons")}>{c.seasonalView}</button></div>
     <div className="library-tools"><label className="search-field"><Search /><span className="sr-only">{c.searchLibrary}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={c.searchLibrary} /></label><div className="filter-row">{(["all", "reading", "want", "read", "paused", "dnf"] as const).map((value) => <button type="button" key={value} className={cn("filter-chip", filter === value && "is-active")} onClick={() => setFilter(value)}>{c[value]}</button>)}</div></div>
     <div className="library-count">{filtered.length} {c.books}</div>{error && <p className="form-error" role="alert">{c.error}</p>}
-    {view === "seasons" ? <SeasonalShelves locale={locale} books={filtered} onSaved={onSaved} /> : filtered.length ? <div className="personal-book-grid">{filtered.map((book) => <article className="personal-book-card" key={book.id}><SimpleBookCard locale={locale} book={book} /><div className="book-card-actions"><BookDialog locale={locale} book={book} onSaved={onSaved} trigger={<Button size="sm" variant="outline">{c.edit}</Button>} /><Button size="sm" variant="ghost" onClick={() => archive(book)} disabled={busyId === book.id}>{c.archive}</Button><Button size="sm" variant="ghost" className="delete-book" onClick={() => remove(book)} disabled={busyId === book.id}>{c.delete}</Button></div></article>)}</div> : <div className="empty-state"><BookHeart /><h2>{books.length ? c.noMatches : c.emptyHome}</h2>{books.length === 0 && <BookDialog locale={locale} onSaved={onSaved} />}</div>}
+    {view === "seasons" ? <SeasonalShelves locale={locale} books={filtered} currentSeason={currentSeason} onSaved={onSaved} /> : filtered.length ? <div className="personal-book-grid">{filtered.map((book) => <article className="personal-book-card" key={book.id}><SimpleBookCard locale={locale} book={book} /><div className="book-card-actions"><BookDialog locale={locale} book={book} onSaved={onSaved} trigger={<Button size="sm" variant="outline">{c.edit}</Button>} /><Button size="sm" variant="ghost" onClick={() => archive(book)} disabled={busyId === book.id}>{c.archive}</Button><Button size="sm" variant="ghost" className="delete-book" onClick={() => remove(book)} disabled={busyId === book.id}>{c.delete}</Button></div></article>)}</div> : <div className="empty-state"><BookHeart /><h2>{books.length ? c.noMatches : c.emptyHome}</h2>{books.length === 0 && <BookDialog locale={locale} onSaved={onSaved} />}</div>}
   </>;
-}
-
-function SeasonalShelves({ locale, books, onSaved }: { locale: Locale; books: LibraryBook[]; onSaved: (book: LibraryBook) => void }) {
-  const c = appCopy[locale];
-  return <section className="seasonal-library"><div className="seasonal-library-intro"><Sparkles /><div><h2>{c.seasonalShelves}</h2><p>{c.seasonalLead}</p></div></div>{seasons.map((season) => { const shelfBooks = books.filter((book) => book.season === season); return <article className="seasonal-shelf" data-shelf-season={season} key={season}><header><span>{seasonSymbol(season)}</span><div><h3>{c[season]}</h3><small>{shelfBooks.length} {c.books}</small></div></header><div className="seasonal-shelf-books">{shelfBooks.length ? shelfBooks.map((book) => <div className="seasonal-book" key={book.id}><SimpleBookCard locale={locale} book={book} /><BookDialog locale={locale} book={book} onSaved={onSaved} trigger={<Button size="sm" variant="outline">{c.edit}</Button>} /></div>) : <p>{c.seasonalEmpty}</p>}</div><div className="shelf-board" aria-hidden="true" /></article>; })}</section>;
 }
 
 function SimpleBookCard({ locale, book }: { locale: Locale; book: LibraryBook }) {
