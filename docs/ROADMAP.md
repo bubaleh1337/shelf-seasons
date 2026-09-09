@@ -139,6 +139,10 @@ Exit criteria:
 
 ## Stage 7 — release hardening and closed beta
 
+Status: encrypted daily database backup automation is prepared in `0.16.0`;
+the first artifact verification and a restore rehearsal in a disposable target
+remain manual release gates.
+
 Deliverables:
 
 - privacy policy, terms, support and data-deletion information;

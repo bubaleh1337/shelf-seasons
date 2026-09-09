@@ -1,12 +1,12 @@
 # Closed public beta on Vercel
 
-Version 0.15.0 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: legal pages, monitoring, rate limits and a restore rehearsal remain on the roadmap.
+Version 0.16.0 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: legal pages, monitoring, rate limits and a completed restore rehearsal remain on the roadmap.
 
 ## Before deployment
 
-1. After overlaying the 0.15.0 archive on Windows, run `.\UPDATE_TO_0.15.0.ps1` once to remove generated caches from the previous source version.
+1. After overlaying the 0.16.0 archive on Windows, run `.\UPDATE_TO_0.16.0.ps1` once to remove generated caches from the previous source version.
 2. Apply every migration in `supabase/migrations` in filename order. The new 0.15.0 migration is `202609090002_recap_library_choices.sql`.
-3. Run `npm run release:check` and push version 0.15.0 to the GitHub `main` branch.
+3. Run `npm run release:check` and push version 0.16.0 to the GitHub `main` branch.
 4. Import `bubaleh1337/shelf-seasons` in Vercel.
 5. Add these Production environment variables in Vercel:
    - `NEXT_PUBLIC_SUPABASE_URL` = the existing Supabase project URL;
@@ -28,3 +28,10 @@ In Vercel **Environment Variables**, production needs the matching Supabase proj
 In Google Auth Platform, keep the Supabase callback URI unchanged. If the OAuth app is still in Testing, add each beta tester's Google email under **Audience → Test users**.
 
 Test sign-in, book status changes and reading check-ins in a private browser window before sharing the link.
+
+## Database backup
+
+After pushing 0.16.0, add the two GitHub Actions secrets and run the first
+encrypted backup manually as described in `docs/DATABASE_BACKUPS.md`. Download
+and verify that first artifact before relying on the schedule. No database
+migration or Vercel variable is required for the backup workflow.

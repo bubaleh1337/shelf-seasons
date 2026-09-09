@@ -1,4 +1,4 @@
-# Shelf Seasons 0.15.0 — дневник чтения на Windows
+# Shelf Seasons 0.16.0 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
@@ -25,7 +25,7 @@
 
 ```powershell
 Set-Location P:\Projects\shelf-seasons\shelf-seasons
-.\UPDATE_TO_0.15.0.ps1
+.\UPDATE_TO_0.16.0.ps1
 npm ci
 npm run release:check
 npm run dev
@@ -33,16 +33,22 @@ npm run dev
 
 Откройте `http://localhost:3000/ru/sign-in` и войдите через Google.
 
-После входа проверьте фон на компьютере и телефоне, внесите текущую страницу
-через «Отметить чтение» и откройте месячные и годовые «Итоги».
+После входа проверьте основные страницы на компьютере и телефоне, внесите
+текущую страницу через «Отметить чтение» и откройте месячные и годовые «Итоги».
 
 ## 4. Отправьте обновление в GitHub
 
 ```powershell
 git add -A
-git commit -m "feat: fix language switching and expand recap choices"
+git commit -m "chore: add encrypted database backups"
 git push origin main
 ```
+
+## 5. Настройте зашифрованный бэкап базы
+
+Откройте `docs/DATABASE_BACKUPS.md`. Создайте отдельный ключ age, добавьте в
+GitHub секреты `SUPABASE_DB_URL` и `BACKUP_AGE_PUBLIC_KEY`, вручную запустите
+первый workflow и проверьте скачанный файл указанным там PowerShell-скриптом.
 
 Файл `.env.local` специально исключён из Git. Это правильно: локальная
 конфигурация остаётся на компьютере. В Vercel нужно добавить URL Supabase и

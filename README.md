@@ -73,6 +73,13 @@ Read in this order before implementation work:
 4. `AGENTS.md`
 5. `docs/ROADMAP.md`
 
+## Database backups
+
+Version 0.16.0 adds a daily encrypted Supabase database backup through GitHub
+Actions. It needs two repository secrets and one manual verification before it
+can be considered active. Follow `docs/DATABASE_BACKUPS.md`; never commit a
+database URI or the private age identity.
+
 ## Current stage
 
-Version 0.15.0 includes the private personal library, reliable Google OAuth and in-app locale switching, translated-title book search, provider and custom covers, current-page reading progress, readable calendar cards, streaks, book completion, yearly goals, user-owned ordered series, physical seasonal shelves with spine-first books, responsive original seasonal backgrounds, protected book-text surfaces, deduplicated monthly/yearly recaps with whole-library category choices, reading-language history, developer contacts, project support, account export and protected account deletion. Initial data queries and private-cover links are batched for a smoother public beta.
+Version 0.16.0 includes the private personal library, reliable Google OAuth and in-app locale switching, translated-title book search, provider and custom covers, current-page reading progress, readable calendar cards, streaks, book completion, yearly goals, user-owned ordered series, physical seasonal shelves with spine-first books, responsive original seasonal backgrounds, protected book-text surfaces, deduplicated monthly/yearly recaps with whole-library category choices, reading-language history, developer contacts, project support, account export and protected account deletion. Initial data queries and private-cover links are batched for a smoother public beta, and the repository now contains an encrypted daily database-backup workflow.

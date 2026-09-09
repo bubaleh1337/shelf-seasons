@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.16.0
+
+- Added an automatic daily Supabase database export with a manual GitHub Actions trigger.
+- Encrypted every backup with a dedicated age public key before uploading it.
+- Added 30-day artifact retention, internal SHA-256 checksums and plaintext cleanup.
+- Added a Windows verification script and a documented non-production restore rehearsal.
+- Documented that database dumps do not contain Supabase Storage object bytes or provider configuration.
+
 ## 0.15.0
 
 - Fixed authenticated language switching so the saved profile locale changes before navigation.

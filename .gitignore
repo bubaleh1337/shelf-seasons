@@ -41,3 +41,7 @@ next-env.d.ts
 /outputs/
 /work/
 /supabase/.temp/
+/backups/
+shelf-seasons-db-*.tar.gz
+shelf-seasons-db-*.tar.gz.age
+age-key.txt
