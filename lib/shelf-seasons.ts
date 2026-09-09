@@ -18,7 +18,7 @@ export const books: Book[] = [
     status: "reading",
     progress: 62,
     palette: "ink",
-    artwork: "/glass-orchard.png",
+    artwork: "/glass-orchard.webp",
   },
   {
     id: "house-of-tides",

@@ -19,6 +19,9 @@ test("developer contacts and project support use the approved public destination
   assert.match(source, /mobile-settings-link/);
   assert.match(copy, /supportProject: "Support the project"/);
   assert.match(copy, /supportProject: "Поддержать проект"/);
+  assert.match(copy, /developerName: "Ekaterina"/);
+  assert.match(copy, /developerName: "Екатерина"/);
+  assert.doesNotMatch(copy, /Pupykina|Пупыкина/);
   assert.match(css, /\.developer-contact-grid/);
   assert.match(css, /\.sidebar-developer-links/);
   assert.match(css, /\.mobile-settings-link/);

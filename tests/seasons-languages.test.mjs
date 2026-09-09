@@ -91,16 +91,20 @@ test("cover picker is localized instead of exposing native browser text", async 
 });
 
 test("book search resolves translated titles and cover storage has provider fallback", async () => {
-  const [searchRoute, bookServer, repairRoute] = await Promise.all([
+  const [searchRoute, bookServer, repairRoute, googleAdapter] = await Promise.all([
     read("app/api/books/search/route.ts"),
     read("lib/books/server.ts"),
     read("app/api/books/repair-covers/route.ts"),
+    read("lib/books/google.ts"),
   ]);
   assert.match(searchRoute, /translatedTitleQueries/);
   assert.match(searchRoute, /"извлечение троих": "The Drawing of the Three"/);
   assert.match(searchRoute, /wbsearchentities/);
   assert.match(searchRoute, /wbgetentities/);
   assert.match(searchRoute, /extraLarge/);
+  assert.match(searchRoute, /identifyGoogleBooksRequest\(url\)/);
+  assert.match(searchRoute, /slice\(0, 2\)/);
+  assert.match(googleAdapter, /process\.env\.GOOGLE_BOOKS_API_KEY/);
   assert.match(bookServer, /resolveProviderCover/);
   assert.match(bookServer, /covers\.openlibrary\.org\/b\/isbn/);
   assert.match(repairRoute, /requireUser\(supabase\)/);

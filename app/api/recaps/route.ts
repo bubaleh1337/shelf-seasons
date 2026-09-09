@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { bookToDto, requireUser } from "@/lib/books/server";
+import { booksToDtos, requireUser } from "@/lib/books/server";
 import { currentPeriodStart, periodBounds, recapGoalProgress, recapSeriesCandidates, summarizeRecapMetrics, uniqueRecapBooks } from "@/lib/recaps/period";
-import type { RecapBookCandidate, RecapSelections, RecapSummary } from "@/lib/recaps/types";
+import type { RecapBookCandidate, RecapBookChoice, RecapSelections, RecapSummary } from "@/lib/recaps/types";
 import { recapPeriodSchema } from "@/lib/recaps/validation";
 import { localDateKey } from "@/lib/reading/dates";
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
@@ -28,14 +28,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "future_period" }, { status: 400 });
     }
 
-    const [{ data: runRows, error: runsError }, { data: sessionRows, error: sessionsError }, { data: seriesRows, error: seriesError }, { data: entryRows, error: entriesError }, { data: selectionRows, error: selectionsError }] = await Promise.all([
+    const [{ data: runRows, error: runsError }, { data: sessionRows, error: sessionsError }, { data: seriesRows, error: seriesError }, { data: entryRows, error: entriesError }, { data: selectionRows, error: selectionsError }, { data: choiceRows, error: choicesError }] = await Promise.all([
       supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,reading_language").eq("user_id", userId).eq("status", "completed").gte("finished_on", bounds.start).lt("finished_on", bounds.end).order("finished_on", { ascending: false }),
       supabase.from("reading_sessions").select("id,run_id,read_on,check_in_only,pages_read,minutes_read,resulting_percent,ending_page").eq("user_id", userId).gte("read_on", bounds.start).lt("read_on", bounds.end).order("read_on"),
       supabase.from("series").select().eq("user_id", userId).order("name"),
       supabase.from("series_entries").select().eq("user_id", userId).order("sort_order"),
-      supabase.from("recap_selections").select("category,run_id,series_id").eq("user_id", userId).eq("period_type", parsed.data.periodType).eq("period_start", bounds.start),
+      supabase.from("recap_selections").select("category,book_id,run_id,series_id").eq("user_id", userId).eq("period_type", parsed.data.periodType).eq("period_start", bounds.start),
+      supabase.from("library_books").select("id,title,authors").eq("user_id", userId).order("title"),
     ]);
-    if (runsError || sessionsError || seriesError || entriesError || selectionsError) throw runsError ?? sessionsError ?? seriesError ?? entriesError ?? selectionsError;
+    if (runsError || sessionsError || seriesError || entriesError || selectionsError || choicesError) throw runsError ?? sessionsError ?? seriesError ?? entriesError ?? selectionsError ?? choicesError;
 
     const runIds = (runRows ?? []).map((run) => run.id);
     const bookIds = [...new Set((runRows ?? []).map((run) => run.book_id))];
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
     ]);
     if (nominationError || booksError) throw nominationError ?? booksError;
 
-    const books = await Promise.all((bookRows ?? []).map((row) => bookToDto(supabase, row)));
+    const books = await booksToDtos(supabase, bookRows ?? []);
+    const selectionBooks: RecapBookChoice[] = (choiceRows ?? []).map((book) => ({ id: book.id, title: book.title, authors: book.authors }));
     const bookMap = new Map(books.map((book) => [book.id, book]));
     const nominationMap = new Map((nominationRows ?? []).map((item) => [item.run_id, item.kind]));
     const runs: ReadingRun[] = (runRows ?? []).map((run) => ({
@@ -70,7 +72,7 @@ export async function GET(request: NextRequest) {
     });
     const uniqueCandidates = uniqueRecapBooks(candidates);
     const uniqueRuns = uniqueCandidates.map((candidate) => runs.find((run) => run.id === candidate.runId)).filter((run): run is ReadingRun => Boolean(run));
-    const selections: RecapSelections = Object.fromEntries((selectionRows ?? []).map((selection) => [selection.category, selection.run_id ?? selection.series_id]));
+    const selections: RecapSelections = Object.fromEntries((selectionRows ?? []).map((selection) => [selection.category, selection.book_id ?? selection.run_id ?? selection.series_id]));
     let goal: YearlyGoal | null = null;
     if (parsed.data.periodType === "year") {
       const year = Number(bounds.start.slice(0, 4));
@@ -83,7 +85,7 @@ export async function GET(request: NextRequest) {
       periodType: parsed.data.periodType, periodStart: bounds.start, periodEnd: bounds.end, isFinal: bounds.end <= today,
       completedCount: uniqueCandidates.length, uniqueBooks: uniqueCandidates.length,
       rereads: runs.filter((run) => run.isReread).length, ...metrics,
-      goal: recapGoalProgress(runs, goal), books: uniqueCandidates,
+      goal: recapGoalProgress(runs, goal), books: uniqueCandidates, selectionBooks,
       series: recapSeriesCandidates(series, runs.map((run) => run.bookId)), selections,
       languageCounts: {
         ru: uniqueRuns.filter((run) => run.readingLanguage === "ru").length,

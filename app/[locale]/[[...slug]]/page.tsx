@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { OnboardingPage, SignInPage } from "@/components/auth/auth-pages";
 import { OfflinePage, ShelfSeasonsDemo } from "@/components/shelf-seasons-demo";
 import { ShelfSeasonsApp } from "@/components/shelf-seasons-app";
-import { bookToDto } from "@/lib/books/server";
+import { booksToDtos } from "@/lib/books/server";
 import { localDateKey } from "@/lib/reading/dates";
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
 import { seriesEntryToDto, seriesToDto } from "@/lib/series/server";
@@ -99,34 +99,27 @@ export default async function LocalizedPage({ params, searchParams }: PageProps)
     redirect(`/${profile.locale}/app${rest ? `/${rest}` : ""}`);
   }
 
-  const { data: rows } = await supabase
-    .from("library_books")
-    .select()
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  const initialBooks = await Promise.all((rows ?? []).map((row) => bookToDto(supabase, row)));
-  const [{ data: runs }, { data: nominations }] = await Promise.all([
+  const currentYear = Number(localDateKey(profile.timezone).slice(0, 4));
+  const [{ data: rows }, { data: runs }, { data: nominations }, { data: sessionRows }, { data: goalRow }, { data: seriesRows }, { data: entryRows }] = await Promise.all([
+    supabase.from("library_books").select().eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("reading_runs").select("id,book_id,status,started_on,finished_on,is_reread,current_position,total_units,rating,impression,reading_language").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("run_nominations").select("run_id,kind").eq("user_id", userId),
+    supabase.from("reading_sessions").select("id,run_id,read_on,check_in_only,pages_read,minutes_read,resulting_percent,ending_page,note").eq("user_id", userId).order("read_on", { ascending: false }).limit(1000),
+    supabase.from("reading_goals").select("year,target_books,include_rereads").eq("user_id", userId).eq("year", currentYear).maybeSingle(),
+    supabase.from("series").select().eq("user_id", userId).order("updated_at", { ascending: false }),
+    supabase.from("series_entries").select().eq("user_id", userId).order("sort_order"),
   ]);
+  const initialBooks = await booksToDtos(supabase, rows ?? []);
   const nominationMap = new Map((nominations ?? []).map((item) => [item.run_id, item.kind]));
   const initialRuns: ReadingRun[] = (runs ?? []).map((run) => ({ id: run.id, bookId: run.book_id, status: run.status, startedOn: run.started_on, finishedOn: run.finished_on, isReread: run.is_reread, currentPosition: run.current_position, totalUnits: run.total_units, rating: run.rating === null ? null : Number(run.rating), impression: run.impression, nomination: nominationMap.get(run.id) ?? null, readingLanguage: run.reading_language }));
   const runBooks = new Map(initialRuns.map((run) => [run.id, run.bookId]));
-  const { data: sessionRows } = await supabase.from("reading_sessions").select("id,run_id,read_on,check_in_only,pages_read,minutes_read,resulting_percent,ending_page,note").eq("user_id", userId).order("read_on", { ascending: false }).limit(1000);
   const initialSessions: ReadingSession[] = (sessionRows ?? []).flatMap((session) => {
     const bookId = runBooks.get(session.run_id);
     if (!bookId) return [];
     return [{ id: session.id, runId: session.run_id, bookId, readOn: session.read_on, checkInOnly: session.check_in_only, endingPage: session.ending_page, pagesRead: session.pages_read, minutesRead: session.minutes_read, resultingPercent: session.resulting_percent, note: session.note }];
   });
 
-  const currentYear = Number(localDateKey(profile.timezone).slice(0, 4));
-  const { data: goalRow } = await supabase.from("reading_goals").select("year,target_books,include_rereads").eq("user_id", userId).eq("year", currentYear).maybeSingle();
   const initialGoal: YearlyGoal | null = goalRow ? { year: goalRow.year, targetBooks: goalRow.target_books, includeRereads: goalRow.include_rereads } : null;
-
-  const [{ data: seriesRows }, { data: entryRows }] = await Promise.all([
-    supabase.from("series").select().eq("user_id", userId).order("updated_at", { ascending: false }),
-    supabase.from("series_entries").select().eq("user_id", userId).order("sort_order"),
-  ]);
   const entriesBySeries = new Map<string, ReturnType<typeof seriesEntryToDto>[]>();
   for (const row of entryRows ?? []) {
     const entry = seriesEntryToDto(row);

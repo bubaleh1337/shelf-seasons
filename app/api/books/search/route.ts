@@ -4,6 +4,7 @@ import {
   type RankedBookSearchResult,
 } from "@/lib/books/search";
 import { requireUser } from "@/lib/books/server";
+import { identifyGoogleBooksRequest } from "@/lib/books/google";
 import { createClient } from "@/lib/supabase/server";
 
 const cleanCover = (url?: string) => url?.replace(/^http:/, "https:") ?? null;
@@ -37,7 +38,7 @@ async function searchGoogle(query: string, language?: "ru" | "en") {
     orderBy: "relevance",
     ...(language ? { langRestrict: language } : {}),
   }).toString();
-  const response = await fetch(url, {
+  const response = await fetch(identifyGoogleBooksRequest(url), {
     signal: AbortSignal.timeout(8_000),
     next: { revalidate: 3600 },
   });
@@ -155,7 +156,7 @@ async function translatedTitleQueries(query: string, locale: "ru" | "en") {
     ...(entity.aliases?.en ?? []).slice(0, 2).map((alias) => alias.value),
   ]).filter((value): value is string => Boolean(value));
   const normalizedQuery = query.toLocaleLowerCase().trim();
-  return [...new Set([...known, ...values])].filter((value) => value.toLocaleLowerCase().trim() !== normalizedQuery).slice(0, 5);
+  return [...new Set([...known, ...values])].filter((value) => value.toLocaleLowerCase().trim() !== normalizedQuery).slice(0, 2);
 }
 
 export async function GET(request: NextRequest) {

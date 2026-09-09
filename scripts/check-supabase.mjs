@@ -58,9 +58,15 @@ if (!schemaResponse.ok) {
 const schema = await schemaResponse.json();
 const libraryColumns = schema?.definitions?.library_books?.properties ?? {};
 const runColumns = schema?.definitions?.reading_runs?.properties ?? {};
+const recapColumns = schema?.definitions?.recap_selections?.properties ?? {};
 if (!("season" in libraryColumns) || !("reading_language" in libraryColumns) || !("reading_language" in runColumns)) {
   console.error("Supabase check failed: apply the 0.10.0 seasons and languages migration first.");
   process.exit(1);
 }
 
-console.log("Supabase Auth is healthy and the 0.10.0 seasons and languages schema is available.");
+if (!("book_id" in recapColumns)) {
+  console.error("Supabase check failed: apply the 0.15.0 recap library choices migration first.");
+  process.exit(1);
+}
+
+console.log("Supabase Auth is healthy and the 0.15.0 schema is available.");

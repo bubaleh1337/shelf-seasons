@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BookInput } from "@/lib/books/validation";
 import type { LibraryBook } from "@/lib/books/types";
 import type { Database } from "@/lib/supabase/database.types";
+import { identifyGoogleBooksRequest } from "@/lib/books/google";
 
 type Client = SupabaseClient<Database>;
 type BookRow = Database["public"]["Tables"]["library_books"]["Row"];
@@ -36,6 +37,34 @@ export async function bookToDto(supabase: Client, row: BookRow): Promise<Library
     season: row.season,
     createdAt: row.created_at,
   };
+}
+
+export async function booksToDtos(supabase: Client, rows: BookRow[]): Promise<LibraryBook[]> {
+  const coverPaths = [...new Set(rows.flatMap((row) => row.cover_path ? [row.cover_path] : []))];
+  const signedUrls = new Map<string, string>();
+  for (let index = 0; index < coverPaths.length; index += 100) {
+    const chunk = coverPaths.slice(index, index + 100);
+    const { data } = await supabase.storage.from("book-covers").createSignedUrls(chunk, 3600);
+    for (const item of data ?? []) {
+      if (item.path && item.signedUrl) signedUrls.set(item.path, item.signedUrl);
+    }
+  }
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    authors: row.authors,
+    description: row.description,
+    coverUrl: row.cover_path ? signedUrls.get(row.cover_path) ?? row.cover_url : row.cover_url,
+    defaultCoverUrl: row.cover_url,
+    isbn: row.isbn,
+    publishedYear: row.published_year,
+    pageCount: row.page_count,
+    format: row.format,
+    status: row.status,
+    readingLanguage: row.reading_language,
+    season: row.season,
+    createdAt: row.created_at,
+  }));
 }
 
 export function toInsert(userId: string, input: BookInput) {
@@ -126,7 +155,8 @@ export async function resolveProviderCover(input: CoverReference) {
   if (input.coverUrl) return input.coverUrl.replace(/^http:/, "https:");
   if (input.provider === "google_books" && input.providerId) {
     try {
-      const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(input.providerId)}`, { signal: AbortSignal.timeout(7_000) });
+      const url = identifyGoogleBooksRequest(new URL(`https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(input.providerId)}`));
+      const response = await fetch(url, { signal: AbortSignal.timeout(7_000) });
       if (response.ok) {
         const info = ((await response.json()) as GoogleVolume).volumeInfo;
         const cover = info?.imageLinks?.extraLarge ?? info?.imageLinks?.large ?? info?.imageLinks?.medium ?? info?.imageLinks?.small ?? info?.imageLinks?.thumbnail ?? info?.imageLinks?.smallThumbnail;

@@ -1,10 +1,10 @@
 # Запуск Shelf Seasons на Windows 11
 
-В архиве находится версия `0.14.1`: Google OAuth, личная библиотека, поиск русских изданий, автоматический прогресс по текущей странице, календарь, итоги без дублей, языки чтения, физические сезонные полки, адаптивные сезонные фоны и читаемые подложки под описаниями книг.
+В архиве находится версия `0.15.0`: исправленное переключение языка внутри аккаунта, Google OAuth, личная библиотека, поиск русских изданий, автоматический прогресс по текущей странице, календарь, итоги без дублей и с выбором любой книги, языки чтения, физические сезонные полки и оптимизированная загрузка.
 
 ## 1. Распакуй проект
 
-Распакуй архив `shelf-seasons-0.14.1-readable-book-cards-verified.zip` в:
+Распакуй архив `shelf-seasons-0.15.0-public-beta-verified.zip` в:
 
 ```text
 P:\Projects\shelf-seasons\shelf-seasons
@@ -19,7 +19,7 @@ P:\Projects\shelf-seasons\shelf-seasons\package.json
 После замены файлов выполни:
 
 ```powershell
-.\UPDATE_TO_0.14.1.ps1
+.\UPDATE_TO_0.15.0.ps1
 ```
 
 Скрипт удалит только локальный кэш сборки. `.env.local`, данные Supabase и пользовательские файлы он не затрагивает.
@@ -64,7 +64,7 @@ npm run release:check
 
 ## 6. Подключение аккаунтов
 
-Для 0.14.0 запусти в Supabase SQL Editor файл `supabase/migrations/202609090001_reading_progress_and_recap_deduplication.sql`. Новые настройки Google OAuth и Vercel не нужны.
+Сначала убедись, что миграция 0.14.0 `supabase/migrations/202609090001_reading_progress_and_recap_deduplication.sql` уже применена. Затем один раз запусти миграцию 0.15.0 `supabase/migrations/202609090002_recap_library_choices.sql`. Для публичной беты рекомендуется добавить в Vercel серверную переменную `GOOGLE_BOOKS_API_KEY` с ограниченным ключом Google Books API.
 
 ## 7. GitHub
 

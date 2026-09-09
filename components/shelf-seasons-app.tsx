@@ -1,18 +1,16 @@
 "use client";
 
 import Link, { useLinkStatus } from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Coffee, Flame, Languages, Layers3, Library, LoaderCircle, LogOut, Mail, Moon, Search, Send, Settings, Sparkles, Sun, Trash2, type LucideIcon } from "lucide-react";
 import { AccountControls } from "@/components/account/account-controls";
 import { BookDialog } from "@/components/library/book-dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
-import { SeasonalShelves } from "@/components/library/seasonal-shelves";
 import { ReadingDialog } from "@/components/reading/reading-dialog";
 import { FinishBookDialog } from "@/components/reading/finish-book-dialog";
 import { YearlyGoalCard } from "@/components/reading/yearly-goal-card";
-import { RecapsPage } from "@/components/recaps/recaps-page";
 import { SeasonalPageBackdrop } from "@/components/seasonal/seasonal-art";
-import { SeriesPage } from "@/components/series/series-page";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -37,6 +35,14 @@ const developerLinks = {
   email: "mailto:ekaterina.pyshkova@gmail.com",
   telegram: "https://t.me/kemisayega",
 } as const;
+
+const SeasonalShelves = dynamic(() => import("@/components/library/seasonal-shelves").then((module) => module.SeasonalShelves), { loading: DeferredSection });
+const RecapsPage = dynamic(() => import("@/components/recaps/recaps-page").then((module) => module.RecapsPage), { loading: DeferredSection });
+const SeriesPage = dynamic(() => import("@/components/series/series-page").then((module) => module.SeriesPage), { loading: DeferredSection });
+
+function DeferredSection() {
+  return <div className="deferred-section" aria-live="polite"><LoaderCircle className="spin" /></div>;
+}
 
 export function ShelfSeasonsApp({ locale, section, readerName, timezone, initialTheme, initialBooks, initialSessions, initialRuns, initialGoal, initialSeries }: { locale: Locale; section: string; readerName?: string; timezone: string; initialTheme: "system" | "light" | "dark"; initialBooks: LibraryBook[]; initialSessions: ReadingSession[]; initialRuns: ReadingRun[]; initialGoal: YearlyGoal | null; initialSeries: BookSeries[] }) {
   const c = appCopy[locale];
@@ -104,7 +110,7 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
     </aside>
     <main className="shelf-main">
       <SeasonalPageBackdrop season={currentSeason} />
-      <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><Link className="locale-switch" href={`/${locale === "ru" ? "en" : "ru"}/app${active === "home" ? "" : `/${active}`}`}><Languages />{locale === "ru" ? "EN" : "RU"}</Link><Link className={cn("theme-button mobile-settings-link", active === "settings" && "is-active")} href={`/${locale}/app/settings`} aria-label={c.settings}><UtilityLinkIcon icon={Settings} label={c.settings} /></Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
+      <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><LanguageSwitch currentLocale={locale} targetLocale={locale === "ru" ? "en" : "ru"} section={active} className="locale-switch" /><Link className={cn("theme-button mobile-settings-link", active === "settings" && "is-active")} href={`/${locale}/app/settings`} aria-label={c.settings}><UtilityLinkIcon icon={Settings} label={c.settings} /></Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
       <div className={cn("page-wrap", (active === "library" || active === "series" || active === "recaps") && "page-wrap-wide")}>
         {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} />}
         {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} currentSeason={currentSeason} onSaved={saveBook} />}
@@ -131,6 +137,28 @@ function NavLinkContent({ locale, icon: Icon, label }: { locale: Locale; icon: L
 function UtilityLinkIcon({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   const { pending } = useLinkStatus();
   return <>{pending && <span className="route-progress" aria-hidden="true" />}{pending ? <LoaderCircle className="route-spinner" aria-hidden="true" /> : <Icon aria-hidden="true" />}<span className="sr-only">{label}</span></>;
+}
+
+function LanguageSwitch({ currentLocale, targetLocale, section, className, compact = false }: { currentLocale: Locale; targetLocale: Locale; section: string; className?: string; compact?: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const active = currentLocale === targetLocale;
+  async function changeLanguage() {
+    if (active || busy) return;
+    setBusy(true);
+    try {
+      const response = await fetch("/api/profile/locale", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ locale: targetLocale }),
+      });
+      if (!response.ok) throw new Error("locale_update_failed");
+      const suffix = section === "home" ? "" : `/${section}`;
+      window.location.assign(`/${targetLocale}/app${suffix}`);
+    } catch {
+      setBusy(false);
+    }
+  }
+  return <button type="button" className={cn(className, active && "is-active")} onClick={changeLanguage} disabled={active || busy} aria-current={active ? "page" : undefined} aria-busy={busy}>{!compact && (busy ? <LoaderCircle className="route-spinner" /> : <Languages />)}{targetLocale.toUpperCase()}</button>;
 }
 
 function SidebarDeveloperLinks({ locale }: { locale: Locale }) {
@@ -287,7 +315,7 @@ function SettingsPage({ locale, dark, toggleTheme }: { locale: Locale; dark: boo
   const c = appCopy[locale];
   return <><PageIntro title={c.settings} lead={c.personalLibrary} /><div className="settings-panel">
     <section><h2>{c.appearance}</h2><div className="setting-row"><span className="setting-icon">{dark ? <Moon /> : <Sun />}</span><div><strong>{c.darkMode}</strong></div><Switch checked={dark} onCheckedChange={toggleTheme} /></div></section>
-    <section><h2>{c.language}</h2><div className="setting-row"><span className="setting-icon"><Languages /></span><div><strong>{locale === "ru" ? "Русский" : "English"}</strong></div><div className="language-links"><Link className={locale === "en" ? "is-active" : ""} href="/en/app/settings">EN</Link><Link className={locale === "ru" ? "is-active" : ""} href="/ru/app/settings">RU</Link></div></div></section>
+    <section><h2>{c.language}</h2><div className="setting-row"><span className="setting-icon"><Languages /></span><div><strong>{locale === "ru" ? "Русский" : "English"}</strong></div><div className="language-links"><LanguageSwitch currentLocale={locale} targetLocale="en" section="settings" compact /><LanguageSwitch currentLocale={locale} targetLocale="ru" section="settings" compact /></div></div></section>
     <section><h2>{c.account}</h2><div className="setting-row"><span className="setting-icon"><LogOut /></span><div><strong>Shelf Seasons</strong><p>{c.signedIn}</p></div><form action="/auth/sign-out" method="post"><input type="hidden" name="locale" value={locale} /><Button variant="outline" type="submit">{c.signOut}</Button></form></div></section>
     <DeveloperSection locale={locale} />
     <AccountControls locale={locale} />

@@ -232,6 +232,7 @@ user_id uuid not null references profiles(user_id) on delete cascade
 period_type recap_period_type not null
 period_start date not null
 category recap_category not null
+book_id uuid null references library_books(id) on delete cascade
 run_id uuid null references reading_runs(id) on delete cascade
 series_id uuid null references series(id) on delete cascade
 created_at timestamptz not null default now()
@@ -239,9 +240,9 @@ updated_at timestamptz not null default now()
 unique(user_id, period_type, period_start, category)
 ```
 
-Exactly one eligible value is stored: a completed run inside the selected period for book/cover choices, or a series with a completed linked book inside that period. The database validates this before every insert or update. Deleting the selected run or series removes only the affected selection.
+Exactly one owned value is stored: a library book for favorite/disappointment/cover choices, or a user-owned series for the series choice. The database validates ownership before every insert or update. `run_id` remains nullable only for migration compatibility with selections saved before version 0.15.0; current writes use `book_id`.
 
-Category-specific constraints determine whether run_id or series_id is required.
+Category-specific constraints determine whether `book_id` or `series_id` is required.
 
 ## 4. Storage
 

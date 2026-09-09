@@ -126,10 +126,10 @@ test("development page loads generated CSS, client scripts and the book cover", 
     assert.match(script.headers.get("content-type") ?? "", /javascript/i, src);
   }
 
-  assert.match(html, /src="\/glass-orchard\.png"/);
+  assert.match(html, /src="\/glass-orchard\.webp"/);
   assert.doesNotMatch(html, /\/_next\/image/);
-  const cover = await fetch(`${origin}/glass-orchard.png`, { signal: AbortSignal.timeout(10_000) });
+  const cover = await fetch(`${origin}/glass-orchard.webp`, { signal: AbortSignal.timeout(10_000) });
   assert.equal(cover.status, 200);
-  assert.match(cover.headers.get("content-type") ?? "", /^image\/png\b/i);
-  assert.ok((await cover.arrayBuffer()).byteLength > 1_000_000);
+  assert.match(cover.headers.get("content-type") ?? "", /^image\/webp\b/i);
+  assert.ok((await cover.arrayBuffer()).byteLength > 100_000);
 });

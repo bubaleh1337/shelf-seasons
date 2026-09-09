@@ -174,6 +174,7 @@ export type Database = {
           period_type: Database["public"]["Enums"]["recap_period_type"];
           period_start: string;
           category: Database["public"]["Enums"]["recap_category"];
+          book_id: string | null;
           run_id: string | null;
           series_id: string | null;
           created_at: string;
@@ -185,6 +186,7 @@ export type Database = {
           period_type: Database["public"]["Enums"]["recap_period_type"];
           period_start: string;
           category: Database["public"]["Enums"]["recap_category"];
+          book_id?: string | null;
           run_id?: string | null;
           series_id?: string | null;
           created_at?: string;

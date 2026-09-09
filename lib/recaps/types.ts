@@ -12,6 +12,12 @@ export type RecapBookCandidate = {
   nomination: "favorite" | "disappointment" | null;
 };
 
+export type RecapBookChoice = {
+  id: string;
+  title: string;
+  authors: string[];
+};
+
 export type RecapSeriesCandidate = {
   id: string;
   name: string;
@@ -39,6 +45,7 @@ export type RecapSummary = {
   mostActiveWeekDays: number;
   goal: { target: number; completed: number; includeRereads: boolean } | null;
   books: RecapBookCandidate[];
+  selectionBooks: RecapBookChoice[];
   series: RecapSeriesCandidate[];
   selections: RecapSelections;
   languageCounts: { ru: number; en: number; other: number };

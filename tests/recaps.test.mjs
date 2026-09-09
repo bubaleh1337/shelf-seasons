@@ -55,3 +55,30 @@ test("recap routes derive ownership from the authenticated user and omit private
   assert.doesNotMatch(summary, /select\([^)]*(note|impression)/i);
   assert.doesNotMatch(selections, /userId.*request|user_id.*json/i);
 });
+
+test("every book category uses the complete owned library", async () => {
+  const [summary, selections, page, migration] = await Promise.all([
+    readFile(new URL("../app/api/recaps/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/recaps/selections/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../components/recaps/recaps-page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/202609090002_recap_library_choices.sql", import.meta.url), "utf8"),
+  ]);
+  assert.match(summary, /from\("library_books"\)\.select\("id,title,authors"\)/);
+  assert.match(page, /candidates=\{summary\.selectionBooks\}/);
+  assert.match(selections, /from\("library_books"\)\.select\("id"\)/);
+  assert.doesNotMatch(selections, /eq\("status", "completed"\)/);
+  assert.match(migration, /add column if not exists book_id uuid references public\.library_books/i);
+  assert.match(migration, /book_not_owned_for_recap/i);
+  assert.ok(migration.indexOf("create or replace function public.validate_recap_selection") < migration.indexOf("set run_id = null"));
+});
+
+test("recap headings name the selected month or year explicitly", async () => {
+  const [page, copy] = await Promise.all([
+    readFile(new URL("../components/recaps/recaps-page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/app-copy.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(page, /summary\.periodType === "month" \? c\.monthSummaryTitle : c\.yearSummaryTitle/);
+  assert.match(copy, /rememberThisPeriod: "Что запомнилось\?"/);
+  assert.match(copy, /monthSummaryTitle: "Итоги месяца"/);
+  assert.match(copy, /yearSummaryTitle: "Итоги года"/);
+});

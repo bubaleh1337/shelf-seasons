@@ -6,7 +6,7 @@ import { LibraryBookCover } from "@/components/library/book-cover";
 import { Button } from "@/components/ui/button";
 import { appCopy } from "@/lib/app-copy";
 import { currentPeriodStart, shiftPeriod } from "@/lib/recaps/period";
-import type { RecapBookCandidate, RecapCategory, RecapPeriodType, RecapSeriesCandidate, RecapSummary } from "@/lib/recaps/types";
+import type { RecapBookChoice, RecapCategory, RecapPeriodType, RecapSeriesCandidate, RecapSummary } from "@/lib/recaps/types";
 import { localDateKey } from "@/lib/reading/dates";
 import type { Locale } from "@/lib/shelf-seasons";
 import { cn } from "@/lib/utils";
@@ -80,8 +80,14 @@ function RecapContent({ locale, summary, onSaved }: { locale: Locale; summary: R
   const c = appCopy[locale];
   const hasActivity = summary.completedCount > 0 || summary.readingDays > 0;
   const covers = summary.books.slice(0, 5);
+  const title = hasActivity
+    ? summary.periodType === "month" ? c.monthSummaryTitle : c.yearSummaryTitle
+    : summary.periodType === "month" ? c.emptyMonthRecapTitle : c.emptyYearRecapTitle;
+  const lead = hasActivity
+    ? summary.periodType === "month" ? c.monthSummaryLead : c.yearSummaryLead
+    : c.emptyRecapLead;
   return <div className="real-recap">
-    <section className="recap-hero real-recap-hero"><div className="recap-copy"><Sparkles /><span className="recap-state-badge">{summary.isFinal ? c.finalRecap : c.liveRecap}</span><h2>{hasActivity ? c.recapHeroTitle : c.emptyRecapTitle}</h2><p>{hasActivity ? c.recapHeroLead : c.emptyRecapLead}</p><div className="recap-stats"><span><strong>{summary.completedCount}</strong>{c.completedBooks}</span><span><strong>{summary.readingDays}</strong>{c.readingDays}</span><span><strong>{summary.longestStreak}</strong>{c.bestPeriodStreak}</span></div></div><div className="real-recap-covers" aria-hidden="true">{covers.length ? covers.map((candidate, index) => <div key={candidate.runId} style={{ "--recap-cover": index } as React.CSSProperties}><LibraryBookCover book={candidate.book} /></div>) : <div className="empty-recap-cover"><BookOpen /></div>}</div></section>
+    <section className="recap-hero real-recap-hero"><div className="recap-copy"><Sparkles /><span className="recap-state-badge">{summary.isFinal ? c.finalRecap : c.liveRecap}</span><h2>{title}</h2><p>{lead}</p><div className="recap-stats"><span><strong>{summary.completedCount}</strong>{c.completedBooks}</span><span><strong>{summary.readingDays}</strong>{c.readingDays}</span><span><strong>{summary.longestStreak}</strong>{c.bestPeriodStreak}</span></div></div><div className="real-recap-covers" aria-hidden="true">{covers.length ? covers.map((candidate, index) => <div key={candidate.runId} style={{ "--recap-cover": index } as React.CSSProperties}><LibraryBookCover book={candidate.book} /></div>) : <div className="empty-recap-cover"><BookOpen /></div>}</div></section>
     <section className="recap-metrics" aria-label={c.recapStatistics}>
       <Metric icon={BookOpen} value={summary.uniqueBooks} label={c.uniqueBooks} />
       <Metric icon={Repeat2} value={summary.rereads} label={c.rereads} />
@@ -93,9 +99,9 @@ function RecapContent({ locale, summary, onSaved }: { locale: Locale; summary: R
     <section className="recap-languages" aria-label={c.readingLanguages}><div><Languages /><span><strong>{c.readingLanguages}</strong><small>{summary.completedCount} {c.completedBooks}</small></span></div><dl><div><dt>RU</dt><dd><strong>{summary.languageCounts.ru}</strong>{c.booksInRussian}</dd></div><div><dt>EN</dt><dd><strong>{summary.languageCounts.en}</strong>{c.booksInEnglish}</dd></div><div><dt>•••</dt><dd><strong>{summary.languageCounts.other}</strong>{c.booksInOtherLanguages}</dd></div></dl></section>
     {summary.books.length > 0 && <section className="recap-section"><div className="section-heading"><div><span>{c.completedInPeriod}</span><h2>{c.coverMosaic}</h2></div><strong>{summary.completedCount}</strong></div><div className="recap-book-grid">{summary.books.map((candidate) => <article key={candidate.runId}><LibraryBookCover book={candidate.book} /><span>{candidate.isReread ? c.reread : formatShortDate(locale, candidate.finishedOn)}</span><strong>{candidate.book.title}</strong><small>{candidate.book.authors.join(", ")}</small>{candidate.rating !== null && <small aria-label={c.ratingOptional}>★ {candidate.rating}</small>}</article>)}</div></section>}
     <section className="recap-section"><div className="section-heading"><div><span>{c.yourSelections}</span><h2>{c.rememberThisPeriod}</h2></div></div><p className="recap-section-lead">{c.selectionsLead}</p><div className="recap-selection-grid">
-      <BookSelection locale={locale} category="favorite_book" title={c.favoriteBook} icon={Trophy} candidates={summary.books} value={summary.selections.favorite_book} summary={summary} onSaved={onSaved} />
-      <BookSelection locale={locale} category="biggest_disappointment" title={c.biggestDisappointment} icon={Repeat2} candidates={summary.books} value={summary.selections.biggest_disappointment} summary={summary} onSaved={onSaved} />
-      <BookSelection locale={locale} category="favorite_cover" title={c.favoriteCover} icon={Image} candidates={summary.books} value={summary.selections.favorite_cover} summary={summary} onSaved={onSaved} />
+      <BookSelection locale={locale} category="favorite_book" title={c.favoriteBook} icon={Trophy} candidates={summary.selectionBooks} value={summary.selections.favorite_book} summary={summary} onSaved={onSaved} />
+      <BookSelection locale={locale} category="biggest_disappointment" title={c.biggestDisappointment} icon={Repeat2} candidates={summary.selectionBooks} value={summary.selections.biggest_disappointment} summary={summary} onSaved={onSaved} />
+      <BookSelection locale={locale} category="favorite_cover" title={c.favoriteCover} icon={Image} candidates={summary.selectionBooks} value={summary.selections.favorite_cover} summary={summary} onSaved={onSaved} />
       <SeriesSelection locale={locale} candidates={summary.series} value={summary.selections.favorite_series} summary={summary} onSaved={onSaved} />
     </div></section>
     <p className="recap-privacy"><Sparkles />{c.recapPrivacy}</p>
@@ -106,10 +112,10 @@ function Metric({ icon: Icon, value, label, detail }: { icon: typeof BookOpen; v
   return <article><Icon /><strong>{value}</strong><span>{label}</span>{detail && <small>{detail}</small>}</article>;
 }
 
-function BookSelection({ locale, category, title, icon: Icon, candidates, value, summary, onSaved }: { locale: Locale; category: Exclude<RecapCategory, "favorite_series">; title: string; icon: typeof BookOpen; candidates: RecapBookCandidate[]; value?: string; summary: RecapSummary; onSaved: (category: RecapCategory, valueId: string | null) => void }) {
+function BookSelection({ locale, category, title, icon: Icon, candidates, value, summary, onSaved }: { locale: Locale; category: Exclude<RecapCategory, "favorite_series">; title: string; icon: typeof BookOpen; candidates: RecapBookChoice[]; value?: string; summary: RecapSummary; onSaved: (category: RecapCategory, valueId: string | null) => void }) {
   const c = appCopy[locale];
-  const ordered = [...candidates].sort((a, b) => Number(preferred(category, b)) - Number(preferred(category, a)) || b.finishedOn.localeCompare(a.finishedOn));
-  return <SelectionCard title={title} icon={Icon} value={value} options={ordered.map((candidate) => ({ id: candidate.runId, label: `${candidate.book.title} — ${candidate.book.authors[0] ?? c.unknownAuthor}` }))} summary={summary} category={category} locale={locale} onSaved={onSaved} />;
+  const ordered = [...candidates].sort((a, b) => a.title.localeCompare(b.title, locale));
+  return <SelectionCard title={title} icon={Icon} value={value} options={ordered.map((book) => ({ id: book.id, label: `${book.title} — ${book.authors[0] ?? c.unknownAuthor}` }))} summary={summary} category={category} locale={locale} onSaved={onSaved} />;
 }
 
 function SeriesSelection({ locale, candidates, value, summary, onSaved }: { locale: Locale; candidates: RecapSeriesCandidate[]; value?: string; summary: RecapSummary; onSaved: (category: RecapCategory, valueId: string | null) => void }) {
@@ -132,10 +138,6 @@ function SelectionCard({ title, icon: Icon, value, options, summary, category, l
     } catch { setError(true); } finally { setBusy(false); }
   }
   return <article className="recap-selection"><span className="selection-icon"><Icon /></span><h3>{title}</h3>{options.length ? <><select aria-label={title} value={selected} onChange={(event) => { setSelected(event.target.value); setSaved(false); }}><option value="">{c.notSelected}</option>{options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select><Button type="button" variant="outline" onClick={save} disabled={busy}>{busy && <LoaderCircle className="spin" />}{c.saveSelection}</Button>{saved && <small className="selection-success" role="status">{c.selectionSaved}</small>}{error && <small className="form-error" role="alert">{c.error}</small>}</> : <p>{c.noEligibleChoices}</p>}</article>;
-}
-
-function preferred(category: RecapCategory, candidate: RecapBookCandidate) {
-  return category === "favorite_book" ? candidate.nomination === "favorite" : category === "biggest_disappointment" ? candidate.nomination === "disappointment" : false;
 }
 
 function formatPeriod(locale: Locale, type: RecapPeriodType, start: string) {

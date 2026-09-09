@@ -1,4 +1,4 @@
-# Shelf Seasons 0.14.1 — дневник чтения на Windows
+# Shelf Seasons 0.15.0 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
@@ -12,6 +12,9 @@
    `supabase/migrations/202609090001_reading_progress_and_recap_deduplication.sql`.
    Он добавляет текущую страницу и автоматический расчёт процентов. Старые
    записи не удаляются; дубликаты безопасно скрываются на уровне итогов.
+4. Для 0.15.0 затем один раз выполните
+   `supabase/migrations/202609090002_recap_library_choices.sql`. Эта миграция
+   разрешает выбирать в категориях «Итогов» любую принадлежащую вам книгу.
 
 ## 2. Распакуйте проект
 
@@ -22,7 +25,7 @@
 
 ```powershell
 Set-Location P:\Projects\shelf-seasons\shelf-seasons
-.\UPDATE_TO_0.14.1.ps1
+.\UPDATE_TO_0.15.0.ps1
 npm ci
 npm run release:check
 npm run dev
@@ -37,7 +40,7 @@ npm run dev
 
 ```powershell
 git add -A
-git commit -m "fix: reading progress recaps and seasonal layout"
+git commit -m "feat: fix language switching and expand recap choices"
 git push origin main
 ```
 

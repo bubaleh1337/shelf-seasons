@@ -58,6 +58,8 @@ a { color: inherit; text-decoration: none; }
 button, input { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+.deferred-section { display: grid; min-height: 240px; place-items: center; color: var(--primary); }
+.deferred-section svg { width: 28px; height: 28px; }
 .auth-success { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; padding: 11px 12px; border-radius: 10px; color: var(--green-deep); background: var(--green-soft); font-size: .82rem; font-weight: 700; }
 .auth-success svg { width: 18px; height: 18px; flex: 0 0 auto; }
 
@@ -428,8 +430,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .setting-row strong { display: block; }
 .setting-row p { margin: 3px 0 0; color: var(--ink-soft); font-size: .8rem; }
 .language-links { display: flex; padding: 3px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-quiet); }
-.language-links a { display: grid; min-width: 42px; min-height: 36px; place-items: center; border-radius: 7px; font-size: .75rem; font-weight: 800; }
-.language-links a.is-active { color: var(--primary-foreground); background: var(--primary); }
+.language-links button { display: grid; min-width: 42px; min-height: 36px; place-items: center; border: 0; border-radius: 7px; color: inherit; background: transparent; font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
+.language-links button.is-active { color: var(--primary-foreground); background: var(--primary); cursor: default; }
 .developer-section { background: linear-gradient(128deg,color-mix(in srgb,var(--season-soft,var(--green-soft)),var(--surface) 45%),var(--surface) 72%); }
 .developer-card { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 18px 22px; }
 .developer-heading { display: flex; min-width: 0; align-items: center; gap: 14px; }

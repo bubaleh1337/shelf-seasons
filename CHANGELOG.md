@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.15.0
+
+- Fixed authenticated language switching so the saved profile locale changes before navigation.
+- Let every book category in Recaps choose from the entire personal library, including paused and unfinished books.
+- Replaced ambiguous seasonal recap copy with explicit monthly and yearly headings in Russian and English.
+- Shortened the developer name to Ekaterina / Екатерина.
+- Parallelized initial data loading, batched signed cover links and split heavier sections into deferred client chunks.
+- Reduced the bundled demonstration cover from 3.1 MB to 153 KB.
+- Added optional server-side Google Books API key support and reduced redundant translated-title requests.
+
 ## 0.14.1
 
 - Added a readable surface beneath every book cover on Home and Library.

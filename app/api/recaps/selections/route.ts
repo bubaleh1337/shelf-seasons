@@ -21,17 +21,13 @@ export async function PUT(request: NextRequest) {
     }
 
     if (parsed.data.category === "favorite_series") {
-      const { data: entries, error: entriesError } = await supabase.from("series_entries").select("book_id").eq("user_id", userId).eq("series_id", parsed.data.valueId).not("book_id", "is", null);
-      if (entriesError) throw entriesError;
-      const bookIds = (entries ?? []).flatMap((entry) => entry.book_id ? [entry.book_id] : []);
-      if (!bookIds.length) return NextResponse.json({ error: "selection_not_eligible" }, { status: 400 });
-      const { count, error } = await supabase.from("reading_runs").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "completed").in("book_id", bookIds).gte("finished_on", bounds.start).lt("finished_on", bounds.end);
+      const { data: series, error } = await supabase.from("series").select("id").eq("id", parsed.data.valueId).eq("user_id", userId).maybeSingle();
       if (error) throw error;
-      if (!count) return NextResponse.json({ error: "selection_not_eligible" }, { status: 400 });
+      if (!series) return NextResponse.json({ error: "selection_not_eligible" }, { status: 400 });
     } else {
-      const { data: run, error } = await supabase.from("reading_runs").select("id").eq("id", parsed.data.valueId).eq("user_id", userId).eq("status", "completed").gte("finished_on", bounds.start).lt("finished_on", bounds.end).maybeSingle();
+      const { data: book, error } = await supabase.from("library_books").select("id").eq("id", parsed.data.valueId).eq("user_id", userId).maybeSingle();
       if (error) throw error;
-      if (!run) return NextResponse.json({ error: "selection_not_eligible" }, { status: 400 });
+      if (!book) return NextResponse.json({ error: "selection_not_eligible" }, { status: 400 });
     }
 
     const isSeries = parsed.data.category === "favorite_series";
@@ -40,7 +36,8 @@ export async function PUT(request: NextRequest) {
       period_type: parsed.data.periodType,
       period_start: bounds.start,
       category: parsed.data.category,
-      run_id: isSeries ? null : parsed.data.valueId,
+      book_id: isSeries ? null : parsed.data.valueId,
+      run_id: null,
       series_id: isSeries ? parsed.data.valueId : null,
     }, { onConflict: "user_id,period_type,period_start,category" });
     if (error) throw error;
