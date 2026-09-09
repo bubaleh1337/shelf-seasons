@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.0
+
+- Replaced sparse seasonal corner decorations with an atmospheric full-page seasonal backdrop.
+- Added original paper texture, layered light, large edge foliage and a cozy illustrated still life for every season.
+- Added autumn books, coffee, pumpkins and string lights, plus distinct spring, summer and winter motifs.
+- Kept all decoration scroll-bound, non-interactive and safely behind application content on desktop and mobile.
+
 ## 0.12.0
 
 - Added a bilingual developer card with direct email and Telegram contacts.

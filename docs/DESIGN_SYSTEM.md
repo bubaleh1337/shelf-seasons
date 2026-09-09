@@ -4,7 +4,14 @@
 
 Mood: **a cozy home library in changing seasons**.
 
-The interface should feel warm, editorial and calm. It should not imitate parchment, use heavy skeuomorphism or become visually crowded. Real book covers provide most of the color; product surfaces remain restrained.
+The interface should feel warm, editorial and calm. Seasonal pages use a subtle paper texture, layered natural light, large edge foliage and an original illustrated still life. The decoration stays behind content and scrolls with the page; product surfaces remain readable and restrained.
+
+Seasonal motifs:
+
+- spring: blossom branches, a vase and a ribbon;
+- summer: sunflowers, a ceramic vase and a shell;
+- autumn: leaves, books, coffee, pumpkins and warm string lights;
+- winter: pine branches, snowflakes, a tree and a steaming mug.
 
 ## 2. Brand expression
 

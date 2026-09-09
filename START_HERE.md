@@ -1,10 +1,10 @@
 # Запуск Shelf Seasons на Windows 11
 
-В архиве находится версия `0.12.0`: Google OAuth, личная библиотека, поиск русских изданий, отметки чтения, календарь, итоги, языки чтения, сезонные полки, контакты разработчицы и поддержка проекта.
+В архиве находится версия `0.13.0`: Google OAuth, личная библиотека, поиск русских изданий, отметки чтения, календарь, итоги, языки чтения, физические сезонные полки и атмосферные сезонные фоны.
 
 ## 1. Распакуй проект
 
-Распакуй архив `shelf-seasons-0.12.0-developer-support-verified.zip` в:
+Распакуй архив `shelf-seasons-0.13.0-seasonal-backgrounds-verified.zip` в:
 
 ```text
 P:\Projects\shelf-seasons\shelf-seasons
@@ -19,7 +19,7 @@ P:\Projects\shelf-seasons\shelf-seasons\package.json
 После замены файлов выполни:
 
 ```powershell
-.\UPDATE_TO_0.12.0.ps1
+.\UPDATE_TO_0.13.0.ps1
 ```
 
 Скрипт удалит только локальный кэш сборки. `.env.local`, данные Supabase и пользовательские файлы он не затрагивает.
@@ -64,7 +64,7 @@ npm run release:check
 
 ## 6. Подключение аккаунтов
 
-Для обновления с 0.11.0 на 0.12.0 новые настройки Supabase, Google OAuth и Vercel не нужны.
+Для обновления с 0.12.0 на 0.13.0 новые настройки Supabase, Google OAuth и Vercel не нужны.
 
 ## 7. GitHub
 

@@ -62,19 +62,38 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .auth-success svg { width: 18px; height: 18px; flex: 0 0 auto; }
 
 .shelf-app { min-height: 100vh; background: var(--page); }
-.shelf-main { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(ellipse at 96% 4%,color-mix(in srgb,var(--season-sky,#e8e1d7),transparent 24%),transparent 36%),radial-gradient(ellipse at 4% 94%,color-mix(in srgb,var(--season-soft,#eee6da),transparent 18%),transparent 38%),var(--page); }
+.shelf-main { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(ellipse at 92% 2%,color-mix(in srgb,var(--season-accent,#d7b07b),transparent 74%),transparent 38%),radial-gradient(ellipse at 8% 45%,color-mix(in srgb,var(--season-sky,#e8e1d7),transparent 44%),transparent 44%),radial-gradient(ellipse at 88% 90%,color-mix(in srgb,var(--season-soft,#eee6da),transparent 18%),transparent 43%),var(--page); }
 .shelf-main > *:not(.seasonal-backdrop) { position: relative; z-index: 1; }
 .seasonal-backdrop { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.seasonal-wallpaper { position: absolute; width: clamp(340px,38vw,640px); height: auto; color: var(--season-main); opacity: .34; }
-.seasonal-wallpaper-top { top: 250px; right: -165px; }
-.seasonal-wallpaper-bottom { bottom: 120px; left: -200px; transform: rotate(180deg); opacity: .2; }
+.seasonal-paper-texture { position: absolute; inset: 0; opacity: .3; background-image: repeating-linear-gradient(3deg,transparent 0 6px,color-mix(in srgb,var(--season-main),transparent 96%) 7px),repeating-linear-gradient(93deg,transparent 0 9px,color-mix(in srgb,var(--season-accent),transparent 97%) 10px); mix-blend-mode: multiply; }
+.seasonal-backdrop::after { position: absolute; inset: 0; content: ""; background: radial-gradient(circle at 75% 18%,color-mix(in srgb,var(--season-accent),transparent 76%),transparent 23%),radial-gradient(circle at 14% 72%,color-mix(in srgb,var(--season-sky),transparent 65%),transparent 28%); opacity: .65; }
+.seasonal-wallpaper { position: absolute; width: clamp(430px,46vw,780px); height: auto; color: var(--season-main); opacity: .31; }
+.seasonal-wallpaper-top { top: 190px; right: -185px; }
+.seasonal-wallpaper-bottom { bottom: 90px; left: -240px; transform: rotate(180deg); opacity: .19; }
 .season-line,.season-snow { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 5; }
 .season-fill { fill: color-mix(in srgb,var(--season-main),transparent 36%); }
 .season-accent-fill,.season-flower { fill: color-mix(in srgb,var(--season-accent),transparent 28%); }
 .season-soft-fill { fill: color-mix(in srgb,var(--season-sky),transparent 18%); }
 .season-sun { fill: color-mix(in srgb,var(--season-accent),transparent 28%); }
 .season-sun-ring { fill: none; stroke: color-mix(in srgb,var(--season-accent),transparent 48%); stroke-width: 4; }
-:root[data-theme="dark"] .seasonal-wallpaper { opacity: .18; }
+:root[data-theme="dark"] .seasonal-wallpaper { opacity: .12; }
+:root[data-theme="dark"] .seasonal-paper-texture { opacity: .12; }
+.seasonal-cozy-vignette { position: absolute; top: 600px; right: -54px; width: clamp(290px,34vw,520px); height: auto; opacity: .48; }
+.vignette-shadow { fill: color-mix(in srgb,var(--season-main),transparent 82%); }
+.vignette-books { filter: drop-shadow(0 8px 9px rgba(52,34,20,.12)); }
+.vignette-book-cover { fill: color-mix(in srgb,var(--season-main),#74452e 30%); stroke: color-mix(in srgb,var(--season-main),black 16%); stroke-width: 2; }
+.vignette-pages { fill: color-mix(in srgb,var(--page),#ead8bb 35%); stroke: color-mix(in srgb,var(--season-main),transparent 55%); stroke-width: 1.5; }
+.vignette-vase { fill: color-mix(in srgb,var(--season-sky),white 25%); stroke: var(--season-main); stroke-width: 3; }
+.vignette-stem,.vignette-shell,.vignette-lights,.vignette-snowflake { fill: none; stroke: var(--season-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
+.vignette-blossom { fill: color-mix(in srgb,var(--season-accent),white 20%); stroke: var(--season-main); stroke-width: 1; }
+.vignette-ribbon,.vignette-leaf { fill: color-mix(in srgb,var(--season-accent),transparent 8%); stroke: var(--season-main); stroke-width: 2; }
+.vignette-sunflower { fill: color-mix(in srgb,var(--season-accent),#f3cd66 30%); stroke: var(--season-main); stroke-width: 2; }
+.vignette-shell { fill: color-mix(in srgb,var(--season-sky),white 30%); }
+.vignette-lights { fill: color-mix(in srgb,var(--season-accent),#f7d78c 35%); }
+.vignette-mug { fill: color-mix(in srgb,var(--season-sky),white 38%); stroke: var(--season-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
+.vignette-pumpkins { fill: color-mix(in srgb,var(--season-accent),#d9823d 28%); stroke: var(--season-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
+.vignette-tree { fill: color-mix(in srgb,var(--season-main),#244b39 22%); stroke: var(--season-main); stroke-width: 2; }
+:root[data-theme="dark"] .seasonal-cozy-vignette { opacity: .24; }
 .shelf-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; display: flex; width: 250px; flex-direction: column; padding: 30px 22px 24px; color: #f7f0e7; background: linear-gradient(165deg,color-mix(in srgb,var(--season-main,#263d32),#17241d 24%),#263d32 78%); border-right: 1px solid rgba(255,255,255,.08); }
 :root[data-theme="dark"] .shelf-sidebar { background: #151d19; }
 .brand { display: flex; align-items: center; gap: 12px; font-family: "Fraunces", Georgia, serif; font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
@@ -702,12 +721,16 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .season-dialog-empty > svg { width: 38px; }
 .season-dialog-empty p { margin: 0; }
 @media (max-width: 820px) {
-  .seasonal-wallpaper { width: 430px; opacity: .25; }
-  .seasonal-wallpaper-top { top: 350px; right: -210px; }
-  .seasonal-wallpaper-bottom { bottom: 170px; left: -245px; }
+  .seasonal-wallpaper { width: 510px; opacity: .2; }
+  .seasonal-wallpaper-top { top: 430px; right: -285px; }
+  .seasonal-wallpaper-bottom { bottom: 170px; left: -300px; }
+  .seasonal-cozy-vignette { top: 720px; right: -105px; width: 360px; opacity: .35; }
   .season-shelf-book-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 @media (max-width: 560px) {
+  .seasonal-wallpaper-top { top: 520px; right: -320px; }
+  .seasonal-wallpaper-bottom { left: -335px; }
+  .seasonal-cozy-vignette { top: 850px; right: -125px; width: 330px; opacity: .28; }
   .seasonal-library { gap: 28px; }
   .seasonal-library-intro { align-items: flex-start; padding: 15px 16px; }
   .seasonal-library-intro h2 { font-size: 1.3rem; }

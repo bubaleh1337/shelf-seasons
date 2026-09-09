@@ -48,8 +48,15 @@ test("personal app exposes seasonal shelves, readable calendar titles and home a
   assert.match(shelves, /shelf-book-spine/);
   assert.match(shelves, /<ShelfOrnaments season=\{season\}/);
   assert.match(wallpaper, /seasonal-backdrop/);
+  assert.match(wallpaper, /seasonal-paper-texture/);
+  assert.match(wallpaper, /seasonal-cozy-vignette/);
+  assert.match(wallpaper, /vignette-pumpkins/);
+  assert.match(wallpaper, /vignette-sunflower/);
+  assert.match(wallpaper, /vignette-blossom/);
+  assert.match(wallpaper, /vignette-tree/);
   assert.doesNotMatch(css, /\.shelf-main::before\s*\{[^}]*position:\s*fixed/);
   assert.match(css, /\.seasonal-backdrop\s*\{[^}]*position:\s*absolute/);
+  assert.doesNotMatch(css, /\.seasonal-(?:backdrop|wallpaper|cozy-vignette)\s*\{[^}]*position:\s*fixed/);
 });
 
 test("book search resolves translated titles and cover storage has provider fallback", async () => {

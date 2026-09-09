@@ -11,13 +11,54 @@ export function SeasonIcon({ season }: { season: BookSeason }) {
 
 export function SeasonalPageBackdrop({ season }: { season: BookSeason }) {
   return <div className="seasonal-backdrop" data-backdrop-season={season} aria-hidden="true">
+    <span className="seasonal-paper-texture" />
     <svg className="seasonal-wallpaper seasonal-wallpaper-top" viewBox="0 0 520 520">
       <BackdropArtwork season={season} />
     </svg>
     <svg className="seasonal-wallpaper seasonal-wallpaper-bottom" viewBox="0 0 520 520">
       <BackdropArtwork season={season} />
     </svg>
+    <svg className="seasonal-cozy-vignette" viewBox="0 0 460 320">
+      <CozyVignette season={season} />
+    </svg>
   </div>;
+}
+
+function CozyVignette({ season }: { season: BookSeason }) {
+  return <>
+    <ellipse className="vignette-shadow" cx="246" cy="287" rx="187" ry="18" />
+    <g className="vignette-books">
+      <path className="vignette-book-cover" d="M54 245h196v32H54c-17 0-17-32 0-32Z" />
+      <path className="vignette-pages" d="M65 251h178v20H65c-10 0-10-20 0-20Z" />
+      <path className="vignette-book-cover" d="M83 205h190v39H83c-18 0-18-39 0-39Z" />
+      <path className="vignette-pages" d="M92 212h173v24H92c-10 0-10-24 0-24Z" />
+    </g>
+    {season === "spring" && <>
+      <path className="vignette-vase" d="M303 159h60l-8 113h-45Z" />
+      <path className="vignette-stem" d="M332 163c-15-48-54-73-84-92m83 90c18-55 50-79 82-91m-104 63c-21-14-39-18-57-15m103 0c17-18 35-24 51-25" />
+      {[{x:246,y:68},{x:251,y:117},{x:413,y:68},{x:407,y:93},{x:287,y:97}].map(({x,y}) => <g className="vignette-blossom" key={`${x}-${y}`} transform={`translate(${x} ${y})`}><circle cx="-7" r="7"/><circle cx="7" r="7"/><circle cy="-7" r="7"/><circle cy="7" r="7"/><circle r="3"/></g>)}
+      <path className="vignette-ribbon" d="M383 246c26-34 49-15 25 8 31 7 17 29-10 10l-17 18-7-7 18-17c-25-3-28-24-9-12Z" />
+    </>}
+    {season === "summer" && <>
+      <path className="vignette-vase" d="M306 172h63l-9 100h-46Z" />
+      <path className="vignette-stem" d="M337 173c-7-56-28-83-55-108m57 104c16-60 41-88 73-102m-87 67c-32-17-49-20-69-12m95 3c21-18 37-22 58-18" />
+      {[{x:280,y:63},{x:413,y:65},{x:256,y:121},{x:408,y:106}].map(({x,y}) => <g className="vignette-sunflower" key={`${x}-${y}`} transform={`translate(${x} ${y})`}><circle r="17"/><circle className="vignette-book-cover" r="7"/></g>)}
+      <path className="vignette-shell" d="M391 271c-2-32 18-50 43-43 20 6 25 31 7 51h-47Zm8-5 15-32m2 35 8-37m8 40-1-34" />
+    </>}
+    {season === "autumn" && <>
+      <path className="vignette-lights" d="M44 44c103 34 227 30 375-7m-328 20v23m74-12v22m77-20v23m76-27v21m65-38v22" />
+      {[91,165,242,318,383].map(x => <circle className="vignette-lights" cx={x} cy={x === 383 ? 71 : x === 318 ? 87 : x === 242 ? 93 : x === 165 ? 90 : 80} r="9" key={x}/>)}
+      <path className="vignette-mug" d="M264 212h71v62h-71Zm71 12c43-7 43 43 1 38m-51-63c-20-26 25-32 5-59m22 59c-19-24 20-29 4-51" />
+      <path className="vignette-pumpkins" d="M350 270c-23-7-29-36-12-52 13-13 29-8 36 2 10-15 33-12 41 3 17-8 34 7 33 26-1 12-7 19-17 24Zm24-51c-3-15 3-24 16-29m-35 35c6 16 7 31 3 45m23-50c-4 17-4 34-1 51m25-45c-8 14-9 29-6 44" />
+      <path className="vignette-leaf" d="M102 191c25-35 67-25 72 10-8 31-41 47-67 30-18-12-20-27-5-40Zm6 34 54-28m-36 17-9-21m25 12 10 17" />
+    </>}
+    {season === "winter" && <>
+      <path className="vignette-mug" d="M276 214h68v59h-68Zm68 11c40-6 40 40 1 36m-48-61c-20-24 22-30 5-56m21 56c-18-23 20-29 4-51" />
+      <path className="vignette-tree" d="m381 80-38 64h21l-37 58h25l-38 63h133l-38-63h25l-37-58h21Z" />
+      <path className="vignette-stem" d="M78 208c30-46 66-82 119-116m-93 83c27 1 43 8 59 22m-36-51c17-2 33 2 47 11m-19-41c16 2 27 7 38 17" />
+      {[{x:70,y:88},{x:132,y:67},{x:214,y:109},{x:251,y:62},{x:408,y:52}].map(({x,y}) => <g className="vignette-snowflake" key={`${x}-${y}`} transform={`translate(${x} ${y})`}><path d="M0-11v22M-10-6 10 6M10-6-10 6"/></g>)}
+    </>}
+  </>;
 }
 
 function BackdropArtwork({ season }: { season: BookSeason }) {
