@@ -128,6 +128,11 @@ cp "$input" "$output"
     assert.match(outputs, /artifact_name=shelf-seasons-db-/);
     assert.match(outputs, /encrypted_path=.*\.tar\.gz\.age/);
   } finally {
-    await rm(temporaryRoot, { recursive: true, force: true });
+    await rm(temporaryRoot, {
+      recursive: true,
+      force: true,
+      maxRetries: 10,
+      retryDelay: 100,
+    });
   }
 });
