@@ -9,6 +9,8 @@ export const authCopy = {
     google: "Continue with Google",
     googlePending: "Opening Google…",
     privacy: "Only your basic Google profile is used to create your account.",
+    privacyPolicy: "Privacy policy",
+    termsOfUse: "Terms of use",
     setupTitle: "Connect Supabase to enable accounts",
     setupLead:
       "The interface is still available in demo mode. Add the development project values to .env.local when you are ready to test sign-in.",
@@ -43,6 +45,8 @@ export const authCopy = {
     google: "Продолжить с Google",
     googlePending: "Открываем Google…",
     privacy: "Для создания аккаунта используется только основная информация профиля Google.",
+    privacyPolicy: "Политика конфиденциальности",
+    termsOfUse: "Условия использования",
     setupTitle: "Подключи Supabase, чтобы включить аккаунты",
     setupLead:
       "Интерфейс по-прежнему доступен в деморежиме. Для проверки входа добавь данные dev-проекта в .env.local.",

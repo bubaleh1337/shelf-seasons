@@ -47,6 +47,10 @@ export function SignInPage({ locale, configured, hasError, accountDeleted }: Sig
                 errorLabel={c.authError}
               />
               <p className="auth-privacy"><LockKeyhole />{c.privacy}</p>
+              <nav className="auth-legal" aria-label={c.privacy}>
+                <Link href={`/${locale}/privacy`}>{c.privacyPolicy}</Link>
+                <Link href={`/${locale}/terms`}>{c.termsOfUse}</Link>
+              </nav>
             </>
           ) : (
             <div className="setup-message">

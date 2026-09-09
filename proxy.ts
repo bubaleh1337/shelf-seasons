@@ -3,10 +3,14 @@ import { NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  const locale = request.nextUrl.pathname.split("/")[1];
+  requestHeaders.set("x-shelf-locale", locale === "en" ? "en" : "ru");
+
   if (request.nextUrl.pathname.startsWith("/auth/")) {
-    return NextResponse.next({ request });
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
-  return updateSession(request);
+  return updateSession(request, requestHeaders);
 }
 
 export const config = {

@@ -316,6 +316,11 @@ Security-definer functions:
 - grant only to intended authenticated role;
 - derive user from `auth.uid()`, never a caller-provided owner ID.
 
+`request_rate_limits` is an internal, user-keyed protection table. Authenticated
+clients have no direct table privileges. The `consume_rate_limit` security-definer
+function performs an atomic window update for a fixed allow-list of expensive API
+buckets and returns only whether the request is allowed and its retry delay.
+
 ## 7. Mutations requiring transactions
 
 - start reading run and update visible library status;

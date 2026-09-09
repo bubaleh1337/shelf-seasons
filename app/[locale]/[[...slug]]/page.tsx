@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { OnboardingPage, SignInPage } from "@/components/auth/auth-pages";
+import { LegalPage } from "@/components/legal/legal-page";
 import { OfflinePage, ShelfSeasonsDemo } from "@/components/shelf-seasons-demo";
 import { ShelfSeasonsApp } from "@/components/shelf-seasons-app";
 import { booksToDtos } from "@/lib/books/server";
@@ -16,6 +18,29 @@ type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
+const metadataCopy = {
+  en: { title: "Shelf Seasons — Reading Journal", description: "A cozy private reading journal, visual book tracker and seasonal library." },
+  ru: { title: "Shelf Seasons — Дневник чтения", description: "Уютный приватный дневник чтения, книжный трекер и сезонная библиотека." },
+} as const;
+
+export async function generateMetadata({ params }: Pick<PageProps, "params">): Promise<Metadata> {
+  const { locale: rawLocale, slug = [] } = await params;
+  const locale: Locale = rawLocale === "en" ? "en" : "ru";
+  const c = metadataCopy[locale];
+  const page = slug[0];
+  const isLegal = page === "privacy" || page === "terms";
+  const legalTitle = page === "privacy"
+    ? (locale === "ru" ? "Политика конфиденциальности" : "Privacy policy")
+    : (locale === "ru" ? "Условия использования" : "Terms of use");
+
+  return {
+    title: isLegal ? `${legalTitle} — Shelf Seasons` : c.title,
+    description: c.description,
+    robots: isLegal ? { index: true, follow: true } : { index: false, follow: false, noarchive: true },
+    openGraph: { title: isLegal ? `${legalTitle} — Shelf Seasons` : c.title, description: c.description, type: "website", locale: locale === "ru" ? "ru_RU" : "en_US" },
+  };
+}
+
 export default async function LocalizedPage({ params, searchParams }: PageProps) {
   const { locale: rawLocale, slug = [] } = await params;
   const query = await searchParams;
@@ -28,6 +53,10 @@ export default async function LocalizedPage({ params, searchParams }: PageProps)
 
   if (slug.length === 0) {
     redirect(`/${locale}/app`);
+  }
+
+  if (slug[0] === "privacy" || slug[0] === "terms") {
+    return <LegalPage locale={locale} document={slug[0]} />;
   }
 
   if (slug[0] === "offline") {

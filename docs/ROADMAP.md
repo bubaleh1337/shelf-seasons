@@ -139,9 +139,10 @@ Exit criteria:
 
 ## Stage 7 — release hardening and closed beta
 
-Status: encrypted daily database backup automation is prepared in `0.16.0`;
-the first artifact verification and a restore rehearsal in a disposable target
-remain manual release gates.
+Status: `0.17.0` adds bilingual legal pages, database-backed limits, patched
+production dependencies, browser security headers and verified encrypted daily
+database backups. External monitoring, a separate Storage-object backup and a
+restore rehearsal in a disposable target remain release gates.
 
 Deliverables:
 

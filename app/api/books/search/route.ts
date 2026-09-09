@@ -6,6 +6,7 @@ import {
 import { requireUser } from "@/lib/books/server";
 import { identifyGoogleBooksRequest } from "@/lib/books/google";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/security/rate-limit";
 
 const cleanCover = (url?: string) => url?.replace(/^http:/, "https:") ?? null;
 const yearFrom = (value?: string) => {
@@ -164,6 +165,8 @@ export async function GET(request: NextRequest) {
   if (!(await requireUser(supabase))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  const limited = await rateLimitResponse(supabase, "book-search", 30, 60);
+  if (limited) return limited;
   const query = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   const locale = request.nextUrl.searchParams.get("locale") === "ru" ? "ru" : "en";
   if (query.length < 2 || query.length > 200) {

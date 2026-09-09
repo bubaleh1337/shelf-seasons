@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { bookToDto, requireUser, resolveProviderCover, storeRemoteCover } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/security/rate-limit";
 
 export async function POST() {
   const supabase = await createClient();
   const userId = await requireUser(supabase);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const limited = await rateLimitResponse(supabase, "cover-repair", 3, 3600);
+  if (limited) return limited;
 
   const { data: rows, error } = await supabase
     .from("library_books")

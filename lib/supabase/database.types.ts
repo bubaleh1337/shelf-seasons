@@ -35,6 +35,24 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
         Relationships: [];
       };
+      request_rate_limits: {
+        Row: {
+          user_id: string;
+          bucket: string;
+          window_started_at: string;
+          request_count: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          bucket: string;
+          window_started_at: string;
+          request_count?: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["request_rate_limits"]["Insert"]>;
+        Relationships: [];
+      };
       reading_goals: {
         Row: {
           id: string;
@@ -331,6 +349,17 @@ export type Database = {
       delete_own_account: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
+      };
+      consume_rate_limit: {
+        Args: {
+          p_bucket: string;
+          p_window_seconds: number;
+          p_max_requests: number;
+        };
+        Returns: Array<{
+          allowed: boolean;
+          retry_after_seconds: number;
+        }>;
       };
     };
     Enums: {

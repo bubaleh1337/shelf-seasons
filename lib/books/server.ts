@@ -9,6 +9,15 @@ import { identifyGoogleBooksRequest } from "@/lib/books/google";
 
 type Client = SupabaseClient<Database>;
 type BookRow = Database["public"]["Tables"]["library_books"]["Row"];
+const MAX_COVER_BYTES = 5 * 1024 * 1024;
+const MAX_BOOK_FORM_BYTES = 6 * 1024 * 1024;
+
+export function isBookFormTooLarge(request: Request) {
+  const rawLength = request.headers.get("content-length");
+  if (!rawLength) return false;
+  const length = Number(rawLength);
+  return Number.isFinite(length) && length > MAX_BOOK_FORM_BYTES;
+}
 
 export async function requireUser(supabase: Client) {
   const { data } = await supabase.auth.getClaims();
@@ -107,13 +116,13 @@ export async function setBookStatus(
 }
 
 export async function storeCover(supabase: Client, userId: string, bookId: string, file: File) {
-  if (file.size > 5 * 1024 * 1024) throw new Error("cover_too_large");
+  if (file.size > MAX_COVER_BYTES) throw new Error("cover_too_large");
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("cover_type");
   return storeCoverBytes(supabase, userId, bookId, Buffer.from(await file.arrayBuffer()));
 }
 
 async function storeCoverBytes(supabase: Client, userId: string, bookId: string, input: Buffer) {
-  if (input.byteLength > 5 * 1024 * 1024) throw new Error("cover_too_large");
+  if (input.byteLength > MAX_COVER_BYTES) throw new Error("cover_too_large");
   const metadata = await sharp(input, { animated: false, limitInputPixels: 40_000_000 }).metadata();
   if (!metadata.width || !metadata.height) throw new Error("cover_invalid");
   const output = await sharp(input, { animated: false })
@@ -145,7 +154,24 @@ export async function storeRemoteCover(supabase: Client, userId: string, bookId:
   if (finalUrl.protocol !== "https:" || !remoteCoverHosts.has(finalUrl.hostname)) throw new Error("cover_redirect");
   const type = response.headers.get("content-type")?.split(";")[0];
   if (!type || !["image/jpeg", "image/png", "image/webp"].includes(type)) throw new Error("cover_type");
-  return storeCoverBytes(supabase, userId, bookId, Buffer.from(await response.arrayBuffer()));
+  const declaredLength = Number(response.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_COVER_BYTES) throw new Error("cover_too_large");
+  if (!response.body) throw new Error("cover_download");
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    received += value.byteLength;
+    if (received > MAX_COVER_BYTES) {
+      await reader.cancel();
+      throw new Error("cover_too_large");
+    }
+    chunks.push(value);
+  }
+  return storeCoverBytes(supabase, userId, bookId, Buffer.concat(chunks, received));
 }
 
 type GoogleVolume = { volumeInfo?: { imageLinks?: { extraLarge?: string; large?: string; medium?: string; small?: string; thumbnail?: string; smallThumbnail?: string } } };

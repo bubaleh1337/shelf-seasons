@@ -51,7 +51,12 @@ test("backup documentation covers key custody, verification and storage exclusio
   assert.match(docs, /Never test a restore against production/);
 });
 
-test("backup orchestration publishes only the encrypted archive and cleans plaintext", async () => {
+test("backup orchestration publishes only the encrypted archive and cleans plaintext", {
+  // The production workflow runs this POSIX script on Ubuntu. Windows exposes
+  // a bash.exe relay even when WSL has no /bin/bash, so executing it locally
+  // produces a false failure instead of testing the backup workflow.
+  skip: process.platform === "win32" ? "covered by the Ubuntu GitHub Actions job" : false,
+}, async () => {
   const temporaryRoot = await mkdtemp(path.join(tmpdir(), "shelf-seasons-backup-test-"));
   const binDirectory = path.join(temporaryRoot, "bin");
   const runnerDirectory = path.join(temporaryRoot, "runner");

@@ -1,12 +1,12 @@
 # Closed public beta on Vercel
 
-Version 0.16.0 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: legal pages, monitoring, rate limits and a completed restore rehearsal remain on the roadmap.
+Version 0.17.0 can be shared with a small group through a public Vercel URL. This is a beta, not the final public release: external monitoring, a separate Storage-object backup and a completed restore rehearsal remain on the roadmap.
 
 ## Before deployment
 
-1. After overlaying the 0.16.0 archive on Windows, run `.\UPDATE_TO_0.16.0.ps1` once to remove generated caches from the previous source version.
-2. Apply every migration in `supabase/migrations` in filename order. The new 0.15.0 migration is `202609090002_recap_library_choices.sql`.
-3. Run `npm run release:check` and push version 0.16.0 to the GitHub `main` branch.
+1. After overlaying the 0.17.0 archive on Windows, run `.\UPDATE_TO_0.17.0.ps1` once to remove generated caches from the previous source version.
+2. Apply every migration in `supabase/migrations` in filename order. The new 0.17.0 migration is `202609090003_public_beta_hardening.sql`.
+3. Run `npm ci`, then `npm run release:check`, and push version 0.17.0 to the GitHub `main` branch.
 4. Import `bubaleh1337/shelf-seasons` in Vercel.
 5. Add these Production environment variables in Vercel:
    - `NEXT_PUBLIC_SUPABASE_URL` = the existing Supabase project URL;
@@ -31,7 +31,6 @@ Test sign-in, book status changes and reading check-ins in a private browser win
 
 ## Database backup
 
-After pushing 0.16.0, add the two GitHub Actions secrets and run the first
-encrypted backup manually as described in `docs/DATABASE_BACKUPS.md`. Download
-and verify that first artifact before relying on the schedule. No database
-migration or Vercel variable is required for the backup workflow.
+Keep the two GitHub Actions backup secrets configured and continue the verification
+routine described in `docs/DATABASE_BACKUPS.md`. Version 0.17.0 does not add a new
+backup secret or Vercel variable.

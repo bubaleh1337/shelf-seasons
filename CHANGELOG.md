@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.17.0
+
+- Updated Next.js and Sharp to patched releases and removed all known production dependency vulnerabilities reported by `npm audit`.
+- Added database-backed rate limits for expensive book search, book editing and cover-repair routes.
+- Added Content Security Policy and other browser security headers and removed the framework disclosure header.
+- Localized document language, page metadata and search-engine indexing rules for Russian and English routes.
+- Added bilingual privacy policy and terms of use with links from sign-in and Settings.
+- Limited remote cover downloads by bytes and reduced automatic cover-repair retries to at most once per week after success.
+- Added Android and Apple PWA icons and removed the unused 3.1 MB PNG cover asset.
+
 ## 0.16.0
 
 - Added an automatic daily Supabase database export with a manual GitHub Actions trigger.

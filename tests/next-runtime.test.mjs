@@ -89,6 +89,10 @@ test("standard Next.js dev server renders every primary bilingual route", async 
     ["/ru/offline", "Сейчас нет подключения"],
     ["/en/sign-in", "Connect Supabase to enable accounts"],
     ["/ru/sign-in", "Подключи Supabase, чтобы включить аккаунты"],
+    ["/en/privacy", "Privacy policy"],
+    ["/ru/privacy", "Политика конфиденциальности"],
+    ["/en/terms", "Terms of use"],
+    ["/ru/terms", "Условия использования"],
   ];
 
   for (const [route, expected] of routes) {
@@ -96,6 +100,24 @@ test("standard Next.js dev server renders every primary bilingual route", async 
     assert.equal(response.status, 200, `${route}\n${serverOutput}`);
     assert.match(await response.text(), new RegExp(expected), route);
   }
+});
+
+test("localized pages expose the correct document language, metadata and security headers", async () => {
+  for (const [route, locale] of [["/en/sign-in", "en"], ["/ru/sign-in", "ru"]]) {
+    const response = await request(route);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, new RegExp(`<html lang="${locale}"`));
+    assert.match(html, /<meta name="robots" content="noindex, nofollow, noarchive"/);
+    assert.match(response.headers.get("content-security-policy") ?? "", /frame-ancestors 'none'/);
+    assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    assert.equal(response.headers.get("x-frame-options"), "DENY");
+    assert.equal(response.headers.get("x-powered-by"), null);
+  }
+
+  const legal = await request("/ru/privacy");
+  assert.equal(legal.status, 200);
+  assert.match(await legal.text(), /<meta name="robots" content="index, follow"/);
 });
 
 test("development page loads generated CSS, client scripts and the book cover", async () => {

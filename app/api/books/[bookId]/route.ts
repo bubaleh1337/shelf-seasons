@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bookInputSchema } from "@/lib/books/validation";
-import { bookToDto, requireUser, resolveProviderCover, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
+import { bookToDto, isBookFormTooLarge, requireUser, resolveProviderCover, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import { rateLimitResponse } from "@/lib/security/rate-limit";
 
 type Context = { params: Promise<{ bookId: string }> };
 
@@ -26,10 +27,13 @@ export async function PATCH(request: NextRequest, context: Context) {
 }
 
 export async function PUT(request: NextRequest, context: Context) {
+  if (isBookFormTooLarge(request)) return NextResponse.json({ error: "cover_too_large" }, { status: 413 });
   const { bookId } = await context.params;
   const supabase = await createClient();
   const userId = await requireUser(supabase);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const limited = await rateLimitResponse(supabase, "book-write", 30, 300);
+  if (limited) return limited;
   const form = await request.formData();
   const parsed = bookInputSchema.safeParse(Object.fromEntries(form.entries()));
   if (!parsed.success) return NextResponse.json({ error: "invalid_book" }, { status: 400 });

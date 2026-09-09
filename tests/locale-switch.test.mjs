@@ -10,6 +10,6 @@ test("authenticated language switching persists the profile before navigation", 
   assert.match(route, /requireUser\(supabase\)/);
   assert.match(route, /\.update\(\{ locale: parsed\.data\.locale \}\)/);
   assert.match(app, /fetch\("\/api\/profile\/locale"/);
-  assert.match(app, /window\.location\.assign\(`\/\$\{targetLocale\}\/app\$\{suffix\}`\)/);
+  assert.match(app, /window\.location\.replace\(`\/\$\{targetLocale\}\/app\$\{suffix\}`\)/);
   assert.doesNotMatch(app, /className="locale-switch" href=/);
 });

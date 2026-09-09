@@ -63,14 +63,18 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
   }, [currentSeason, dark, locale]);
 
   useEffect(() => {
-    const repairKey = "shelf-seasons-cover-repair-0.10.0";
-    if (!initialBooks.some((book) => !book.coverUrl) || window.sessionStorage.getItem(repairKey)) return;
-    window.sessionStorage.setItem(repairKey, "1");
-    void fetch("/api/books/repair-covers", { method: "POST" }).then(async (response) => {
-      if (!response.ok) throw new Error("cover_repair_failed");
-      const payload = (await response.json()) as { books: LibraryBook[] };
-      if (payload.books.length) setBooks((current) => current.map((book) => payload.books.find((repaired) => repaired.id === book.id) ?? book));
-    }).catch(() => window.sessionStorage.removeItem(repairKey));
+    const repairKey = "shelf-seasons-cover-repair-next-at";
+    const nextAttempt = Number(window.localStorage.getItem(repairKey) ?? 0);
+    if (!navigator.onLine || !initialBooks.some((book) => !book.coverUrl) || Date.now() < nextAttempt) return;
+    window.localStorage.setItem(repairKey, String(Date.now() + 7 * 24 * 60 * 60 * 1000));
+    const timeout = window.setTimeout(() => {
+      void fetch("/api/books/repair-covers", { method: "POST" }).then(async (response) => {
+        if (!response.ok) throw new Error("cover_repair_failed");
+        const payload = (await response.json()) as { books: LibraryBook[] };
+        if (payload.books.length) setBooks((current) => current.map((book) => payload.books.find((repaired) => repaired.id === book.id) ?? book));
+      }).catch(() => window.localStorage.setItem(repairKey, String(Date.now() + 60 * 60 * 1000)));
+    }, 1_500);
+    return () => window.clearTimeout(timeout);
   }, [initialBooks]);
 
   const toggleTheme = (value: boolean) => { setDark(value); document.documentElement.dataset.theme = value ? "dark" : "light"; };
@@ -153,7 +157,7 @@ function LanguageSwitch({ currentLocale, targetLocale, section, className, compa
       });
       if (!response.ok) throw new Error("locale_update_failed");
       const suffix = section === "home" ? "" : `/${section}`;
-      window.location.assign(`/${targetLocale}/app${suffix}`);
+      window.location.replace(`/${targetLocale}/app${suffix}`);
     } catch {
       setBusy(false);
     }
@@ -317,6 +321,7 @@ function SettingsPage({ locale, dark, toggleTheme }: { locale: Locale; dark: boo
     <section><h2>{c.appearance}</h2><div className="setting-row"><span className="setting-icon">{dark ? <Moon /> : <Sun />}</span><div><strong>{c.darkMode}</strong></div><Switch checked={dark} onCheckedChange={toggleTheme} /></div></section>
     <section><h2>{c.language}</h2><div className="setting-row"><span className="setting-icon"><Languages /></span><div><strong>{locale === "ru" ? "Русский" : "English"}</strong></div><div className="language-links"><LanguageSwitch currentLocale={locale} targetLocale="en" section="settings" compact /><LanguageSwitch currentLocale={locale} targetLocale="ru" section="settings" compact /></div></div></section>
     <section><h2>{c.account}</h2><div className="setting-row"><span className="setting-icon"><LogOut /></span><div><strong>Shelf Seasons</strong><p>{c.signedIn}</p></div><form action="/auth/sign-out" method="post"><input type="hidden" name="locale" value={locale} /><Button variant="outline" type="submit">{c.signOut}</Button></form></div></section>
+    <section><h2>{c.legal}</h2><div className="settings-legal-links"><Link href={`/${locale}/privacy`}>{c.privacyPolicy}</Link><Link href={`/${locale}/terms`}>{c.termsOfUse}</Link></div></section>
     <DeveloperSection locale={locale} />
     <AccountControls locale={locale} />
   </div></>;

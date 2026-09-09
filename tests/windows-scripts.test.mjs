@@ -15,7 +15,7 @@ test("project commands are portable to Windows PowerShell", async () => {
   assert.equal(packageJson.scripts.dev, "next dev");
   assert.equal(packageJson.scripts.build, "next build");
   assert.equal(packageJson.scripts.start, "next start");
-  assert.equal(packageJson.dependencies.next, "16.2.6");
+  assert.equal(packageJson.dependencies.next, "16.3.4");
   assert.equal(packageJson.devDependencies.vite, undefined);
   assert.equal(packageJson.devDependencies.vinext, undefined);
   assert.equal(packageJson.devDependencies.wrangler, undefined);
@@ -99,6 +99,13 @@ test("the 0.15.0 updater only clears generated caches", async () => {
 
 test("the 0.16.0 updater only clears generated caches", async () => {
   const script = await readFile(new URL("../scripts/update-to-0.16.0.mjs", import.meta.url), "utf8");
+  assert.match(script, /\.next/);
+  assert.match(script, /\.sites-runtime/);
+  assert.doesNotMatch(script, /node_modules|\.git|\.env\.local/);
+});
+
+test("the 0.17.0 updater only clears generated caches", async () => {
+  const script = await readFile(new URL("../scripts/update-to-0.17.0.mjs", import.meta.url), "utf8");
   assert.match(script, /\.next/);
   assert.match(script, /\.sites-runtime/);
   assert.doesNotMatch(script, /node_modules|\.git|\.env\.local/);
