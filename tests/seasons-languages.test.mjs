@@ -56,9 +56,20 @@ test("personal app exposes seasonal shelves, readable calendar titles and home a
   assert.match(wallpaper, /vignette-tree/);
   assert.doesNotMatch(css, /\.shelf-main::before\s*\{[^}]*position:\s*fixed/);
   assert.match(css, /\.seasonal-backdrop\s*\{[^}]*position:\s*absolute/);
-  assert.match(css, /\.seasonal-garland\s*\{[^}]*left:\s*50%/);
+  assert.doesNotMatch(wallpaper, /seasonal-garland/);
+  assert.doesNotMatch(css, /\.seasonal-garland/);
   assert.match(css, /\.seasonal-cozy-vignette\s*\{[^}]*bottom:\s*76px/);
   assert.doesNotMatch(css, /\.seasonal-(?:backdrop|wallpaper|cozy-vignette)\s*\{[^}]*position:\s*fixed/);
+});
+
+test("book titles use a readable surface below each cover", async () => {
+  const [source, css] = await Promise.all([
+    read("components/shelf-seasons-app.tsx"),
+    read("app/globals.css"),
+  ]);
+  assert.match(source, /className="simple-book-meta"/);
+  assert.match(css, /\.simple-book-meta\s*\{[^}]*background:/);
+  assert.match(css, /\.simple-book-meta\s*\{[^}]*backdrop-filter:\s*blur\(8px\)/);
 });
 
 test("book editing keeps an unchanged status from creating another completed run", async () => {

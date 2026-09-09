@@ -73,4 +73,4 @@ Read in this order before implementation work:
 
 ## Current stage
 
-Version 0.14.0 includes the private personal library, reliable Google OAuth, translated-title book search, provider and custom covers, current-page reading progress, readable calendar cards, streaks, book completion, yearly goals, user-owned ordered series, physical seasonal shelves with spine-first books, responsive original seasonal backgrounds, deduplicated monthly/yearly recaps, reading-language history, developer contacts, project support, account export and protected account deletion.
+Version 0.14.1 includes the private personal library, reliable Google OAuth, translated-title book search, provider and custom covers, current-page reading progress, readable calendar cards, streaks, book completion, yearly goals, user-owned ordered series, physical seasonal shelves with spine-first books, responsive original seasonal backgrounds, protected book-text surfaces, deduplicated monthly/yearly recaps, reading-language history, developer contacts, project support, account export and protected account deletion.

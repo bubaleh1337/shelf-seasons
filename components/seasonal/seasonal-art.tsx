@@ -18,10 +18,6 @@ export function SeasonalPageBackdrop({ season }: { season: BookSeason }) {
     <svg className="seasonal-wallpaper seasonal-wallpaper-bottom" viewBox="0 0 520 520">
       <BackdropArtwork season={season} />
     </svg>
-    {season === "autumn" && <svg className="seasonal-garland" viewBox="0 0 760 120">
-      <path d="M24 29c178 71 477 70 712-2" />
-      {[92, 205, 325, 448, 568, 682].map((x, index) => <g key={x} transform={`translate(${x} ${48 + (index % 2) * 18})`}><path d="M0-12v18" /><circle cx="0" cy="17" r="12" /></g>)}
-    </svg>}
     <svg className="seasonal-cozy-vignette" viewBox="0 0 460 320">
       <CozyVignette season={season} />
     </svg>

@@ -1,4 +1,4 @@
-# Shelf Seasons 0.14.0 — дневник чтения на Windows
+# Shelf Seasons 0.14.1 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
@@ -22,7 +22,7 @@
 
 ```powershell
 Set-Location P:\Projects\shelf-seasons\shelf-seasons
-.\UPDATE_TO_0.14.0.ps1
+.\UPDATE_TO_0.14.1.ps1
 npm ci
 npm run release:check
 npm run dev

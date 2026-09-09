@@ -78,7 +78,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .season-sun-ring { fill: none; stroke: color-mix(in srgb,var(--season-accent),transparent 48%); stroke-width: 4; }
 :root[data-theme="dark"] .seasonal-wallpaper { opacity: .12; }
 :root[data-theme="dark"] .seasonal-paper-texture { opacity: .12; }
-.seasonal-garland { position: absolute; top: 84px; left: 50%; width: min(760px,68vw); height: auto; transform: translateX(-50%); fill: color-mix(in srgb,var(--season-accent),#f5d48b 36%); stroke: var(--season-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; opacity: .38; }
 .seasonal-cozy-vignette { position: absolute; right: max(16px,3vw); bottom: 76px; width: clamp(300px,34vw,520px); height: auto; opacity: .48; }
 .vignette-shadow { fill: color-mix(in srgb,var(--season-main),transparent 82%); }
 .vignette-books { filter: drop-shadow(0 8px 9px rgba(52,34,20,.12)); }
@@ -95,7 +94,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .vignette-pumpkins { fill: color-mix(in srgb,var(--season-accent),#d9823d 28%); stroke: var(--season-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
 .vignette-tree { fill: color-mix(in srgb,var(--season-main),#244b39 22%); stroke: var(--season-main); stroke-width: 2; }
 :root[data-theme="dark"] .seasonal-cozy-vignette { opacity: .24; }
-:root[data-theme="dark"] .seasonal-garland { opacity: .2; }
 .shelf-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; display: flex; width: 250px; flex-direction: column; padding: 30px 22px 24px; color: #f7f0e7; background: linear-gradient(165deg,color-mix(in srgb,var(--season-main,#263d32),#17241d 24%),#263d32 78%); border-right: 1px solid rgba(255,255,255,.08); }
 :root[data-theme="dark"] .shelf-sidebar { background: #151d19; }
 .brand { display: flex; align-items: center; gap: 12px; font-family: "Fraunces", Georgia, serif; font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
@@ -637,7 +635,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .personal-book-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 30px 20px; }
 .personal-book-card { min-width: 0; }
 .simple-book-card { min-width: 0; }
-.book-badges { display: flex; min-height: 20px; align-items: center; gap: 7px; margin-top: 7px; }
+.simple-book-meta { min-width: 0; margin-top: 8px; padding: 10px 11px 12px; border: 1px solid color-mix(in srgb,var(--border),transparent 10%); border-radius: 12px; background: color-mix(in srgb,var(--surface),transparent 3%); box-shadow: 0 8px 22px rgba(61,43,29,.07); backdrop-filter: blur(8px); }
+.book-badges { display: flex; min-height: 20px; align-items: center; gap: 7px; }
 .book-badges .status-text { margin-right: auto; }
 .language-badge,.season-badge { display: inline-flex; min-width: 25px; height: 20px; align-items: center; justify-content: center; padding: 0 6px; border-radius: 999px; color: var(--green-deep); background: var(--green-soft); font-size: .58rem; font-weight: 850; }
 .season-badge { padding: 0 5px; font-size: .7rem; }
@@ -726,15 +725,14 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .seasonal-wallpaper { width: 510px; opacity: .2; }
   .seasonal-wallpaper-top { top: 430px; right: -285px; }
   .seasonal-wallpaper-bottom { bottom: 170px; left: -300px; }
-  .seasonal-garland { top: 82px; width: 82vw; opacity: .28; }
   .seasonal-cozy-vignette { right: -70px; bottom: 105px; width: 360px; opacity: .35; }
   .season-shelf-book-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 @media (max-width: 560px) {
   .seasonal-wallpaper-top { top: 520px; right: -320px; }
   .seasonal-wallpaper-bottom { left: -335px; }
-  .seasonal-garland { top: 78px; width: 94vw; opacity: .22; }
   .seasonal-cozy-vignette { right: -92px; bottom: 112px; width: 330px; opacity: .28; }
+  .simple-book-meta { padding: 9px 9px 10px; }
   .seasonal-library { gap: 28px; }
   .seasonal-library-intro { align-items: flex-start; padding: 15px 16px; }
   .seasonal-library-intro h2 { font-size: 1.3rem; }

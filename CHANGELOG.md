@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.1
+
+- Added a readable surface beneath every book cover on Home and Library.
+- Kept status, language, season, title and author together inside the protected text surface.
+- Removed the detached autumn garland from desktop and mobile layouts.
+
 ## 0.14.0
 
 - Anchored each seasonal still life to the true bottom-right of the page and centered the autumn garland independently.

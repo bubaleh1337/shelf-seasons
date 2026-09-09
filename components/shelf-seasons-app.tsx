@@ -209,7 +209,7 @@ function PersonalLibrary({ locale, books, setBooks, currentSeason, onSaved }: { 
 
 function SimpleBookCard({ locale, book }: { locale: Locale; book: LibraryBook }) {
   const c = appCopy[locale];
-  return <div className="simple-book-card"><LibraryBookCover book={book} /><div className="book-badges"><span className={`status-text status-${book.status}`}>{c[book.status]}</span><span className="language-badge">{book.readingLanguage === "other" ? "•••" : book.readingLanguage.toLocaleUpperCase()}</span>{book.season && <span className="season-badge" title={c[book.season]}>{seasonSymbol(book.season as BookSeason)}</span>}</div><h3>{book.title}</h3><p>{book.authors.join(", ") || "—"}</p></div>;
+  return <div className="simple-book-card"><LibraryBookCover book={book} /><div className="simple-book-meta"><div className="book-badges"><span className={`status-text status-${book.status}`}>{c[book.status]}</span><span className="language-badge">{book.readingLanguage === "other" ? "•••" : book.readingLanguage.toLocaleUpperCase()}</span>{book.season && <span className="season-badge" title={c[book.season]}>{seasonSymbol(book.season as BookSeason)}</span>}</div><h3>{book.title}</h3><p>{book.authors.join(", ") || "—"}</p></div></div>;
 }
 
 function ReadingCalendar({ locale, books, sessions, timezone, setSessions, onSessionSaved }: { locale: Locale; books: LibraryBook[]; sessions: ReadingSession[]; timezone: string; setSessions: React.Dispatch<React.SetStateAction<ReadingSession[]>>; onSessionSaved: (session: ReadingSession) => void }) {
