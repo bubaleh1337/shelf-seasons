@@ -103,7 +103,7 @@ export const copy = {
     dataNoteDetail: "This first version uses sample data. Nothing is saved to an account yet.",
     modalTitle: "Log today’s reading",
     modalDescription: "A simple check-in is enough. Details are optional.",
-    date: "Date", timeRead: "Minutes read", pagesRead: "Pages read", optional: "Optional",
+    date: "Date", timeRead: "Minutes read", pagesRead: "Current page", optional: "Optional",
     saveEntry: "Save entry", cancel: "Cancel", empty: "No books match this shelf yet.",
   },
   ru: {
@@ -135,7 +135,7 @@ export const copy = {
     dataNoteDetail: "Первая версия использует примеры. Данные пока не сохраняются в аккаунте.",
     modalTitle: "Отметить чтение сегодня",
     modalDescription: "Достаточно простой отметки. Подробности можно добавить по желанию.",
-    date: "Дата", timeRead: "Минут чтения", pagesRead: "Прочитано страниц", optional: "Необязательно",
+    date: "Дата", timeRead: "Минут чтения", pagesRead: "Текущая страница", optional: "Необязательно",
     saveEntry: "Сохранить отметку", cancel: "Отмена", empty: "На этой полке пока нет подходящих книг.",
   },
 } as const;

@@ -4,7 +4,7 @@
 
 Mood: **a cozy home library in changing seasons**.
 
-The interface should feel warm, editorial and calm. Seasonal pages use a subtle paper texture, layered natural light, large edge foliage and an original illustrated still life. The decoration stays behind content and scrolls with the page; product surfaces remain readable and restrained.
+The interface should feel warm, editorial and calm. Seasonal pages use a subtle paper texture, layered natural light, large edge foliage and an original illustrated still life. The still life is anchored to the page's bottom-right edge, while wide motifs such as the autumn garland are centered independently. Decoration stays behind content and scrolls with the page; product surfaces remain readable and restrained.
 
 Seasonal motifs:
 

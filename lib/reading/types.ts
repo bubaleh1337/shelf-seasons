@@ -4,6 +4,7 @@ export type ReadingSession = {
   bookId: string;
   readOn: string;
   checkInOnly: boolean;
+  endingPage: number | null;
   pagesRead: number | null;
   minutesRead: number | null;
   resultingPercent: number | null;

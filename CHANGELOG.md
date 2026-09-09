@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.0
+
+- Anchored each seasonal still life to the true bottom-right of the page and centered the autumn garland independently.
+- Replaced manual page and percentage calculations with one current-page field and server-calculated progress.
+- Added the current page and progress bar to the active book on Home.
+- Prevented ordinary book edits from creating duplicate completed reading runs and deduplicated recap books and selectors.
+- Preserved existing reading history while deduplicating recap presentation.
+- Replaced the browser-native cover picker text with fully localized Russian and English controls.
+
 ## 0.13.0
 
 - Replaced sparse seasonal corner decorations with an atmospheric full-page seasonal backdrop.

@@ -18,6 +18,10 @@ export function SeasonalPageBackdrop({ season }: { season: BookSeason }) {
     <svg className="seasonal-wallpaper seasonal-wallpaper-bottom" viewBox="0 0 520 520">
       <BackdropArtwork season={season} />
     </svg>
+    {season === "autumn" && <svg className="seasonal-garland" viewBox="0 0 760 120">
+      <path d="M24 29c178 71 477 70 712-2" />
+      {[92, 205, 325, 448, 568, 682].map((x, index) => <g key={x} transform={`translate(${x} ${48 + (index % 2) * 18})`}><path d="M0-12v18" /><circle cx="0" cy="17" r="12" /></g>)}
+    </svg>}
     <svg className="seasonal-cozy-vignette" viewBox="0 0 460 320">
       <CozyVignette season={season} />
     </svg>
@@ -46,8 +50,6 @@ function CozyVignette({ season }: { season: BookSeason }) {
       <path className="vignette-shell" d="M391 271c-2-32 18-50 43-43 20 6 25 31 7 51h-47Zm8-5 15-32m2 35 8-37m8 40-1-34" />
     </>}
     {season === "autumn" && <>
-      <path className="vignette-lights" d="M44 44c103 34 227 30 375-7m-328 20v23m74-12v22m77-20v23m76-27v21m65-38v22" />
-      {[91,165,242,318,383].map(x => <circle className="vignette-lights" cx={x} cy={x === 383 ? 71 : x === 318 ? 87 : x === 242 ? 93 : x === 165 ? 90 : 80} r="9" key={x}/>)}
       <path className="vignette-mug" d="M264 212h71v62h-71Zm71 12c43-7 43 43 1 38m-51-63c-20-26 25-32 5-59m22 59c-19-24 20-29 4-51" />
       <path className="vignette-pumpkins" d="M350 270c-23-7-29-36-12-52 13-13 29-8 36 2 10-15 33-12 41 3 17-8 34 7 33 26-1 12-7 19-17 24Zm24-51c-3-15 3-24 16-29m-35 35c6 16 7 31 3 45m23-50c-4 17-4 34-1 51m25-45c-8 14-9 29-6 44" />
       <path className="vignette-leaf" d="M102 191c25-35 67-25 72 10-8 31-41 47-67 30-18-12-20-27-5-40Zm6 34 54-28m-36 17-9-21m25 12 10 17" />

@@ -79,7 +79,7 @@ async function requestSummary(periodType: RecapPeriodType, periodStart: string) 
 function RecapContent({ locale, summary, onSaved }: { locale: Locale; summary: RecapSummary; onSaved: (category: RecapCategory, valueId: string | null) => void }) {
   const c = appCopy[locale];
   const hasActivity = summary.completedCount > 0 || summary.readingDays > 0;
-  const covers = summary.books.filter((candidate, index, all) => all.findIndex((item) => item.book.id === candidate.book.id) === index).slice(0, 5);
+  const covers = summary.books.slice(0, 5);
   return <div className="real-recap">
     <section className="recap-hero real-recap-hero"><div className="recap-copy"><Sparkles /><span className="recap-state-badge">{summary.isFinal ? c.finalRecap : c.liveRecap}</span><h2>{hasActivity ? c.recapHeroTitle : c.emptyRecapTitle}</h2><p>{hasActivity ? c.recapHeroLead : c.emptyRecapLead}</p><div className="recap-stats"><span><strong>{summary.completedCount}</strong>{c.completedBooks}</span><span><strong>{summary.readingDays}</strong>{c.readingDays}</span><span><strong>{summary.longestStreak}</strong>{c.bestPeriodStreak}</span></div></div><div className="real-recap-covers" aria-hidden="true">{covers.length ? covers.map((candidate, index) => <div key={candidate.runId} style={{ "--recap-cover": index } as React.CSSProperties}><LibraryBookCover book={candidate.book} /></div>) : <div className="empty-recap-cover"><BookOpen /></div>}</div></section>
     <section className="recap-metrics" aria-label={c.recapStatistics}>

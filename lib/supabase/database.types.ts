@@ -252,6 +252,7 @@ export type Database = {
           run_id: string;
           read_on: string;
           check_in_only: boolean;
+          ending_page: number | null;
           pages_read: number | null;
           minutes_read: number | null;
           resulting_percent: number | null;
@@ -265,6 +266,7 @@ export type Database = {
           run_id: string;
           read_on: string;
           check_in_only?: boolean;
+          ending_page?: number | null;
           pages_read?: number | null;
           minutes_read?: number | null;
           resulting_percent?: number | null;

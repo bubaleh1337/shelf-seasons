@@ -17,9 +17,8 @@ export function ReadingDialog({ locale, books, timezone, onSaved, compact = fals
   const [bookId, setBookId] = useState(preferredBook?.id ?? "");
   const [readOn, setReadOn] = useState(localDateKey(timezone));
   const [detailed, setDetailed] = useState(false);
-  const [pagesRead, setPagesRead] = useState("");
+  const [currentPage, setCurrentPage] = useState("");
   const [minutesRead, setMinutesRead] = useState("");
-  const [percent, setPercent] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -27,7 +26,7 @@ export function ReadingDialog({ locale, books, timezone, onSaved, compact = fals
   function reset() {
     setBookId((books.find((book) => book.status === "reading") ?? books[0])?.id ?? "");
     setReadOn(localDateKey(timezone));
-    setDetailed(false); setPagesRead(""); setMinutesRead(""); setPercent(""); setNote(""); setError(false);
+    setDetailed(false); setCurrentPage(""); setMinutesRead(""); setNote(""); setError(false);
   }
 
   function handleOpen(next: boolean) {
@@ -39,12 +38,12 @@ export function ReadingDialog({ locale, books, timezone, onSaved, compact = fals
     event.preventDefault();
     if (!bookId) return;
     setBusy(true); setError(false);
-    const input = { bookId, readOn, checkInOnly: !detailed, pagesRead: detailed ? pagesRead : null, minutesRead: detailed ? minutesRead : null, resultingPercent: detailed ? percent : null, note: detailed ? note : null };
+    const input = { bookId, readOn, checkInOnly: !detailed, currentPage: detailed ? currentPage : null, minutesRead: detailed ? minutesRead : null, note: detailed ? note : null };
     try {
       const response = await fetch("/api/reading", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(input) });
       if (!response.ok) throw new Error();
-      const payload = (await response.json()) as { sessionId: string; runId: string; bookId: string };
-      onSaved({ id: payload.sessionId, runId: payload.runId, bookId: payload.bookId, readOn, checkInOnly: !detailed, pagesRead: pagesRead ? Number(pagesRead) : null, minutesRead: minutesRead ? Number(minutesRead) : null, resultingPercent: percent ? Number(percent) : null, note: note.trim() || null });
+      const payload = (await response.json()) as { sessionId: string; runId: string; bookId: string; pagesRead: number | null; minutesRead: number | null; resultingPercent: number | null; endingPage: number | null };
+      onSaved({ id: payload.sessionId, runId: payload.runId, bookId: payload.bookId, readOn, checkInOnly: !detailed, endingPage: payload.endingPage, pagesRead: payload.pagesRead, minutesRead: payload.minutesRead, resultingPercent: payload.resultingPercent, note: note.trim() || null });
       setOpen(false);
     } catch { setError(true); } finally { setBusy(false); }
   }
@@ -57,10 +56,22 @@ export function ReadingDialog({ locale, books, timezone, onSaved, compact = fals
         <label><span>{c.book}</span><select value={bookId} onChange={(event) => setBookId(event.target.value)}>{books.map((book) => <option value={book.id} key={book.id}>{book.title}{book.authors[0] ? ` — ${book.authors[0]}` : ""}</option>)}</select></label>
         <label><span>{c.date}</span><input type="date" value={readOn} max={localDateKey(timezone)} onChange={(event) => setReadOn(event.target.value)} required /></label>
         <button className="detail-toggle" type="button" onClick={() => setDetailed((value) => !value)}>{detailed ? <Check /> : <Plus />}{detailed ? c.quickCheckIn : c.details}</button>
-        {detailed && <div className="reading-details"><label><span>{c.pagesRead}</span><input type="number" min="1" value={pagesRead} onChange={(event) => setPagesRead(event.target.value)} /></label><label><span>{c.minutesRead}</span><input type="number" min="1" value={minutesRead} onChange={(event) => setMinutesRead(event.target.value)} /></label><label><span>{c.percentAfter}</span><input type="number" min="0" max="100" step="0.1" value={percent} onChange={(event) => setPercent(event.target.value)} /></label><label className="reading-note"><span>{c.note}</span><textarea maxLength={1000} rows={3} value={note} onChange={(event) => setNote(event.target.value)} /></label></div>}
+        {detailed && <ReadingDetails locale={locale} book={books.find((book) => book.id === bookId)} currentPage={currentPage} setCurrentPage={setCurrentPage} minutesRead={minutesRead} setMinutesRead={setMinutesRead} note={note} setNote={setNote} />}
         {error && <p className="form-error" role="alert">{c.error}</p>}
-        <div className="editor-actions"><Button type="button" variant="ghost" onClick={() => setOpen(false)}>{c.cancel}</Button><Button className="primary-button" type="submit" disabled={busy || (detailed && !pagesRead && !minutesRead && !percent)}>{busy && <LoaderCircle className="spin" />}{busy ? c.saving : c.saveReading}</Button></div>
+        <div className="editor-actions"><Button type="button" variant="ghost" onClick={() => setOpen(false)}>{c.cancel}</Button><Button className="primary-button" type="submit" disabled={busy || (detailed && !currentPage && !minutesRead)}>{busy && <LoaderCircle className="spin" />}{busy ? c.saving : c.saveReading}</Button></div>
       </form>}
     </DialogContent>
   </Dialog>;
+}
+
+function ReadingDetails({ locale, book, currentPage, setCurrentPage, minutesRead, setMinutesRead, note, setNote }: { locale: Locale; book?: LibraryBook; currentPage: string; setCurrentPage: (value: string) => void; minutesRead: string; setMinutesRead: (value: string) => void; note: string; setNote: (value: string) => void }) {
+  const c = appCopy[locale];
+  const page = Number(currentPage);
+  const percent = book?.pageCount && page > 0 ? Math.min(100, Math.round((page / book.pageCount) * 100)) : null;
+  return <div className="reading-details">
+    <label><span>{c.currentPage}</span><input type="number" min="1" max={book?.pageCount ?? 100000} value={currentPage} onChange={(event) => setCurrentPage(event.target.value)} />{book?.pageCount && <small>{c.currentPageHint.replace("{count}", String(book.pageCount))}</small>}</label>
+    <label><span>{c.minutesRead}</span><input type="number" min="1" value={minutesRead} onChange={(event) => setMinutesRead(event.target.value)} /></label>
+    {percent !== null && <div className="calculated-reading-progress" aria-live="polite"><span>{c.calculatedProgress}</span><strong>{percent}%</strong><i><b style={{ width: `${percent}%` }} /></i></div>}
+    <label className="reading-note"><span>{c.note}</span><textarea maxLength={1000} rows={3} value={note} onChange={(event) => setNote(event.target.value)} /></label>
+  </div>;
 }

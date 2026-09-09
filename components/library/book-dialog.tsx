@@ -38,6 +38,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [coverFileName, setCoverFileName] = useState("");
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
@@ -47,6 +48,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
       setQuery("");
       setError(false);
       setHasSearched(false);
+      setCoverFileName("");
     }
     setOpen(nextOpen);
   }
@@ -111,7 +113,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
             <label><span>{c.pages}</span><input name="pageCount" type="number" min="1" max="100000" value={draft.pageCount} onChange={(event) => field("pageCount", event.target.value)} /></label>
             <label className="span-two"><span>{c.isbn}</span><input name="isbn" maxLength={32} value={draft.isbn} onChange={(event) => field("isbn", event.target.value)} /></label>
             <label className="span-two"><span>{c.description}</span><textarea name="description" maxLength={5000} rows={3} value={draft.description} onChange={(event) => field("description", event.target.value)} /></label>
-            <label className="span-two cover-upload"><span>{c.cover}</span><input name="cover" type="file" accept="image/jpeg,image/png,image/webp" /><small>{c.coverHint}</small></label>
+            <label className="span-two cover-upload"><span>{c.cover}</span><span className="localized-file-input"><input name="cover" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setCoverFileName(event.target.files?.[0]?.name ?? "")} /><span aria-hidden="true">{c.chooseCover}</span><em>{coverFileName || c.noCoverChosen}</em></span><small>{c.coverHint}</small></label>
             {book?.coverUrl && <label className="remove-cover span-two"><input type="checkbox" checked={draft.removeCover} onChange={(event) => field("removeCover", event.target.checked)} />{c.removeCover}</label>}
           </div>
           {error && <p className="form-error" role="alert">{c.error}</p>}

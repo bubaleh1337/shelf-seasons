@@ -57,10 +57,16 @@ export async function PUT(request: NextRequest, context: Context) {
   const { error } = await supabase.from("library_books").update({ ...metadata, cover_path: coverPath }).eq("id", bookId).eq("user_id", userId);
   if (error) return NextResponse.json({ error: "save_failed" }, { status: 400 });
   let updated;
-  try {
-    updated = await setBookStatus(supabase, bookId, status ?? "want");
-  } catch {
-    return NextResponse.json({ error: "status_sync_failed" }, { status: 400 });
+  if ((status ?? "want") === current.status) {
+    const { data: unchangedStatusRow, error: reloadError } = await supabase.from("library_books").select().eq("id", bookId).eq("user_id", userId).single();
+    if (reloadError || !unchangedStatusRow) return NextResponse.json({ error: "save_failed" }, { status: 400 });
+    updated = unchangedStatusRow;
+  } else {
+    try {
+      updated = await setBookStatus(supabase, bookId, status ?? "want");
+    } catch {
+      return NextResponse.json({ error: "status_sync_failed" }, { status: 400 });
+    }
   }
   return NextResponse.json({ book: await bookToDto(supabase, updated) });
 }

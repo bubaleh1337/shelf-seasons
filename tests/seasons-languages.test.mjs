@@ -56,7 +56,27 @@ test("personal app exposes seasonal shelves, readable calendar titles and home a
   assert.match(wallpaper, /vignette-tree/);
   assert.doesNotMatch(css, /\.shelf-main::before\s*\{[^}]*position:\s*fixed/);
   assert.match(css, /\.seasonal-backdrop\s*\{[^}]*position:\s*absolute/);
+  assert.match(css, /\.seasonal-garland\s*\{[^}]*left:\s*50%/);
+  assert.match(css, /\.seasonal-cozy-vignette\s*\{[^}]*bottom:\s*76px/);
   assert.doesNotMatch(css, /\.seasonal-(?:backdrop|wallpaper|cozy-vignette)\s*\{[^}]*position:\s*fixed/);
+});
+
+test("book editing keeps an unchanged status from creating another completed run", async () => {
+  const route = await read("app/api/books/[bookId]/route.ts");
+  assert.match(route, /\(status \?\? "want"\) === current\.status/);
+  assert.match(route, /unchangedStatusRow/);
+});
+
+test("cover picker is localized instead of exposing native browser text", async () => {
+  const [dialog, copy] = await Promise.all([
+    read("components/library/book-dialog.tsx"),
+    read("lib/app-copy.ts"),
+  ]);
+  assert.match(dialog, /localized-file-input/);
+  assert.match(dialog, /c\.chooseCover/);
+  assert.match(dialog, /c\.noCoverChosen/);
+  assert.match(copy, /chooseCover: "Выбрать обложку"/);
+  assert.match(copy, /noCoverChosen: "Файл не выбран\."/);
 });
 
 test("book search resolves translated titles and cover storage has provider fallback", async () => {

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { longestStreakInPeriod, mostActiveWeek, periodBounds, recapSeriesCandidates, summarizeRecapMetrics } from "../lib/recaps/period.ts";
+import { longestStreakInPeriod, mostActiveWeek, periodBounds, recapSeriesCandidates, summarizeRecapMetrics, uniqueRecapBooks } from "../lib/recaps/period.ts";
 
-const session = (id, readOn, pagesRead = null, minutesRead = null) => ({ id, runId: "run", bookId: "book", readOn, checkInOnly: pagesRead === null && minutesRead === null, pagesRead, minutesRead, resultingPercent: null, note: null });
+const session = (id, readOn, pagesRead = null, minutesRead = null) => ({ id, runId: "run", bookId: "book", readOn, checkInOnly: pagesRead === null && minutesRead === null, endingPage: null, pagesRead, minutesRead, resultingPercent: null, note: null });
 
 test("recap periods require canonical month and year starts", () => {
   assert.deepEqual(periodBounds("month", "2026-09-01"), { start: "2026-09-01", end: "2026-10-01" });
@@ -26,6 +26,13 @@ test("recap metrics count unique days, details and the longest streak", () => {
 test("only series with completed books in the period become recap choices", () => {
   const series = [{ id: "dark-tower", name: "The Dark Tower", entries: [{ bookId: "one" }, { bookId: "two" }, { bookId: null }] }, { id: "empty", name: "Empty", entries: [{ bookId: "three" }] }];
   assert.deepEqual(recapSeriesCandidates(series, ["one", "two"]), [{ id: "dark-tower", name: "The Dark Tower", completedInPeriod: 2, totalVolumes: 3 }]);
+});
+
+test("recap book grids and selections contain one card per library book", () => {
+  const book = { id: "book-one", title: "One", authors: [] };
+  const original = { runId: "original", book, finishedOn: "2026-09-01", isReread: false, rating: null, nomination: null };
+  const accidentalRepeat = { runId: "duplicate", book, finishedOn: "2026-09-08", isReread: true, rating: null, nomination: null };
+  assert.deepEqual(uniqueRecapBooks([accidentalRepeat, original]), [original]);
 });
 
 test("recap migration validates eligibility and isolates selections", async () => {

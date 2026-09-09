@@ -78,7 +78,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .season-sun-ring { fill: none; stroke: color-mix(in srgb,var(--season-accent),transparent 48%); stroke-width: 4; }
 :root[data-theme="dark"] .seasonal-wallpaper { opacity: .12; }
 :root[data-theme="dark"] .seasonal-paper-texture { opacity: .12; }
-.seasonal-cozy-vignette { position: absolute; top: 600px; right: -54px; width: clamp(290px,34vw,520px); height: auto; opacity: .48; }
+.seasonal-garland { position: absolute; top: 84px; left: 50%; width: min(760px,68vw); height: auto; transform: translateX(-50%); fill: color-mix(in srgb,var(--season-accent),#f5d48b 36%); stroke: var(--season-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; opacity: .38; }
+.seasonal-cozy-vignette { position: absolute; right: max(16px,3vw); bottom: 76px; width: clamp(300px,34vw,520px); height: auto; opacity: .48; }
 .vignette-shadow { fill: color-mix(in srgb,var(--season-main),transparent 82%); }
 .vignette-books { filter: drop-shadow(0 8px 9px rgba(52,34,20,.12)); }
 .vignette-book-cover { fill: color-mix(in srgb,var(--season-main),#74452e 30%); stroke: color-mix(in srgb,var(--season-main),black 16%); stroke-width: 2; }
@@ -94,6 +95,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .vignette-pumpkins { fill: color-mix(in srgb,var(--season-accent),#d9823d 28%); stroke: var(--season-main); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
 .vignette-tree { fill: color-mix(in srgb,var(--season-main),#244b39 22%); stroke: var(--season-main); stroke-width: 2; }
 :root[data-theme="dark"] .seasonal-cozy-vignette { opacity: .24; }
+:root[data-theme="dark"] .seasonal-garland { opacity: .2; }
 .shelf-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; display: flex; width: 250px; flex-direction: column; padding: 30px 22px 24px; color: #f7f0e7; background: linear-gradient(165deg,color-mix(in srgb,var(--season-main,#263d32),#17241d 24%),#263d32 78%); border-right: 1px solid rgba(255,255,255,.08); }
 :root[data-theme="dark"] .shelf-sidebar { background: #151d19; }
 .brand { display: flex; align-items: center; gap: 12px; font-family: "Fraunces", Georgia, serif; font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
@@ -724,13 +726,15 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .seasonal-wallpaper { width: 510px; opacity: .2; }
   .seasonal-wallpaper-top { top: 430px; right: -285px; }
   .seasonal-wallpaper-bottom { bottom: 170px; left: -300px; }
-  .seasonal-cozy-vignette { top: 720px; right: -105px; width: 360px; opacity: .35; }
+  .seasonal-garland { top: 82px; width: 82vw; opacity: .28; }
+  .seasonal-cozy-vignette { right: -70px; bottom: 105px; width: 360px; opacity: .35; }
   .season-shelf-book-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 @media (max-width: 560px) {
   .seasonal-wallpaper-top { top: 520px; right: -320px; }
   .seasonal-wallpaper-bottom { left: -335px; }
-  .seasonal-cozy-vignette { top: 850px; right: -125px; width: 330px; opacity: .28; }
+  .seasonal-garland { top: 78px; width: 94vw; opacity: .22; }
+  .seasonal-cozy-vignette { right: -92px; bottom: 112px; width: 330px; opacity: .28; }
   .seasonal-library { gap: 28px; }
   .seasonal-library-intro { align-items: flex-start; padding: 15px 16px; }
   .seasonal-library-intro h2 { font-size: 1.3rem; }
@@ -785,7 +789,10 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .editor-grid input:not([type="checkbox"]),.editor-grid select,.editor-grid textarea { width: 100%; min-height: 44px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; color: var(--ink); background: var(--surface); outline: 0; }
 .editor-grid textarea { resize: vertical; }
 .editor-grid small { color: var(--ink-soft); font-weight: 500; }
-.cover-upload input { padding: 8px !important; }
+.localized-file-input { position: relative; display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; min-height: 46px; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.localized-file-input input { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; padding: 0 !important; opacity: 0; cursor: pointer; }
+.localized-file-input > span { align-self: stretch; display: flex; align-items: center; padding: 0 13px; border-right: 1px solid var(--border); color: var(--green-deep); background: var(--green-soft); font-size: .73rem; font-weight: 800; }
+.localized-file-input > em { min-width: 0; overflow: hidden; padding: 0 12px; color: var(--ink-soft); font-size: .73rem; font-style: normal; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .remove-cover { display: flex !important; grid-template-columns: auto 1fr; align-items: center; min-height: 40px; }
 .remove-cover input { width: 18px; height: 18px; }
 .editor-actions { display: flex; justify-content: flex-end; gap: 9px; }
@@ -802,6 +809,10 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .reading-now-card > .personal-cover { width: 180px; }
 .reading-now-card h2 { margin: 8px 0 5px; font-family: "Fraunces",Georgia,serif; font-size: clamp(1.8rem,3vw,2.6rem); line-height: 1; }
 .reading-now-card > div > p:not(.eyebrow) { margin: 0 0 22px; color: var(--ink-soft); }
+.reading-progress-summary { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 12px; margin: -8px 0 20px; color: var(--ink-soft); font-size: .75rem; }
+.reading-progress-summary strong { color: var(--green); font-size: .78rem; }
+.reading-progress-summary > i { grid-column: 1 / -1; height: 7px; overflow: hidden; border-radius: 999px; background: var(--surface-quiet); }
+.reading-progress-summary > i > b { display: block; height: 100%; border-radius: inherit; background: var(--green); transition: width .25s ease; }
 .reading-now-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .reading-now-actions button { min-height: 44px; }
 .reading-now-empty { grid-template-columns: 180px 1fr; }
@@ -840,7 +851,12 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .reading-entry-form select,.reading-entry-form input,.reading-entry-form textarea { width: 100%; min-height: 44px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; color: var(--ink); background: var(--surface); }
 .detail-toggle { display: flex; min-height: 44px; align-items: center; justify-content: center; gap: 8px; border: 1px dashed var(--border); border-radius: 11px; color: var(--green-deep); background: var(--green-soft); cursor: pointer; font-weight: 750; }
 .detail-toggle svg { width: 17px; }
-.reading-details { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.reading-details { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+.reading-details label small { color: var(--ink-soft); font-weight: 500; }
+.calculated-reading-progress { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 7px 12px; padding: 11px 12px; border-radius: 10px; color: var(--ink-soft); background: var(--surface-quiet); font-size: .75rem; }
+.calculated-reading-progress strong { color: var(--green-deep); }
+.calculated-reading-progress i { grid-column: 1 / -1; height: 7px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb,var(--border),transparent 30%); }
+.calculated-reading-progress b { display: block; height: 100%; border-radius: inherit; background: var(--green); }
 .reading-details .reading-note { grid-column: 1 / -1; }
 .reading-no-books { display: grid; min-height: 180px; place-items: center; align-content: center; color: var(--ink-soft); text-align: center; }
 .reading-no-books svg { width: 36px; height: 36px; }

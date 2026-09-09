@@ -32,7 +32,7 @@ Open the local address printed by the development server.
 
 The default address is `http://localhost:3000/ru/app`.
 
-For the reading tracker, apply `supabase/migrations/202609050003_reading_tracker.sql` once after the personal-library migration, then apply `supabase/migrations/202609050004_library_status_sync.sql`. Version 0.6.0 additionally requires `supabase/migrations/202609060001_completion_and_goals.sql`, followed by `supabase/migrations/202609070001_series.sql` for version 0.7.0, `supabase/migrations/202609070002_recaps.sql` for version 0.8.0, `supabase/migrations/202609070003_account_controls.sql` for version 0.9.0 and `supabase/migrations/202609070004_seasons_and_languages.sql` for version 0.10.0.
+For the reading tracker, apply `supabase/migrations/202609050003_reading_tracker.sql` once after the personal-library migration, then apply `supabase/migrations/202609050004_library_status_sync.sql`. Version 0.6.0 additionally requires `supabase/migrations/202609060001_completion_and_goals.sql`, followed by `supabase/migrations/202609070001_series.sql` for version 0.7.0, `supabase/migrations/202609070002_recaps.sql` for version 0.8.0, `supabase/migrations/202609070003_account_controls.sql` for version 0.9.0, `supabase/migrations/202609070004_seasons_and_languages.sql` for version 0.10.0 and `supabase/migrations/202609090001_reading_progress_and_recap_deduplication.sql` for version 0.14.0.
 
 Verification:
 
@@ -73,4 +73,4 @@ Read in this order before implementation work:
 
 ## Current stage
 
-Version 0.13.0 includes the private personal library, reliable Google OAuth, translated-title book search, provider and custom covers, reading sessions, readable calendar cards, streaks, book completion, yearly goals, user-owned ordered series, physical seasonal shelves with spine-first books, atmospheric original seasonal backgrounds, reading-language history, real monthly/yearly recaps, developer contacts, project support, account export and protected account deletion.
+Version 0.14.0 includes the private personal library, reliable Google OAuth, translated-title book search, provider and custom covers, current-page reading progress, readable calendar cards, streaks, book completion, yearly goals, user-owned ordered series, physical seasonal shelves with spine-first books, responsive original seasonal backgrounds, deduplicated monthly/yearly recaps, reading-language history, developer contacts, project support, account export and protected account deletion.

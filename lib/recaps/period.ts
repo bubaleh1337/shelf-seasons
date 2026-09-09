@@ -1,6 +1,6 @@
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
 import type { BookSeries } from "@/lib/series/types";
-import type { RecapPeriodType, RecapSeriesCandidate } from "@/lib/recaps/types";
+import type { RecapBookCandidate, RecapPeriodType, RecapSeriesCandidate } from "@/lib/recaps/types";
 
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -31,6 +31,15 @@ export function shiftPeriod(periodType: RecapPeriodType, periodStart: string, am
   if (periodType === "month") date.setUTCMonth(date.getUTCMonth() + amount);
   else date.setUTCFullYear(date.getUTCFullYear() + amount);
   return date.toISOString().slice(0, 10);
+}
+
+export function uniqueRecapBooks(candidates: RecapBookCandidate[]) {
+  const unique = new Map<string, RecapBookCandidate>();
+  for (const candidate of candidates) {
+    const existing = unique.get(candidate.book.id);
+    if (!existing || (existing.isReread && !candidate.isReread)) unique.set(candidate.book.id, candidate);
+  }
+  return [...unique.values()].sort((a, b) => b.finishedOn.localeCompare(a.finishedOn));
 }
 
 export function longestStreakInPeriod(readingDates: string[]) {

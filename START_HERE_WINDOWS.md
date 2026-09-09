@@ -1,4 +1,4 @@
-# Shelf Seasons 0.13.0 — дневник чтения на Windows
+# Shelf Seasons 0.14.0 — дневник чтения на Windows
 
 Проект уже настроен на Supabase `shelf-seasons-dev`. Секрет Google OAuth в
 архиве не нужен: он должен оставаться только в Google Cloud и Supabase.
@@ -8,7 +8,10 @@
 1. Откройте **Supabase → SQL Editor → New query**.
 2. Если миграции прошлых версий ещё не запускались, примените их по порядку из
    `supabase/migrations`.
-3. Для обновления с версии 0.12.0 на 0.13.0 новая SQL-миграция не нужна.
+3. Для обновления на 0.14.0 целиком выполните файл
+   `supabase/migrations/202609090001_reading_progress_and_recap_deduplication.sql`.
+   Он добавляет текущую страницу и автоматический расчёт процентов. Старые
+   записи не удаляются; дубликаты безопасно скрываются на уровне итогов.
 
 ## 2. Распакуйте проект
 
@@ -19,7 +22,7 @@
 
 ```powershell
 Set-Location P:\Projects\shelf-seasons\shelf-seasons
-.\UPDATE_TO_0.13.0.ps1
+.\UPDATE_TO_0.14.0.ps1
 npm ci
 npm run release:check
 npm run dev
@@ -27,14 +30,14 @@ npm run dev
 
 Откройте `http://localhost:3000/ru/sign-in` и войдите через Google.
 
-После входа проверьте атмосферный фон текущего сезона, прокрутите страницу и
-убедитесь, что украшения не перекрывают интерфейс.
+После входа проверьте фон на компьютере и телефоне, внесите текущую страницу
+через «Отметить чтение» и откройте месячные и годовые «Итоги».
 
 ## 4. Отправьте обновление в GitHub
 
 ```powershell
 git add -A
-git commit -m "feat: add atmospheric seasonal backgrounds"
+git commit -m "fix: reading progress recaps and seasonal layout"
 git push origin main
 ```
 

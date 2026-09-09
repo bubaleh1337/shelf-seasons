@@ -39,13 +39,13 @@ export async function POST(request: NextRequest) {
     p_book_id: input.bookId,
     p_read_on: input.readOn,
     p_check_in_only: input.checkInOnly,
-    p_pages_read: input.pagesRead,
+    p_pages_read: input.currentPage,
     p_minutes_read: input.minutesRead,
-    p_resulting_percent: input.resultingPercent,
+    p_resulting_percent: null,
     p_note: input.note,
   });
   if (error || !sessionId) return NextResponse.json({ error: "save_failed" }, { status: 400 });
-  const { data: session } = await supabase.from("reading_sessions").select("run_id").eq("id", sessionId).eq("user_id", userId).single();
+  const { data: session } = await supabase.from("reading_sessions").select("run_id,pages_read,minutes_read,resulting_percent,ending_page").eq("id", sessionId).eq("user_id", userId).single();
   if (!session) return NextResponse.json({ error: "save_failed" }, { status: 400 });
-  return NextResponse.json({ sessionId, runId: session.run_id, bookId: input.bookId }, { status: 201 });
+  return NextResponse.json({ sessionId, runId: session.run_id, bookId: input.bookId, pagesRead: session.pages_read, minutesRead: session.minutes_read, resultingPercent: session.resulting_percent, endingPage: session.ending_page }, { status: 201 });
 }
