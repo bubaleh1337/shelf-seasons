@@ -2,9 +2,11 @@
 
 **Your reading life, season by season.**
 
-Shelf Seasons is a cozy bilingual reading journal and visual book tracker. This repository contains the verified bilingual design and account foundation plus a real personal library and reading tracker on standard Next.js.
+Shelf Seasons is a cozy bilingual reading journal and visual book tracker built to preserve reading life over time — not just count finished books.
 
-The brand is always **Shelf Seasons**. The technical slug is always `shelf-seasons`.
+It combines a private personal library, daily reading history, calendar views, series tracking, seasonal shelves and monthly/yearly recaps in a calm, visual interface.
+
+**Live app:** https://shelf-seasons.vercel.app
 
 ## Current routes
 
