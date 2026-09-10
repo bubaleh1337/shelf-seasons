@@ -202,7 +202,7 @@ function Home({ locale, name, books, sessions, runs, goal, timezone, completionN
         <div className="streak-summary"><article><Flame /><strong>{streaks.current}</strong><span>{c.days}</span><small>{c.currentStreak}</small></article><article><Sparkles /><strong>{streaks.longest}</strong><span>{c.days}</span><small>{c.longestStreak}</small></article><article><CalendarDays /><strong>{monthDays}</strong><span>{c.readingDays}</span><small>{c.thisMonth}</small></article></div>
       </section>
       <YearlyGoalCard locale={locale} year={currentYear} goal={goal} progress={goalProgress} onSaved={onGoalSaved} />
-      <section className="recent-section"><div className="section-heading"><h2>{c.library}</h2><Link href={`/${locale}/app/library`}>{c.openLibrary}</Link></div><div className="personal-book-grid">{books.slice(0, 5).map((book) => <SimpleBookCard key={book.id} locale={locale} book={book} />)}</div></section>
+      <section className="recent-section"><div className="section-heading"><h2>{c.library}</h2><Link href={`/${locale}/app/library`}>{c.openLibrary}</Link></div><div className="personal-book-grid">{books.slice(0, 5).map((book) => <div className="home-book-card" key={book.id}><SimpleBookCard locale={locale} book={book} /><BookDialog locale={locale} book={book} onSaved={onBookSaved} trigger={<button type="button" className="home-book-card-trigger" aria-label={c.openBookDetails.replace("{title}", book.title)} />} /></div>)}</div></section>
     </>}
   </>;
 }

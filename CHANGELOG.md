@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.17.1
+
+- Made every book card in the Home library preview open the existing book editor.
+- Added full-card pointer, keyboard focus and pressed feedback without changing the separate Library link.
+- Added complete Russian and English accessible labels for opening book details.
+
 ## 0.17.0
 
 - Updated Next.js and Sharp to patched releases and removed all known production dependency vulnerabilities reported by `npm audit`.

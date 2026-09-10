@@ -25,3 +25,20 @@ test("book routes derive ownership from the authenticated session", async () => 
   assert.match(updateRoute, /\.eq\("user_id", userId\)/);
   assert.doesNotMatch(createRoute, /form\.get\("user_id"\)/);
 });
+
+test("home library preview opens each book in the existing editor", async () => {
+  const [app, copy, styles] = await Promise.all([
+    read("components/shelf-seasons-app.tsx"),
+    read("lib/app-copy.ts"),
+    read("app/globals.css"),
+  ]);
+
+  assert.match(app, /className="home-book-card"/);
+  assert.match(app, /<BookDialog locale=\{locale\} book=\{book\} onSaved=\{onBookSaved\}/);
+  assert.match(app, /className="home-book-card-trigger"/);
+  assert.match(app, /aria-label=\{c\.openBookDetails/);
+  assert.match(copy, /openBookDetails: "Open details for/);
+  assert.match(copy, /openBookDetails: "Открыть книгу/);
+  assert.match(styles, /\.home-book-card-trigger \{ position: absolute; inset: 0;/);
+  assert.match(styles, /\.home-book-card:focus-within/);
+});

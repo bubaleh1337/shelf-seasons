@@ -139,7 +139,8 @@ Exit criteria:
 
 ## Stage 7 — release hardening and closed beta
 
-Status: `0.17.0` adds bilingual legal pages, database-backed limits, patched
+Status: `0.17.1` adds direct book-editor access from the Home library preview
+after `0.17.0` introduced bilingual legal pages, database-backed limits, patched
 production dependencies, browser security headers and verified encrypted daily
 database backups. External monitoring, a separate Storage-object backup and a
 restore rehearsal in a disposable target remain release gates.
