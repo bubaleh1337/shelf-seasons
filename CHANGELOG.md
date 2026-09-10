@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.18.0
+
+- Added an inspectable yearly-goal breakdown with every counted title, completion date and reread label.
+- Added a protected way to remove an accidental duplicate reread while keeping the original completed reading history.
+- Clarified that yearly goals count completed reading runs rather than the current number of library cards.
+- Fixed the Russian `Игра престолов` search with a fast translated-title fallback through Open Library.
+- Bounded and parallelized provider requests so a slow translation service no longer exhausts the server request budget.
+- Added distinct localized messages for temporary search outages and rate limits.
+
 ## 0.17.1
 
 - Made every book card in the Home library preview open the existing book editor.

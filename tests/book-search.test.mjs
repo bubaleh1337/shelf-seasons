@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { providerLanguageToReadingLanguage, rankAndDedupeResults } from "../lib/books/search.ts";
+import { knownAlternateTitle, providerLanguageToReadingLanguage, rankAndDedupeResults } from "../lib/books/search.ts";
 
 const result = (providerId, title, language, coverUrl = null) => ({
   provider: "google_books",
@@ -36,4 +37,18 @@ test("provider languages map to reading language choices", () => {
   assert.equal(providerLanguageToReadingLanguage("rus"), "ru");
   assert.equal(providerLanguageToReadingLanguage("en"), "en");
   assert.equal(providerLanguageToReadingLanguage("de"), "other");
+});
+
+test("common Russian translated titles have a fast provider fallback", () => {
+  assert.equal(knownAlternateTitle("Игра престолов"), "A Game of Thrones");
+  assert.equal(knownAlternateTitle("  ИГРА ПРЕСТОЛОВ!  "), "A Game of Thrones");
+});
+
+test("provider fallbacks stay inside the production request budget", async () => {
+  const route = await readFile(new URL("../app/api/books/search/route.ts", import.meta.url), "utf8");
+  assert.match(route, /knownAlternateTitle\(query\)/);
+  assert.match(route, /Promise\.allSettled/);
+  assert.match(route, /AbortSignal\.timeout\(4_000\)/);
+  assert.match(route, /AbortSignal\.timeout\(2_000\)/);
+  assert.doesNotMatch(route, /AbortSignal\.timeout\(8_000\)/);
 });

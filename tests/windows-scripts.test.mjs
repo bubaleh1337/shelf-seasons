@@ -117,3 +117,10 @@ test("the 0.17.1 updater only clears generated caches", async () => {
   assert.match(script, /\.sites-runtime/);
   assert.doesNotMatch(script, /node_modules|\.git|\.env\.local/);
 });
+
+test("the 0.18.0 updater only clears generated caches", async () => {
+  const script = await readFile(new URL("../scripts/update-to-0.18.0.mjs", import.meta.url), "utf8");
+  assert.match(script, /\.next/);
+  assert.match(script, /\.sites-runtime/);
+  assert.doesNotMatch(script, /node_modules|\.git|\.env\.local/);
+});

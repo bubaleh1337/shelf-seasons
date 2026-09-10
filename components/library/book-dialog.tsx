@@ -37,6 +37,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
   const [showForm, setShowForm] = useState(Boolean(book));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [coverFileName, setCoverFileName] = useState("");
 
@@ -47,6 +48,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
       setResults([]);
       setQuery("");
       setError(false);
+      setSearchError(null);
       setHasSearched(false);
       setCoverFileName("");
     }
@@ -56,14 +58,18 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
   async function searchBooks(event: React.FormEvent) {
     event.preventDefault();
     if (query.trim().length < 2) return;
-    setBusy(true); setError(false); setHasSearched(false);
+    setBusy(true); setError(false); setSearchError(null); setHasSearched(false);
     try {
       const response = await fetch(`/api/books/search?q=${encodeURIComponent(query.trim())}&locale=${locale}`);
-      if (!response.ok) throw new Error();
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as { error?: string } | null;
+        setSearchError(response.status === 429 || payload?.error === "too_many_requests" ? c.searchRateLimited : c.searchUnavailable);
+        return;
+      }
       const payload = (await response.json()) as { results: BookSearchResult[] };
       setResults(payload.results);
       setHasSearched(true);
-    } catch { setError(true); } finally { setBusy(false); }
+    } catch { setSearchError(c.searchUnavailable); } finally { setBusy(false); }
   }
 
   async function saveBook(event: React.FormEvent<HTMLFormElement>) {
@@ -94,7 +100,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
         <DialogHeader><DialogTitle>{book ? c.editTitle : c.addTitle}</DialogTitle><DialogDescription>{book ? c.libraryLead : c.findBook}</DialogDescription></DialogHeader>
         {!showForm ? <div className="book-search-step">
           <form className="book-search-box" onSubmit={searchBooks}><Search aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={c.findBook} autoFocus /><Button type="submit" disabled={busy || query.trim().length < 2}>{busy ? c.searching : c.search}</Button></form>
-          {error && <p className="form-error" role="alert">{c.error}</p>}
+          {searchError && <p className="form-error" role="alert">{searchError}</p>}
           <div className="search-results">
             {results.map((result) => <button type="button" key={`${result.provider}:${result.providerId}`} onClick={() => { setDraft(fromResult(result)); setShowForm(true); }}><LibraryBookCover book={{ ...result, coverUrl: result.coverUrl }} /><span><strong>{result.title}</strong><small>{result.authors.join(", ") || "—"}</small><em>{[result.publishedYear, result.pageCount ? `${result.pageCount} p.` : null].filter(Boolean).join(" · ")}</em></span><span>{c.choose}</span></button>)}
           </div>

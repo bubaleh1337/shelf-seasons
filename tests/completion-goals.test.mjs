@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { calculateGoalProgress } from "../lib/reading/goals.ts";
+import { calculateGoalProgress, selectGoalRuns } from "../lib/reading/goals.ts";
 
 const baseRun = {
   bookId: "book",
@@ -34,6 +34,18 @@ test("yearly goal can exclude rereads", () => {
   assert.equal(calculateGoalProgress(runs, null), 0);
 });
 
+test("goal breakdown uses the same runs as the displayed total", () => {
+  const runs = [
+    { ...baseRun, id: "earlier", isReread: false, finishedOn: "2026-01-02" },
+    { ...baseRun, id: "latest", isReread: true, finishedOn: "2026-09-06" },
+    { ...baseRun, id: "other-year", isReread: false, finishedOn: "2025-12-31" },
+  ];
+  const goal = { year: 2026, targetBooks: 12, includeRereads: true };
+  const selected = selectGoalRuns(runs, goal);
+  assert.deepEqual(selected.map((run) => run.id), ["latest", "earlier"]);
+  assert.equal(calculateGoalProgress(runs, goal), selected.length);
+});
+
 test("completion migration validates ratings, owns nominations, and is idempotent", async () => {
   const sql = await readFile(new URL("../supabase/migrations/202609060001_completion_and_goals.sql", import.meta.url), "utf8");
   assert.match(sql, /rating between 0\.5 and 5/i);
@@ -55,4 +67,21 @@ test("completion and goal interfaces use authenticated application routes", asyn
   assert.match(goal, /eq\("user_id", userId\)|user_id: userId/);
   assert.match(app, /FinishBookDialog/);
   assert.match(app, /YearlyGoalCard/);
+});
+
+test("the yearly goal exposes every counted run with bilingual context", async () => {
+  const [card, copy, removeRoute] = await Promise.all([
+    readFile(new URL("../components/reading/yearly-goal-card.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/app-copy.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/reading/runs/[runId]/route.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(card, /selectGoalRuns/);
+  assert.match(card, /countedRuns\.map/);
+  assert.match(card, /goal-reread-badge/);
+  assert.match(copy, /View \{count\} reads/);
+  assert.match(copy, /Посмотреть \{count\} чтений/);
+  assert.match(removeRoute, /requireUser/);
+  assert.match(removeRoute, /eq\("user_id", userId\)/);
+  assert.match(removeRoute, /!run\.is_reread/);
+  assert.match(removeRoute, /count < 2/);
 });

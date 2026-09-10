@@ -171,6 +171,10 @@ Constraints:
 
 Progress is computed from completed runs. It is not stored in this table.
 
+The goal interface exposes the exact completed runs behind the total. A reader
+may remove an erroneous reread only while another completed run for that book
+remains, so cleaning legacy duplicates cannot erase the sole completion.
+
 ### 3.6 `series`
 
 ```text

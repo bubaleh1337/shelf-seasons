@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  knownAlternateTitle,
   rankAndDedupeResults,
   type RankedBookSearchResult,
 } from "@/lib/books/search";
@@ -40,7 +41,7 @@ async function searchGoogle(query: string, language?: "ru" | "en") {
     ...(language ? { langRestrict: language } : {}),
   }).toString();
   const response = await fetch(identifyGoogleBooksRequest(url), {
-    signal: AbortSignal.timeout(8_000),
+    signal: AbortSignal.timeout(4_000),
     next: { revalidate: 3600 },
   });
   if (!response.ok) return [];
@@ -76,7 +77,7 @@ async function searchOpenLibrary(query: string) {
       "key,title,author_name,first_publish_year,isbn,cover_i,number_of_pages_median,language",
   }).toString();
   const response = await fetch(url, {
-    signal: AbortSignal.timeout(8_000),
+    signal: AbortSignal.timeout(4_000),
     next: { revalidate: 3600 },
   });
   if (!response.ok) return [];
@@ -122,33 +123,19 @@ type WikidataEntitiesPayload = {
   entities?: Record<string, { labels?: Record<string, { value: string }>; aliases?: Record<string, Array<{ value: string }>> }>;
 };
 
-const knownRussianTitles: Record<string, string> = {
-  "стрелок": "The Gunslinger",
-  "извлечение троих": "The Drawing of the Three",
-  "бесплодные земли": "The Waste Lands",
-  "колдун и кристалл": "Wizard and Glass",
-  "ветер сквозь замочную скважину": "The Wind Through the Keyhole",
-  "волки кальи": "Wolves of the Calla",
-  "песнь сюзанны": "Song of Susannah",
-  "темная башня": "The Dark Tower",
-  "тёмная башня": "The Dark Tower",
-};
-
 async function translatedTitleQueries(query: string, locale: "ru" | "en") {
-  const knownTitle = knownRussianTitles[query.toLocaleLowerCase().trim()];
-  const known = knownTitle ? [knownTitle] : [];
   const searchUrl = new URL("https://www.wikidata.org/w/api.php");
   searchUrl.search = new URLSearchParams({ action: "wbsearchentities", format: "json", language: locale, uselang: locale, type: "item", limit: "4", search: query }).toString();
-  const searchResponse = await fetch(searchUrl, { headers: { "User-Agent": "ShelfSeasons/0.10 (https://shelf-seasons.vercel.app)" }, signal: AbortSignal.timeout(5_000), next: { revalidate: 86_400 } }).catch(() => null);
-  if (!searchResponse?.ok) return known;
+  const searchResponse = await fetch(searchUrl, { headers: { "User-Agent": "ShelfSeasons/0.18 (https://shelf-seasons.vercel.app)" }, signal: AbortSignal.timeout(2_000), next: { revalidate: 86_400 } }).catch(() => null);
+  if (!searchResponse?.ok) return [];
   const search = (await searchResponse.json()) as WikidataSearchPayload;
   const ids = (search.search ?? []).map((item) => item.id).filter(Boolean);
-  if (!ids.length) return known;
+  if (!ids.length) return [];
 
   const entitiesUrl = new URL("https://www.wikidata.org/w/api.php");
   entitiesUrl.search = new URLSearchParams({ action: "wbgetentities", format: "json", ids: ids.join("|"), props: "labels|aliases", languages: "ru|en" }).toString();
-  const entitiesResponse = await fetch(entitiesUrl, { headers: { "User-Agent": "ShelfSeasons/0.10 (https://shelf-seasons.vercel.app)" }, signal: AbortSignal.timeout(5_000), next: { revalidate: 86_400 } }).catch(() => null);
-  if (!entitiesResponse?.ok) return known;
+  const entitiesResponse = await fetch(entitiesUrl, { headers: { "User-Agent": "ShelfSeasons/0.18 (https://shelf-seasons.vercel.app)" }, signal: AbortSignal.timeout(2_000), next: { revalidate: 86_400 } }).catch(() => null);
+  if (!entitiesResponse?.ok) return [];
   const payload = (await entitiesResponse.json()) as WikidataEntitiesPayload;
   const values = Object.values(payload.entities ?? {}).flatMap((entity) => [
     entity.labels?.ru?.value,
@@ -157,7 +144,7 @@ async function translatedTitleQueries(query: string, locale: "ru" | "en") {
     ...(entity.aliases?.en ?? []).slice(0, 2).map((alias) => alias.value),
   ]).filter((value): value is string => Boolean(value));
   const normalizedQuery = query.toLocaleLowerCase().trim();
-  return [...new Set([...known, ...values])].filter((value) => value.toLocaleLowerCase().trim() !== normalizedQuery).slice(0, 2);
+  return [...new Set(values)].filter((value) => value.toLocaleLowerCase().trim() !== normalizedQuery).slice(0, 2);
 }
 
 export async function GET(request: NextRequest) {
@@ -174,15 +161,25 @@ export async function GET(request: NextRequest) {
   }
 
   const titleQuery = `intitle:\"${query.replaceAll('"', "")}\"`;
-  const [googleTitle, googleGeneral, openLibrary, translatedTitles] = await Promise.allSettled([
-    searchGoogle(titleQuery, locale),
-    searchGoogle(query),
-    searchOpenLibrary(query),
-    translatedTitleQueries(query, locale),
+  const knownAlternate = knownAlternateTitle(query);
+  const [firstAttempts, translatedAlternates] = await Promise.all([
+    Promise.allSettled([
+      searchGoogle(titleQuery, locale),
+      searchGoogle(query),
+      searchOpenLibrary(query),
+      ...(knownAlternate
+        ? [searchGoogle(`intitle:\"${knownAlternate}\"`), searchOpenLibrary(knownAlternate)]
+        : []),
+    ]),
+    knownAlternate ? Promise.resolve([]) : translatedTitleQueries(query, locale).catch(() => []),
   ]);
-  const directResults: RankedBookSearchResult[] = [googleTitle, googleGeneral, openLibrary].flatMap((attempt) => attempt.status === "fulfilled" ? attempt.value : []);
-  const alternateQueries = translatedTitles.status === "fulfilled" ? translatedTitles.value : [];
-  const translatedAttempts = await Promise.allSettled(alternateQueries.flatMap((alternate) => [searchGoogle(`intitle:\"${alternate.replaceAll('"', '')}\"`), searchOpenLibrary(alternate)]));
+  const directResults: RankedBookSearchResult[] = firstAttempts.flatMap((attempt) => attempt.status === "fulfilled" ? attempt.value : []);
+  const translatedAttempts = await Promise.allSettled(
+    (directResults.length ? [] : translatedAlternates).flatMap((alternate) => [
+      searchGoogle(`intitle:\"${alternate.replaceAll('"', "")}\"`),
+      searchOpenLibrary(alternate),
+    ]),
+  );
   const translatedResults = translatedAttempts.flatMap((attempt) => attempt.status === "fulfilled" ? attempt.value : []);
   return NextResponse.json({
     results: rankAndDedupeResults(query, locale, [...directResults, ...translatedResults]),

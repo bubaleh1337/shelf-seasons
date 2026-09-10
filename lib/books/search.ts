@@ -15,6 +15,23 @@ const normalize = (value: string) =>
 
 const usesCyrillic = (value: string) => /\p{Script=Cyrillic}/u.test(value);
 
+const alternateTitles: Record<string, string> = {
+  "бесплодные земли": "The Waste Lands",
+  "ветер сквозь замочную скважину": "The Wind Through the Keyhole",
+  "волки кальи": "Wolves of the Calla",
+  "игра престолов": "A Game of Thrones",
+  "извлечение троих": "The Drawing of the Three",
+  "колдун и кристалл": "Wizard and Glass",
+  "песнь сюзанны": "Song of Susannah",
+  "стрелок": "The Gunslinger",
+  "темная башня": "The Dark Tower",
+  "тёмная башня": "The Dark Tower",
+};
+
+export function knownAlternateTitle(query: string) {
+  return alternateTitles[normalize(query)] ?? null;
+}
+
 function scoreResult(
   query: string,
   locale: Locale,

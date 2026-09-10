@@ -18,7 +18,6 @@ import { appCopy } from "@/lib/app-copy";
 import { selectCurrentBook } from "@/lib/books/current";
 import type { LibraryBook, LibraryStatus } from "@/lib/books/types";
 import { calculateStreaks, localDateKey } from "@/lib/reading/dates";
-import { calculateGoalProgress } from "@/lib/reading/goals";
 import type { ReadingRun, ReadingSession, YearlyGoal } from "@/lib/reading/types";
 import type { BookSeries } from "@/lib/series/types";
 import { seasonFromDateKey, seasonSymbol, type BookSeason } from "@/lib/seasons";
@@ -99,6 +98,7 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
     setBooks((current) => current.map((book) => book.id === run.bookId ? { ...book, status: "read" } : book));
     setCompletionNotice(true);
   };
+  const removeRun = (runId: string) => setRuns((current) => current.filter((run) => run.id !== runId));
   const saveSeries = (saved: BookSeries) => setSeriesItems((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
   const deleteSeries = (seriesId: string) => setSeriesItems((current) => current.filter((item) => item.id !== seriesId));
   const displayName = readerName?.trim() || "Shelf Seasons";
@@ -116,7 +116,7 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
       <SeasonalPageBackdrop season={currentSeason} />
       <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><LanguageSwitch currentLocale={locale} targetLocale={locale === "ru" ? "en" : "ru"} section={active} className="locale-switch" /><Link className={cn("theme-button mobile-settings-link", active === "settings" && "is-active")} href={`/${locale}/app/settings`} aria-label={c.settings}><UtilityLinkIcon icon={Settings} label={c.settings} /></Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
       <div className={cn("page-wrap", (active === "library" || active === "series" || active === "recaps") && "page-wrap-wide")}>
-        {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} />}
+        {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} onRunRemoved={removeRun} />}
         {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} currentSeason={currentSeason} onSaved={saveBook} />}
         {active === "calendar" && <ReadingCalendar locale={locale} books={books} sessions={sessions} timezone={timezone} setSessions={setSessions} onSessionSaved={saveSession} />}
         {active === "series" && <SeriesPage locale={locale} books={books} items={seriesItems} onSaved={saveSeries} onDeleted={deleteSeries} onBookSaved={saveBook} />}
@@ -181,7 +181,7 @@ function PageIntro({ title, lead, action }: { title: string; lead: string; actio
   return <header className="page-intro"><div><h1>{title}</h1><p>{lead}</p></div>{action}</header>;
 }
 
-function Home({ locale, name, books, sessions, runs, goal, timezone, completionNotice, onBookSaved, onSessionSaved, onRunFinished, onGoalSaved }: { locale: Locale; name: string; books: LibraryBook[]; sessions: ReadingSession[]; runs: ReadingRun[]; goal: YearlyGoal | null; timezone: string; completionNotice: boolean; onBookSaved: (book: LibraryBook) => void; onSessionSaved: (session: ReadingSession) => void; onRunFinished: (run: ReadingRun) => void; onGoalSaved: (goal: YearlyGoal) => void }) {
+function Home({ locale, name, books, sessions, runs, goal, timezone, completionNotice, onBookSaved, onSessionSaved, onRunFinished, onGoalSaved, onRunRemoved }: { locale: Locale; name: string; books: LibraryBook[]; sessions: ReadingSession[]; runs: ReadingRun[]; goal: YearlyGoal | null; timezone: string; completionNotice: boolean; onBookSaved: (book: LibraryBook) => void; onSessionSaved: (session: ReadingSession) => void; onRunFinished: (run: ReadingRun) => void; onGoalSaved: (goal: YearlyGoal) => void; onRunRemoved: (runId: string) => void }) {
   const c = appCopy[locale];
   const firstName = name === "Shelf Seasons" ? "" : `, ${name.split(" ")[0]}`;
   const today = localDateKey(timezone);
@@ -193,7 +193,6 @@ function Home({ locale, name, books, sessions, runs, goal, timezone, completionN
   const pageProgress = currentRun?.currentPosition !== null && currentRun?.currentPosition !== undefined && currentBook?.pageCount && currentRun.totalUnits === currentBook.pageCount ? Math.min(currentBook.pageCount, Number(currentRun.currentPosition)) : null;
   const progressPercent = pageProgress !== null && currentBook?.pageCount ? Math.round((pageProgress / currentBook.pageCount) * 100) : currentRun?.totalUnits === 100 && currentRun.currentPosition !== null ? Math.round(Number(currentRun.currentPosition)) : null;
   const currentYear = Number(today.slice(0, 4));
-  const goalProgress = calculateGoalProgress(runs, goal);
   return <><PageIntro title={`${c.greeting}${firstName}`} lead={c.homeLead} action={<BookDialog locale={locale} onSaved={onBookSaved} />} />
     {completionNotice && <div className="success-banner" role="status"><CheckCircle2 />{c.completedMessage}</div>}
     {books.length === 0 ? <section className="personal-empty-hero"><BookHeart /><h2>{c.emptyHome}</h2><p>{c.emptyHomeLead}</p><BookDialog locale={locale} onSaved={onBookSaved} /></section> : <>
@@ -201,7 +200,7 @@ function Home({ locale, name, books, sessions, runs, goal, timezone, completionN
         {currentBook ? <article className="reading-now-card"><LibraryBookCover book={currentBook} /><div><p className="eyebrow">{c.reading}</p><h2>{currentBook.title}</h2><p>{currentBook.authors.join(", ") || "—"}</p>{progressPercent !== null && <div className="reading-progress-summary"><span>{pageProgress !== null && currentBook.pageCount ? c.lastPage.replace("{page}", String(pageProgress)).replace("{total}", String(currentBook.pageCount)) : c.readingProgress}</span><strong>{progressPercent}%</strong><i><b style={{ width: `${progressPercent}%` }} /></i></div>}<div className="reading-now-actions"><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /><FinishBookDialog locale={locale} book={currentBook} timezone={timezone} onFinished={onRunFinished} /></div></div></article> : <article className="reading-now-card reading-now-empty"><span className="reading-empty-icon"><BookOpen /></span><div><p className="eyebrow">{c.reading}</p><h2>{c.noCurrentBook}</h2><p>{c.noCurrentBookLead}</p><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={onSessionSaved} /></div></article>}
         <div className="streak-summary"><article><Flame /><strong>{streaks.current}</strong><span>{c.days}</span><small>{c.currentStreak}</small></article><article><Sparkles /><strong>{streaks.longest}</strong><span>{c.days}</span><small>{c.longestStreak}</small></article><article><CalendarDays /><strong>{monthDays}</strong><span>{c.readingDays}</span><small>{c.thisMonth}</small></article></div>
       </section>
-      <YearlyGoalCard locale={locale} year={currentYear} goal={goal} progress={goalProgress} onSaved={onGoalSaved} />
+      <YearlyGoalCard locale={locale} year={currentYear} goal={goal} runs={runs} books={books} onSaved={onGoalSaved} onRunRemoved={onRunRemoved} />
       <section className="recent-section"><div className="section-heading"><h2>{c.library}</h2><Link href={`/${locale}/app/library`}>{c.openLibrary}</Link></div><div className="personal-book-grid">{books.slice(0, 5).map((book) => <div className="home-book-card" key={book.id}><SimpleBookCard locale={locale} book={book} /><BookDialog locale={locale} book={book} onSaved={onBookSaved} trigger={<button type="button" className="home-book-card-trigger" aria-label={c.openBookDetails.replace("{title}", book.title)} />} /></div>)}</div></section>
     </>}
   </>;
