@@ -139,8 +139,9 @@ Exit criteria:
 
 ## Stage 7 — release hardening and closed beta
 
-Status: `0.19.0` gives completed books a separate reread action, keeps the
-yearly-goal history compact and adds browser-side catalog fallbacks for Russian
+Status: `0.19.1` polishes the responsive yearly-goal actions after `0.19.0`
+gave completed books a separate reread action, kept the yearly-goal history
+compact and added browser-side catalog fallbacks for Russian
 searches. Earlier versions made goal totals inspectable and added direct
 book-editor access from the Home library preview. The public beta also has bilingual legal pages,
 database-backed limits, patched production dependencies, browser security

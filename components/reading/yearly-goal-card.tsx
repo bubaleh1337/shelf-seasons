@@ -73,7 +73,7 @@ export function YearlyGoalCard({ locale, year, goal, runs, books, onSaved, onRun
     <div><p className="eyebrow">{c.yearlyGoal} · {year}</p><h2>{goal ? (remaining ? `${remaining} ${c.booksToGoal}` : c.goalReached) : c.noGoal}</h2><p>{goal ? c.goalProgressLead : c.noGoalLead}</p></div>
     <div className="goal-card-actions">
       {goal && <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogTrigger asChild><Button variant="outline" onClick={() => setRemoveError(false)}><BookOpen />{c.viewGoalReads.replace("{count}", String(progress))}</Button></DialogTrigger>
+        <DialogTrigger asChild><Button variant="outline" onClick={() => setRemoveError(false)}><BookOpen />{c.viewGoalReads}</Button></DialogTrigger>
         <DialogContent className="goal-dialog goal-details-dialog"><DialogHeader><DialogTitle>{c.goalBreakdownTitle}</DialogTitle><DialogDescription>{c.goalBreakdownLead.replace("{year}", String(year))}</DialogDescription></DialogHeader>
           {countedRuns.length ? <div className="goal-run-list">{countedRuns.map((run) => {
             const book = booksById.get(run.bookId);

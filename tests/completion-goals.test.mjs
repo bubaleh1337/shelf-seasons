@@ -79,8 +79,8 @@ test("the yearly goal exposes every counted run with bilingual context", async (
   assert.match(card, /countedRuns\.map/);
   assert.match(card, /LibraryBookCover book=\{book\} compact/);
   assert.match(card, /goal-reread-badge/);
-  assert.match(copy, /View \{count\} reads/);
-  assert.match(copy, /Посмотреть \{count\} чтений/);
+  assert.match(copy, /View goal/);
+  assert.match(copy, /Посмотреть цель/);
   assert.match(removeRoute, /requireUser/);
   assert.match(removeRoute, /eq\("user_id", userId\)/);
   assert.match(removeRoute, /!run\.is_reread/);
@@ -100,4 +100,17 @@ test("a completed book exposes an explicit reread action", async () => {
   assert.match(cover, /compact \? \{ width: 36/);
   assert.match(copy, /Start rereading/);
   assert.match(copy, /Начать перечитывание/);
+});
+
+test("yearly goal actions use short bilingual labels and stack on phones", async () => {
+  const [card, copy, css] = await Promise.all([
+    readFile(new URL("../components/reading/yearly-goal-card.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/app-copy.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(card, /\{c\.viewGoalReads\}/);
+  assert.doesNotMatch(card, /viewGoalReads\.replace/);
+  assert.match(copy, /viewGoalReads: "View goal"/);
+  assert.match(copy, /viewGoalReads: "Посмотреть цель"/);
+  assert.match(css, /@media \(max-width: 560px\)[^}]*[\s\S]*?\.goal-card-actions \{[^}]*grid-template-columns: 1fr;/);
 });

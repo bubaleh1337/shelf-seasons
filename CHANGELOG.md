@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.19.1
+
+- Renamed the yearly-goal details action to `View goal` / `Посмотреть цель`.
+- Stacked yearly-goal actions at full card width on phones so buttons no longer overflow or collide.
+- Preserved the compact horizontal action layout on larger screens.
+
 ## 0.19.0
 
 - Replaced oversized yearly-goal covers with fixed compact 36 × 54 px thumbnails on desktop and mobile.
