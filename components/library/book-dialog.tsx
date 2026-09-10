@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { LoaderCircle, Plus, Search, X } from "lucide-react";
+import { LoaderCircle, Plus, Repeat2, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
 import { appCopy } from "@/lib/app-copy";
-import { providerLanguageToReadingLanguage } from "@/lib/books/search";
+import { searchBooksInBrowser } from "@/lib/books/browser-search";
+import { providerLanguageToReadingLanguage, rankAndDedupeResults } from "@/lib/books/search";
 import type { BookSearchResult, LibraryBook } from "@/lib/books/types";
 import { seasons } from "@/lib/seasons";
 import type { Locale } from "@/lib/shelf-seasons";
@@ -40,6 +41,8 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
   const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [coverFileName, setCoverFileName] = useState("");
+  const [rereadBusy, setRereadBusy] = useState(false);
+  const [rereadError, setRereadError] = useState(false);
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
@@ -51,25 +54,57 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
       setSearchError(null);
       setHasSearched(false);
       setCoverFileName("");
+      setRereadBusy(false);
+      setRereadError(false);
     }
     setOpen(nextOpen);
   }
 
   async function searchBooks(event: React.FormEvent) {
     event.preventDefault();
-    if (query.trim().length < 2) return;
+    const searchQuery = query.trim();
+    if (searchQuery.length < 2) return;
     setBusy(true); setError(false); setSearchError(null); setHasSearched(false);
     try {
-      const response = await fetch(`/api/books/search?q=${encodeURIComponent(query.trim())}&locale=${locale}`);
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null) as { error?: string } | null;
-        setSearchError(response.status === 429 || payload?.error === "too_many_requests" ? c.searchRateLimited : c.searchUnavailable);
-        return;
-      }
-      const payload = (await response.json()) as { results: BookSearchResult[] };
-      setResults(payload.results);
+      const [applicationSearch, browserSearch] = await Promise.all([
+        fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}&locale=${locale}`, {
+          signal: AbortSignal.timeout(7_000),
+        }).then(async (response) => {
+          if (response.ok) return { results: ((await response.json()) as { results: BookSearchResult[] }).results, error: null };
+          const payload = await response.json().catch(() => null) as { error?: string } | null;
+          return { results: [], error: response.status === 429 || payload?.error === "too_many_requests" ? c.searchRateLimited : c.searchUnavailable };
+        }).catch(() => ({ results: [], error: c.searchUnavailable })),
+        searchBooksInBrowser(searchQuery, locale).catch(() => []),
+      ]);
+      const combined = rankAndDedupeResults(searchQuery, locale, [
+        ...applicationSearch.results,
+        ...browserSearch,
+      ]);
+      setResults(combined);
       setHasSearched(true);
-    } catch { setSearchError(c.searchUnavailable); } finally { setBusy(false); }
+      if (!combined.length && applicationSearch.error) setSearchError(applicationSearch.error);
+    } catch { setSearchError(c.searchUnavailable); setHasSearched(true); } finally { setBusy(false); }
+  }
+
+  async function startReread() {
+    if (!book || !window.confirm(c.startRereadConfirm.replace("{title}", book.title))) return;
+    setRereadBusy(true);
+    setRereadError(false);
+    try {
+      const response = await fetch(`/api/books/${book.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "reading" }),
+      });
+      if (!response.ok) throw new Error();
+      const payload = (await response.json()) as { book: LibraryBook };
+      onSaved(payload.book);
+      setOpen(false);
+    } catch {
+      setRereadError(true);
+    } finally {
+      setRereadBusy(false);
+    }
   }
 
   async function saveBook(event: React.FormEvent<HTMLFormElement>) {
@@ -111,7 +146,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
           <div className="editor-grid">
             <label className="span-two"><span>{c.title}</span><input name="title" required maxLength={300} value={draft.title} onChange={(event) => field("title", event.target.value)} /></label>
             <label className="span-two"><span>{c.authors}</span><input name="authors" maxLength={1000} value={draft.authors} onChange={(event) => field("authors", event.target.value)} placeholder={c.authorsHint} /></label>
-            <label><span>{c.status}</span><select name="status" value={draft.status} onChange={(event) => field("status", event.target.value)}>{(["want", "reading", "read", "paused", "dnf"] as const).map((value) => <option key={value} value={value}>{c[value]}</option>)}</select></label>
+            <label><span>{c.status}</span><select name="status" value={draft.status} onChange={(event) => field("status", event.target.value)}>{(["want", "reading", "read", "paused", "dnf"] as const).filter((value) => !(book?.status === "read" && value === "reading")).map((value) => <option key={value} value={value}>{c[value]}</option>)}</select>{book?.status === "read" && <small className="reread-status-hint">{c.rereadStatusHint}</small>}</label>
             <label><span>{c.format}</span><select name="format" value={draft.format} onChange={(event) => field("format", event.target.value)}>{(["print", "ebook", "audiobook"] as const).map((value) => <option key={value} value={value}>{c[value]}</option>)}</select></label>
             <label><span>{c.readingLanguage}</span><select name="readingLanguage" value={draft.readingLanguage} onChange={(event) => field("readingLanguage", event.target.value)}>{(["ru", "en", "other"] as const).map((value) => <option key={value} value={value}>{c[`language_${value}`]}</option>)}</select></label>
             <label><span>{c.seasonShelf}</span><select name="season" value={draft.season} onChange={(event) => field("season", event.target.value)}><option value="">{c.noSeason}</option>{seasons.map((value) => <option key={value} value={value}>{c[value]}</option>)}</select></label>
@@ -123,6 +158,12 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
             {book?.coverUrl && <label className="remove-cover span-two"><input type="checkbox" checked={draft.removeCover} onChange={(event) => field("removeCover", event.target.checked)} />{c.removeCover}</label>}
           </div>
           {error && <p className="form-error" role="alert">{c.error}</p>}
+          {book?.status === "read" && <section className="reread-action" aria-labelledby="reread-action-title">
+            <span><Repeat2 aria-hidden="true" /></span>
+            <div><strong id="reread-action-title">{c.rereadBook}</strong><p>{c.rereadBookLead}</p></div>
+            <Button type="button" variant="outline" onClick={() => void startReread()} disabled={busy || rereadBusy}>{rereadBusy ? <LoaderCircle className="spin" /> : <Repeat2 />}{rereadBusy ? c.startingReread : c.startReread}</Button>
+          </section>}
+          {rereadError && <p className="form-error" role="alert">{c.rereadStartError}</p>}
           <div className="editor-actions"><Button type="button" variant="ghost" onClick={() => setOpen(false)}>{c.cancel}</Button><Button className="primary-button" type="submit" disabled={busy}>{busy && <LoaderCircle className="spin" />}{busy ? c.saving : c.save}</Button></div>
         </form>}
       </DialogContent>

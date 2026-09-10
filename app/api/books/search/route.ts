@@ -152,7 +152,9 @@ export async function GET(request: NextRequest) {
   if (!(await requireUser(supabase))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  const limited = await rateLimitResponse(supabase, "book-search", 30, 60);
+  const limited = await rateLimitResponse(supabase, "book-search", 30, 60, {
+    continueOnInfrastructureError: true,
+  });
   if (limited) return limited;
   const query = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   const locale = request.nextUrl.searchParams.get("locale") === "ru" ? "ru" : "en";

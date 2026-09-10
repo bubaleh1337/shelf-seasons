@@ -11,6 +11,7 @@ export async function rateLimitResponse(
   bucket: RateLimitBucket,
   maxRequests: number,
   windowSeconds: number,
+  options: { continueOnInfrastructureError?: boolean } = {},
 ) {
   const { data, error } = await supabase.rpc("consume_rate_limit", {
     p_bucket: bucket,
@@ -19,6 +20,7 @@ export async function rateLimitResponse(
   });
 
   if (error || !data?.[0]) {
+    if (options.continueOnInfrastructureError) return null;
     return NextResponse.json(
       { error: "rate_limit_unavailable" },
       { status: 503, headers: { "Cache-Control": "no-store", "Retry-After": "60" } },

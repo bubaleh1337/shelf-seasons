@@ -42,6 +42,25 @@ test("provider languages map to reading language choices", () => {
 test("common Russian translated titles have a fast provider fallback", () => {
   assert.equal(knownAlternateTitle("Игра престолов"), "A Game of Thrones");
   assert.equal(knownAlternateTitle("  ИГРА ПРЕСТОЛОВ!  "), "A Game of Thrones");
+  assert.equal(knownAlternateTitle("Хоббит"), "The Hobbit");
+  assert.equal(knownAlternateTitle("Ведьмак"), "The Witcher");
+});
+
+test("book search survives server-side quota infrastructure failures", async () => {
+  const [dialog, browserSearch, limiter, route, config] = await Promise.all([
+    readFile(new URL("../components/library/book-dialog.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/books/browser-search.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/security/rate-limit.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/books/search/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../next.config.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(dialog, /searchBooksInBrowser/);
+  assert.match(dialog, /Promise\.all/);
+  assert.match(browserSearch, /www\.googleapis\.com\/books/);
+  assert.match(browserSearch, /openlibrary\.org\/search\.json/);
+  assert.match(limiter, /continueOnInfrastructureError/);
+  assert.match(route, /continueOnInfrastructureError: true/);
+  assert.match(config, /connect-src[^\n]*www\.googleapis\.com[^\n]*openlibrary\.org/);
 });
 
 test("provider fallbacks stay inside the production request budget", async () => {

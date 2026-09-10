@@ -139,9 +139,10 @@ Exit criteria:
 
 ## Stage 7 — release hardening and closed beta
 
-Status: `0.18.0` makes yearly-goal totals inspectable and repairs the slow
-translated-title search fallback after `0.17.1` added direct book-editor access
-from the Home library preview. The public beta also has bilingual legal pages,
+Status: `0.19.0` gives completed books a separate reread action, keeps the
+yearly-goal history compact and adds browser-side catalog fallbacks for Russian
+searches. Earlier versions made goal totals inspectable and added direct
+book-editor access from the Home library preview. The public beta also has bilingual legal pages,
 database-backed limits, patched production dependencies, browser security
 headers and verified encrypted daily database backups. External monitoring, a
 separate Storage-object backup and a restore rehearsal in a disposable target

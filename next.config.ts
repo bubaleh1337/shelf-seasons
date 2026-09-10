@@ -11,7 +11,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://books.google.com https://books.googleusercontent.com https://covers.openlibrary.org https://*.supabase.co",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googleapis.com https://openlibrary.org",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   ...(!isDevelopment ? ["upgrade-insecure-requests"] : []),

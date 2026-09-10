@@ -11,7 +11,7 @@ Version 0.17.0 can be shared with a small group through a public Vercel URL. Thi
 5. Add these Production environment variables in Vercel:
    - `NEXT_PUBLIC_SUPABASE_URL` = the existing Supabase project URL;
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = the existing publishable key.
-   - `GOOGLE_BOOKS_API_KEY` = an optional restricted server-side key, recommended before sharing the app publicly.
+   - `GOOGLE_BOOKS_API_KEY` = an optional restricted server-side key, strongly recommended before sharing the app publicly. Browser-side catalog fallback remains available when the server quota is exhausted.
 
 Vercel supplies the production hostname automatically. `NEXT_PUBLIC_APP_URL` is optional and is only needed later for a custom domain or to override the generated Vercel hostname.
 

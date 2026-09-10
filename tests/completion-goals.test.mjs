@@ -77,6 +77,7 @@ test("the yearly goal exposes every counted run with bilingual context", async (
   ]);
   assert.match(card, /selectGoalRuns/);
   assert.match(card, /countedRuns\.map/);
+  assert.match(card, /LibraryBookCover book=\{book\} compact/);
   assert.match(card, /goal-reread-badge/);
   assert.match(copy, /View \{count\} reads/);
   assert.match(copy, /Посмотреть \{count\} чтений/);
@@ -84,4 +85,19 @@ test("the yearly goal exposes every counted run with bilingual context", async (
   assert.match(removeRoute, /eq\("user_id", userId\)/);
   assert.match(removeRoute, /!run\.is_reread/);
   assert.match(removeRoute, /count < 2/);
+});
+
+test("a completed book exposes an explicit reread action", async () => {
+  const [dialog, cover, copy] = await Promise.all([
+    readFile(new URL("../components/library/book-dialog.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/library/book-cover.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/app-copy.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(dialog, /async function startReread/);
+  assert.match(dialog, /book\?\.status === "read"/);
+  assert.match(dialog, /body: JSON\.stringify\(\{ status: "reading" \}\)/);
+  assert.match(dialog, /startRereadConfirm/);
+  assert.match(cover, /compact \? \{ width: 36/);
+  assert.match(copy, /Start rereading/);
+  assert.match(copy, /Начать перечитывание/);
 });

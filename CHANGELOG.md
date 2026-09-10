@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.19.0
+
+- Replaced oversized yearly-goal covers with fixed compact 36 × 54 px thumbnails on desktop and mobile.
+- Added a separate confirmed reread action for completed books; ordinary metadata saves never start another reading run.
+- Kept completed reading history intact when a reread starts and made the behavior explicit in Russian and English.
+- Added browser-side Google Books and Open Library fallbacks so a server quota or rate-limit infrastructure failure no longer disables discovery.
+- Expanded instant translated-title fallbacks for common Russian searches including `Хоббит` and `Ведьмак`.
+- Kept manual book entry available when every external catalog is unavailable.
+
 ## 0.18.0
 
 - Added an inspectable yearly-goal breakdown with every counted title, completion date and reread label.
