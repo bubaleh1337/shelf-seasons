@@ -21,6 +21,42 @@ type Draft = {
 
 const blank: Draft = { title: "", authors: "", description: "", coverUrl: "", isbn: "", publishedYear: "", pageCount: "", format: "print", status: "want", readingLanguage: "other", season: "", provider: "manual", providerId: "", removeCover: false };
 
+type SaveErrorPayload = { error?: string };
+
+function saveErrorMessage(locale: Locale, status: number, code: string | undefined, fallback: string) {
+  const messages = locale === "ru"
+    ? {
+        rateLimited: "Слишком много попыток сохранения за короткое время. Подожди минуту и попробуй снова.",
+        unauthorized: "Сессия входа закончилась. Обнови страницу и войди снова.",
+        invalid: "Не удалось проверить данные книги. Проверь поля и попробуй снова.",
+        coverTooLarge: "Обложка слишком большая. Выбери JPG, PNG или WebP до 5 МБ.",
+        coverFailed: "Не удалось сохранить выбранную обложку. Попробуй другую обложку или сохрани книгу без неё.",
+        statusFailed: "Книга сохранилась некорректно: не удалось синхронизировать полку и историю чтения. Попробуй ещё раз.",
+        saveFailed: "Не удалось сохранить данные книги. Попробуй ещё раз.",
+        unavailable: "Сервис сохранения временно недоступен. Попробуй ещё раз через минуту.",
+      }
+    : {
+        rateLimited: "Too many save attempts in a short time. Wait a minute and try again.",
+        unauthorized: "Your sign-in session has expired. Refresh the page and sign in again.",
+        invalid: "The book data could not be validated. Check the fields and try again.",
+        coverTooLarge: "The cover is too large. Choose a JPG, PNG or WebP file up to 5 MB.",
+        coverFailed: "The selected cover could not be saved. Try another cover or save the book without it.",
+        statusFailed: "The book could not be fully saved because its shelf and reading history did not synchronize. Please try again.",
+        saveFailed: "The book data could not be saved. Please try again.",
+        unavailable: "Saving is temporarily unavailable. Please try again in a minute.",
+      };
+
+  if (status === 429 || code === "too_many_requests") return messages.rateLimited;
+  if (status === 401 || code === "unauthorized") return messages.unauthorized;
+  if (status === 503 || code === "rate_limit_unavailable") return messages.unavailable;
+  if (code === "invalid_book") return messages.invalid;
+  if (code === "cover_too_large") return messages.coverTooLarge;
+  if (code === "cover_failed") return messages.coverFailed;
+  if (code === "status_sync_failed") return messages.statusFailed;
+  if (code === "save_failed") return messages.saveFailed;
+  return fallback;
+}
+
 function fromBook(book: LibraryBook): Draft {
   return { title: book.title, authors: book.authors.join(", "), description: book.description ?? "", coverUrl: book.defaultCoverUrl ?? "", isbn: book.isbn ?? "", publishedYear: book.publishedYear?.toString() ?? "", pageCount: book.pageCount?.toString() ?? "", format: book.format, status: book.status, readingLanguage: book.readingLanguage, season: book.season ?? "", provider: "manual", providerId: "", removeCover: false };
 }
@@ -37,7 +73,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
   const [results, setResults] = useState<BookSearchResult[]>([]);
   const [showForm, setShowForm] = useState(Boolean(book));
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [coverFileName, setCoverFileName] = useState("");
@@ -50,7 +86,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
       setShowForm(Boolean(book));
       setResults([]);
       setQuery("");
-      setError(false);
+      setError(null);
       setSearchError(null);
       setHasSearched(false);
       setCoverFileName("");
@@ -64,7 +100,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
     event.preventDefault();
     const searchQuery = query.trim();
     if (searchQuery.length < 2) return;
-    setBusy(true); setError(false); setSearchError(null); setHasSearched(false);
+    setBusy(true); setError(null); setSearchError(null); setHasSearched(false);
     try {
       const [applicationSearch, browserSearch] = await Promise.all([
         fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}&locale=${locale}`, {
@@ -109,7 +145,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
 
   async function saveBook(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setBusy(true); setError(false);
+    setBusy(true); setError(null);
     try {
       const form = new FormData(event.currentTarget);
       form.set("provider", draft.provider);
@@ -119,11 +155,16 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
       form.set("readingLanguage", draft.readingLanguage);
       form.set("season", draft.season);
       const response = await fetch(book ? `/api/books/${book.id}` : "/api/books", { method: book ? "PUT" : "POST", body: form });
-      if (!response.ok) throw new Error();
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as SaveErrorPayload | null;
+        setError(saveErrorMessage(locale, response.status, payload?.error, c.error));
+        return;
+      }
       const payload = (await response.json()) as { book: LibraryBook };
       onSaved(payload.book);
       setOpen(false);
-    } catch { setError(true); } finally { setBusy(false); }
+      void fetch("/api/books/repair-covers", { method: "POST" }).catch(() => undefined);
+    } catch { setError(c.error); } finally { setBusy(false); }
   }
 
   const field = (key: keyof Draft, value: string | boolean) => setDraft((current) => ({ ...current, [key]: value }));
@@ -157,7 +198,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
             <label className="span-two cover-upload"><span>{c.cover}</span><span className="localized-file-input"><input name="cover" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setCoverFileName(event.target.files?.[0]?.name ?? "")} /><span aria-hidden="true">{c.chooseCover}</span><em>{coverFileName || c.noCoverChosen}</em></span><small>{c.coverHint}</small></label>
             {book?.coverUrl && <label className="remove-cover span-two"><input type="checkbox" checked={draft.removeCover} onChange={(event) => field("removeCover", event.target.checked)} />{c.removeCover}</label>}
           </div>
-          {error && <p className="form-error" role="alert">{c.error}</p>}
+          {error && <p className="form-error" role="alert">{error}</p>}
           {book?.status === "read" && <section className="reread-action" aria-labelledby="reread-action-title">
             <span><Repeat2 aria-hidden="true" /></span>
             <div><strong id="reread-action-title">{c.rereadBook}</strong><p>{c.rereadBookLead}</p></div>

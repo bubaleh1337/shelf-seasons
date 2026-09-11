@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bookInputSchema } from "@/lib/books/validation";
-import { bookToDto, isBookFormTooLarge, requireUser, resolveProviderCover, setBookStatus, storeCover, storeRemoteCover, toInsert } from "@/lib/books/server";
+import { bookToDto, isBookFormTooLarge, requireUser, setBookStatus, storeCover, toInsert } from "@/lib/books/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { rateLimitResponse } from "@/lib/security/rate-limit";
@@ -32,7 +32,9 @@ export async function PUT(request: NextRequest, context: Context) {
   const supabase = await createClient();
   const userId = await requireUser(supabase);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  const limited = await rateLimitResponse(supabase, "book-write", 30, 300);
+  const limited = await rateLimitResponse(supabase, "book-write", 30, 300, {
+    continueOnInfrastructureError: true,
+  });
   if (limited) return limited;
   const form = await request.formData();
   const parsed = bookInputSchema.safeParse(Object.fromEntries(form.entries()));
@@ -40,26 +42,24 @@ export async function PUT(request: NextRequest, context: Context) {
   const { data: current } = await supabase.from("library_books").select().eq("id", bookId).eq("user_id", userId).maybeSingle();
   if (!current) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  let coverPath = current.cover_path;
-  const remoteCoverUrl = await resolveProviderCover(parsed.data);
+  const previousCoverPath = current.cover_path;
+  let coverPath = parsed.data.removeCover ? null : previousCoverPath;
   const cover = form.get("cover");
   try {
-    if (parsed.data.removeCover && coverPath) {
-      await supabase.storage.from("book-covers").remove([coverPath]);
-      coverPath = null;
-      if (remoteCoverUrl) coverPath = await storeRemoteCover(supabase, userId, bookId, remoteCoverUrl);
-    }
     if (cover instanceof File && cover.size > 0) coverPath = await storeCover(supabase, userId, bookId, cover);
-    else if (!coverPath && remoteCoverUrl) coverPath = await storeRemoteCover(supabase, userId, bookId, remoteCoverUrl);
   } catch {
     return NextResponse.json({ error: "cover_failed" }, { status: 400 });
   }
 
   const values = toInsert(userId, parsed.data);
   const { status, ...metadata } = values;
-  if (remoteCoverUrl) metadata.cover_url = remoteCoverUrl;
+  metadata.source = current.source;
+  metadata.provider_id = current.provider_id;
   const { error } = await supabase.from("library_books").update({ ...metadata, cover_path: coverPath }).eq("id", bookId).eq("user_id", userId);
   if (error) return NextResponse.json({ error: "save_failed" }, { status: 400 });
+  if (parsed.data.removeCover && previousCoverPath && coverPath !== previousCoverPath) {
+    await supabase.storage.from("book-covers").remove([previousCoverPath]);
+  }
   let updated;
   if ((status ?? "want") === current.status) {
     const { data: unchangedStatusRow, error: reloadError } = await supabase.from("library_books").select().eq("id", bookId).eq("user_id", userId).single();

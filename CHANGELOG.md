@@ -1,18 +1,31 @@
-# Changelog
+﻿# Changelog
 
+## 0.19.3
+
+- Book create/edit now continues when only the rate-limit infrastructure is temporarily unavailable; real request limits still return 429.
+- Save failures now show specific Russian and English messages instead of one generic error.
+- Added a dedicated regression test for search в†’ choose в†’ mark as read в†’ save.
+- Removing a custom cover no longer deletes the stored file before the book metadata update has succeeded.
+## 0.19.2
+
+- Decoupled Google Books/Open Library cover persistence from the critical book create/edit request.
+- Book metadata and reading status now save even when a remote cover download, image conversion or Storage write is slow or fails.
+- Provider covers are repaired in the background after a successful save.
+- Custom user-uploaded covers remain synchronous and validated before the save is reported successful.
+- Editing an imported book now preserves its original provider identity so later cover repair can still recover the catalog cover.
 ## 0.19.1
 
-- Renamed the yearly-goal details action to `View goal` / `Посмотреть цель`.
+- Renamed the yearly-goal details action to `View goal` / `РџРѕСЃРјРѕС‚СЂРµС‚СЊ С†РµР»СЊ`.
 - Stacked yearly-goal actions at full card width on phones so buttons no longer overflow or collide.
 - Preserved the compact horizontal action layout on larger screens.
 
 ## 0.19.0
 
-- Replaced oversized yearly-goal covers with fixed compact 36 × 54 px thumbnails on desktop and mobile.
+- Replaced oversized yearly-goal covers with fixed compact 36 Г— 54 px thumbnails on desktop and mobile.
 - Added a separate confirmed reread action for completed books; ordinary metadata saves never start another reading run.
 - Kept completed reading history intact when a reread starts and made the behavior explicit in Russian and English.
 - Added browser-side Google Books and Open Library fallbacks so a server quota or rate-limit infrastructure failure no longer disables discovery.
-- Expanded instant translated-title fallbacks for common Russian searches including `Хоббит` and `Ведьмак`.
+- Expanded instant translated-title fallbacks for common Russian searches including `РҐРѕР±Р±РёС‚` and `Р’РµРґСЊРјР°Рє`.
 - Kept manual book entry available when every external catalog is unavailable.
 
 ## 0.18.0
@@ -20,7 +33,7 @@
 - Added an inspectable yearly-goal breakdown with every counted title, completion date and reread label.
 - Added a protected way to remove an accidental duplicate reread while keeping the original completed reading history.
 - Clarified that yearly goals count completed reading runs rather than the current number of library cards.
-- Fixed the Russian `Игра престолов` search with a fast translated-title fallback through Open Library.
+- Fixed the Russian `РРіСЂР° РїСЂРµСЃС‚РѕР»РѕРІ` search with a fast translated-title fallback through Open Library.
 - Bounded and parallelized provider requests so a slow translation service no longer exhausts the server request budget.
 - Added distinct localized messages for temporary search outages and rate limits.
 
@@ -53,7 +66,7 @@
 - Fixed authenticated language switching so the saved profile locale changes before navigation.
 - Let every book category in Recaps choose from the entire personal library, including paused and unfinished books.
 - Replaced ambiguous seasonal recap copy with explicit monthly and yearly headings in Russian and English.
-- Shortened the developer name to Ekaterina / Екатерина.
+- Shortened the developer name to Ekaterina / Р•РєР°С‚РµСЂРёРЅР°.
 - Parallelized initial data loading, batched signed cover links and split heavier sections into deferred client chunks.
 - Reduced the bundled demonstration cover from 3.1 MB to 153 KB.
 - Added optional server-side Google Books API key support and reduced redundant translated-title requests.
@@ -127,7 +140,7 @@
 
 - Added an idempotent finish-book ritual with completion date, optional rating, impression and recap nomination.
 - Added an editable yearly goal calculated from authoritative completed reading runs, with optional reread counting.
-- Made direct “Read” shelf changes create a completed run and refresh the interface from the server.
+- Made direct вЂњReadвЂќ shelf changes create a completed run and refresh the interface from the server.
 - Added owner-bound nomination storage, RLS policies and regression coverage for completion and goal calculations.
 
 ## 0.5.5
@@ -156,7 +169,7 @@
 - Ranked matching-language and matching-script book editions first.
 - Added a clear empty search state with manual-entry fallback.
 
-## 0.5.1 — 2026-09-05
+## 0.5.1 вЂ” 2026-09-05
 
 - Fixed the Home page so only a book on the Reading shelf can appear as the current book.
 - Added a bilingual empty state when the library has books but none are currently being read.
@@ -164,7 +177,7 @@
 - Added deterministic Vercel build configuration and automatic Vercel production-origin detection.
 - Added regression coverage for completed books, recent current-book selection, status transitions and deployment configuration.
 
-## 0.5.0 — 2026-09-05
+## 0.5.0 вЂ” 2026-09-05
 
 - Added real reading runs and daily reading sessions with ownership-based RLS.
 - Added quick check-ins, optional pages/minutes/progress, backdated entries and notes.
@@ -173,7 +186,7 @@
 - Made provider covers resilient: Russian search is preferred, remote covers are normalized into private storage and failed images always show an accessible fallback.
 - Added a closed-beta Vercel deployment checklist.
 
-## 0.4.0 — 2026-09-05
+## 0.4.0 вЂ” 2026-09-05
 
 - Replaced fictional books with each signed-in account's private personal library.
 - Added Google Books search with Open Library fallback and fully manual entry.
@@ -182,13 +195,13 @@
 - Removed timezone selection from onboarding and kept automatic detection for future calendar-day boundaries.
 - Replaced misleading demo calendar, series and recap data with honest empty states for signed-in accounts.
 
-## 0.3.1 — 2026-09-05
+## 0.3.1 вЂ” 2026-09-05
 
 - Added a connected Supabase health/schema check for the configured development project.
 - Made the regular runtime suite deterministic even when a local Supabase configuration is present.
 - Prepared the Windows handoff for the connected `shelf-seasons-dev` environment.
 
-## 0.3.0 — 2026-09-05
+## 0.3.0 вЂ” 2026-09-05
 
 - Added Supabase SSR client boundaries for standard Next.js 16.
 - Added Google OAuth start, PKCE callback, safe local sign-out and protected app routes.
@@ -196,7 +209,7 @@
 - Added the first ordered migration, ownership-based RLS policies, typed database definitions and pgTAP policy tests.
 - Kept a no-credentials demo mode so the interface remains runnable before Supabase setup.
 
-## 0.2.0 — 2026-09-04
+## 0.2.0 вЂ” 2026-09-04
 
 - Replaced the Vinext, Vite and Cloudflare Worker development runtime with
   standard Next.js, matching the local workflow used by `vmeste-app`.
@@ -205,24 +218,24 @@
 - Added clean-install runtime tests for both languages, every primary route,
   generated CSS, client scripts and the bundled book cover.
 
-## 0.1.3 — 2026-09-04
+## 0.1.3 вЂ” 2026-09-04
 
 - Fixed the unstyled Windows development page by removing the local public
   asset binding that intercepted Vite's generated CSS and client modules.
 - Kept development book covers on their direct public URLs, so local image
   loading no longer depends on Cloudflare image bindings.
 
-## 0.1.2 — 2026-09-04
+## 0.1.2 вЂ” 2026-09-04
 
 - Fixed local book-cover loading by declaring the `public` asset binding and
   serving public covers directly when the app runs in development mode.
 
-## 0.1.1 — 2026-09-03
+## 0.1.1 вЂ” 2026-09-03
 
 - Fixed `npm run dev`, build, lint and related scripts for Windows PowerShell.
 - Added an automated guard against Unix-only npm scripts returning to the project.
 
-## 0.1.0 — 2026-09-03
+## 0.1.0 вЂ” 2026-09-03
 
 - Created the Shelf Seasons Stage 0/1 foundation.
 - Added bilingual English/Russian routes and navigation.
@@ -230,3 +243,5 @@
 - Added light/dark theme behavior, localized sample content and reading check-in interaction.
 - Added PWA metadata, an original fictional cover asset and accessibility foundations.
 - Added the approved product, data, design, localization and release documentation.
+
+

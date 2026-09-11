@@ -26,6 +26,29 @@ test("book routes derive ownership from the authenticated session", async () => 
   assert.doesNotMatch(createRoute, /form\.get\("user_id"\)/);
 });
 
+test("provider cover persistence cannot block book create or edit", async () => {
+  const [createRoute, updateRoute, repairRoute, dialog] = await Promise.all([
+    read("app/api/books/route.ts"),
+    read("app/api/books/[bookId]/route.ts"),
+    read("app/api/books/repair-covers/route.ts"),
+    read("components/library/book-dialog.tsx"),
+  ]);
+
+  assert.doesNotMatch(createRoute, /resolveProviderCover|storeRemoteCover/);
+  assert.doesNotMatch(updateRoute, /resolveProviderCover|storeRemoteCover/);
+  assert.match(createRoute, /storeCover\(supabase, userId, row\.id, cover\)/);
+  assert.match(updateRoute, /storeCover\(supabase, userId, bookId, cover\)/);
+  assert.match(repairRoute, /resolveProviderCover/);
+  assert.match(repairRoute, /storeRemoteCover/);
+  assert.match(dialog, /void fetch\("\/api\/books\/repair-covers", \{ method: "POST" \}\)/);
+});
+
+test("editing a catalog book preserves its provider identity", async () => {
+  const updateRoute = await read("app/api/books/[bookId]/route.ts");
+  assert.match(updateRoute, /metadata\.source = current\.source/);
+  assert.match(updateRoute, /metadata\.provider_id = current\.provider_id/);
+});
+
 test("home library preview opens each book in the existing editor", async () => {
   const [app, copy, styles] = await Promise.all([
     read("components/shelf-seasons-app.tsx"),
