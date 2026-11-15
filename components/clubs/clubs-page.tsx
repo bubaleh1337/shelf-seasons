@@ -357,8 +357,8 @@ export function ClubsPage({ locale, books, today, onBookSaved }: { locale: Local
               </div>
               <div className="club-organizer-complete">
                 <p className="club-muted">{c.clubFinishHint}</p>
-                <button className="club-secondary club-finish-danger" type="button" disabled={busy}
-                  onClick={() => finishRead(activeRead.id)}>{c.clubFinishRead}</button>
+                <button className="club-secondary club-finish-success" type="button" disabled={busy}
+                  onClick={() => finishRead(activeRead.id)}><Check aria-hidden="true" />{c.clubFinishRead}</button>
               </div>
             </div>}
           </> : owner ? <form className="club-create-read" onSubmit={startRead}>

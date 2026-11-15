@@ -9,6 +9,12 @@
 - Added RLS-protected club schema and an isolated development migration.
 
 
+## 0.20.3
+
+- Changed the club book completion action from red to green, with a checkmark in both themes.
+- Clarified that completing the current book keeps personal progress and allows another shared book.
+- Updated bilingual labels, descriptions and regression tests. No database migration.
+
 ## 0.20.2
 
 - Separated club book replacement from finishing the current shared reading.

@@ -77,7 +77,10 @@
 .club-replace-form > .club-primary { width: 100%; }
 .club-organizer-complete { display: grid; justify-items: start; gap: 13px; min-width: 0; padding-top: 24px; border-top: 1px solid var(--border); }
 .club-organizer-complete > .club-muted { max-width: 56ch; line-height: 1.55; }
-.club-secondary.club-finish-danger { color: var(--destructive); border-color: color-mix(in srgb,var(--destructive),transparent 48%); background: color-mix(in srgb,var(--destructive),transparent 95%); }
-.club-secondary.club-finish-danger:focus-visible { outline-color: var(--destructive); }
-@media (hover: hover) { .club-secondary.club-finish-danger:not(:disabled):hover { background: color-mix(in srgb,var(--destructive),transparent 87%); border-color: var(--destructive); } }
+/* Finishing a book is a positive milestone, unlike deleting a club. */
+.club-secondary.club-finish-success { color: #fff; background: #306b4c; border-color: #306b4c; box-shadow: 0 3px 8px rgba(30,82,56,.13); }
+.club-secondary.club-finish-success:focus-visible { outline-color: #328f60; outline-offset: 3px; }
+@media (hover: hover) { .club-secondary.club-finish-success:not(:disabled):hover { color: #fff; background: #25543d; border-color: #25543d; } }
+:root[data-theme="dark"] .club-secondary.club-finish-success { color: #12301f; background: #a6d7b4; border-color: #a6d7b4; }
+@media (hover: hover) { :root[data-theme="dark"] .club-secondary.club-finish-success:not(:disabled):hover { color: #102d1b; background: #bce6c7; border-color: #bce6c7; } }
 @media (max-width: 600px) { .club-organizer-manage,.club-organizer-complete { justify-items: stretch; } .club-organizer-manage > .club-secondary,.club-organizer-complete > .club-secondary { width: 100%; } .club-replace-form { padding: 14px; } }
