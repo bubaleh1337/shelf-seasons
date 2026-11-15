@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      book_clubs: {
+        Row: { id: string; owner_id: string; name: string; invite_token: string; created_at: string };
+        Insert: { id?: string; owner_id: string; name: string; invite_token?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["book_clubs"]["Insert"]>;
+        Relationships: [];
+      };
+      book_club_members: {
+        Row: { club_id: string; user_id: string; display_name: string; joined_at: string };
+        Insert: { club_id: string; user_id: string; display_name: string; joined_at?: string };
+        Update: Partial<Database["public"]["Tables"]["book_club_members"]["Insert"]>;
+        Relationships: [];
+      };
+      book_club_reads: {
+        Row: { id: string; club_id: string; created_by: string; title: string; authors: string[]; isbn: string | null; published_year: number | null; page_count: number | null; format: Database["public"]["Enums"]["book_format"]; reading_language: Database["public"]["Enums"]["reading_language"]; cover_url: string | null; started_on: string; target_on: string | null; status: "active" | "finished"; created_at: string };
+        Insert: { id?: string; club_id: string; created_by: string; title: string; authors?: string[]; isbn?: string | null; published_year?: number | null; page_count?: number | null; format?: Database["public"]["Enums"]["book_format"]; reading_language?: Database["public"]["Enums"]["reading_language"]; cover_url?: string | null; started_on: string; target_on?: string | null; status?: "active" | "finished"; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["book_club_reads"]["Insert"]>;
+        Relationships: [];
+      };
+      book_club_progress: {
+        Row: { club_read_id: string; club_id: string; user_id: string; book_id: string; current_page: number | null; total_pages: number | null; percent: number | null; is_complete: boolean; updated_at: string };
+        Insert: { club_read_id: string; club_id: string; user_id: string; book_id: string; current_page?: number | null; total_pages?: number | null; percent?: number | null; is_complete?: boolean; updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["book_club_progress"]["Insert"]>;
+        Relationships: [];
+      };
       profiles: {
         Row: {
           user_id: string;
@@ -300,6 +324,7 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      join_book_club: { Args: { p_invite_token: string }; Returns: string };
       complete_onboarding: {
         Args: {
           p_locale: Database["public"]["Enums"]["app_locale"];

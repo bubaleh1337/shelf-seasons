@@ -1,4 +1,20 @@
-﻿# Changelog
+# Changelog
+
+
+
+- Updated the Russian finish-book impression prompt as requested.
+- Added private reading clubs with invitation links, membership and one shared active book.
+- Added explicit member opt-in and automatic club progress snapshots from personal reading runs.
+- Updated bilingual navigation: Clubs and a mobile More screen keep secondary pages accessible.
+- Added RLS-protected club schema and an isolated development migration.
+
+
+## 0.20.0
+
+- Club members add the club-selected book through the existing full editor, with edition metadata prefilled and personal fields editable.
+- Exact personal matches can be connected directly; arbitrary book-selection dropdown removed from member view.
+- Added display-name editing in Settings and synchronization for club member labels.
+- Club reads keep a privacy-safe metadata snapshot; original covers, private descriptions and personal seasonal shelves are not shared.
 
 ## 0.19.3
 

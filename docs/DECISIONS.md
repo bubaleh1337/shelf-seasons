@@ -123,3 +123,9 @@ These decisions are binding until deliberately replaced by a dated decision in t
 **Decision:** detect the IANA timezone from the browser and store it without asking the user to choose during onboarding. Show the saved value only as an informational setting until travel/timezone editing is implemented.
 
 **Why:** day boundaries still need a timezone, but choosing one is unnecessary friction for almost every new user.
+
+## D-020 — private, opt-in book clubs after MVP
+
+**Decision (2026-11-15):** A user-requested post-MVP club feature may be added in small verified slices. Clubs are invitation-only, personal libraries remain private and each reader explicitly links their own edition to opt into sharing a limited progress snapshot. No public feeds, comments, social graph or private-note sharing are included in the first slice. This supersedes D-014 only for the specified clubs feature.
+
+**Why:** Friends need to coordinate one shared book without giving other members access to their personal reading journal.

@@ -3,8 +3,11 @@
 import Link, { useLinkStatus } from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Coffee, Flame, Languages, Layers3, Library, LoaderCircle, LogOut, Mail, Moon, Search, Send, Settings, Sparkles, Sun, Trash2, type LucideIcon } from "lucide-react";
+import { BookHeart, BookOpen, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Coffee, Flame, Languages, Layers3, Library, LoaderCircle, LogOut, Mail, MoreHorizontal, Moon, Search, Send, Settings, UsersRound, Sparkles, Sun, Trash2, type LucideIcon } from "lucide-react";
 import { AccountControls } from "@/components/account/account-controls";
+import { DisplayNameEditor } from "@/components/profile/display-name-editor";
+import { ClubsPage } from "@/components/clubs/clubs-page";
+import { MorePage } from "@/components/clubs/more-page";
 import { BookDialog } from "@/components/library/book-dialog";
 import { LibraryBookCover } from "@/components/library/book-cover";
 import { ReadingDialog } from "@/components/reading/reading-dialog";
@@ -26,7 +29,8 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { id: "home", icon: BookOpen }, { id: "library", icon: Library }, { id: "calendar", icon: CalendarDays },
-  { id: "series", icon: Layers3 }, { id: "recaps", icon: Sparkles }, { id: "settings", icon: Settings },
+  { id: "clubs", icon: UsersRound }, { id: "series", icon: Layers3 }, { id: "recaps", icon: Sparkles },
+  { id: "settings", icon: Settings }, { id: "more", icon: MoreHorizontal },
 ] as const;
 
 const developerLinks = {
@@ -101,12 +105,12 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
   const removeRun = (runId: string) => setRuns((current) => current.filter((run) => run.id !== runId));
   const saveSeries = (saved: BookSeries) => setSeriesItems((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
   const deleteSeries = (seriesId: string) => setSeriesItems((current) => current.filter((item) => item.id !== seriesId));
-  const displayName = readerName?.trim() || "Shelf Seasons";
+  const [displayName, setDisplayName] = useState(readerName?.trim() || "Shelf Seasons");
 
   return <div className="shelf-app" lang={locale}>
     <aside className="shelf-sidebar" aria-label={c.personalLibrary}>
       <Brand />
-      <nav className="sidebar-nav">{nav.map(({ id, icon }) => <AppNavLink key={id} locale={locale} id={id} icon={icon} label={c[id]} active={active === id} />)}</nav>
+      <nav className="sidebar-nav">{nav.filter(({ id }) => id !== "more").map(({ id, icon }) => <AppNavLink key={id} locale={locale} id={id} icon={icon} label={c[id]} active={active === id} />)}</nav>
       <ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={saveSession} />
       <BookDialog locale={locale} onSaved={saveBook} />
       <SidebarDeveloperLinks locale={locale} />
@@ -115,16 +119,18 @@ export function ShelfSeasonsApp({ locale, section, readerName, timezone, initial
     <main className="shelf-main">
       <SeasonalPageBackdrop season={currentSeason} />
       <header className="topbar"><div className="mobile-brand"><Brand compact /></div><div className="topbar-actions"><LanguageSwitch currentLocale={locale} targetLocale={locale === "ru" ? "en" : "ru"} section={active} className="locale-switch" /><Link className={cn("theme-button mobile-settings-link", active === "settings" && "is-active")} href={`/${locale}/app/settings`} aria-label={c.settings}><UtilityLinkIcon icon={Settings} label={c.settings} /></Link><button className="theme-button" type="button" onClick={() => toggleTheme(!dark)} aria-label={c.darkMode}>{dark ? <Sun /> : <Moon />}</button></div></header>
-      <div className={cn("page-wrap", (active === "library" || active === "series" || active === "recaps") && "page-wrap-wide")}>
+      <div className={cn("page-wrap", (active === "library" || active === "series" || active === "recaps" || active === "clubs") && "page-wrap-wide")}>
         {active === "home" && <Home locale={locale} name={displayName} books={books} sessions={sessions} runs={runs} goal={goal} timezone={timezone} completionNotice={completionNotice} onBookSaved={saveBook} onSessionSaved={saveSession} onRunFinished={finishRun} onGoalSaved={setGoal} onRunRemoved={removeRun} />}
         {active === "library" && <PersonalLibrary locale={locale} books={books} setBooks={setBooks} currentSeason={currentSeason} onSaved={saveBook} />}
         {active === "calendar" && <ReadingCalendar locale={locale} books={books} sessions={sessions} timezone={timezone} setSessions={setSessions} onSessionSaved={saveSession} />}
         {active === "series" && <SeriesPage locale={locale} books={books} items={seriesItems} onSaved={saveSeries} onDeleted={deleteSeries} onBookSaved={saveBook} />}
         {active === "recaps" && <RecapsPage locale={locale} timezone={timezone} />}
-        {active === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} />}
+        {active === "clubs" && <ClubsPage locale={locale} books={books} today={localDateKey(timezone)} onBookSaved={saveBook} />}
+        {active === "settings" && <SettingsPage locale={locale} dark={dark} toggleTheme={toggleTheme} displayName={displayName} onNameSaved={setDisplayName} />}
+        {active === "more" && <MorePage locale={locale} />}
       </div>
     </main>
-    <nav className="mobile-nav" aria-label={c.personalLibrary}>{nav.slice(0, 5).map(({ id, icon }) => <AppNavLink key={id} locale={locale} id={id} icon={icon} label={c[id]} active={active === id} mobile />)}</nav>
+    <nav className="mobile-nav" aria-label={c.personalLibrary}>{nav.filter(({ id }) => ["home", "library", "calendar", "clubs", "more"].includes(id)).map(({ id, icon }) => <AppNavLink key={id} locale={locale} id={id} icon={icon} label={c[id]} active={id === "more" ? ["more", "series", "recaps", "settings"].includes(active) : active === id} mobile />)}</nav>
     <div className="mobile-log-wrap"><ReadingDialog locale={locale} books={books} timezone={timezone} onSaved={saveSession} compact /></div>
   </div>;
 }
@@ -314,9 +320,10 @@ function YearCalendar({ locale, year, sessions }: { locale: Locale; year: number
   return <div className="real-year-grid">{Array.from({ length: 12 }, (_, month) => { const prefix = `${year}-${String(month + 1).padStart(2, "0")}`; const days = new Set(sessions.filter((session) => session.readOn.startsWith(prefix)).map((session) => session.readOn)).size; return <article key={prefix}><strong>{new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-US", { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(year, month, 1)))}</strong><span>{days}</span></article>; })}</div>;
 }
 
-function SettingsPage({ locale, dark, toggleTheme }: { locale: Locale; dark: boolean; toggleTheme: (value: boolean) => void }) {
+function SettingsPage({ locale, dark, toggleTheme, displayName, onNameSaved }: { locale: Locale; dark: boolean; toggleTheme: (value: boolean) => void; displayName: string; onNameSaved: (name: string) => void }) {
   const c = appCopy[locale];
   return <><PageIntro title={c.settings} lead={c.personalLibrary} /><div className="settings-panel">
+    <DisplayNameEditor locale={locale} displayName={displayName} onSaved={onNameSaved} />
     <section><h2>{c.appearance}</h2><div className="setting-row"><span className="setting-icon">{dark ? <Moon /> : <Sun />}</span><div><strong>{c.darkMode}</strong></div><Switch checked={dark} onCheckedChange={toggleTheme} /></div></section>
     <section><h2>{c.language}</h2><div className="setting-row"><span className="setting-icon"><Languages /></span><div><strong>{locale === "ru" ? "Русский" : "English"}</strong></div><div className="language-links"><LanguageSwitch currentLocale={locale} targetLocale="en" section="settings" compact /><LanguageSwitch currentLocale={locale} targetLocale="ru" section="settings" compact /></div></div></section>
     <section><h2>{c.account}</h2><div className="setting-row"><span className="setting-icon"><LogOut /></span><div><strong>Shelf Seasons</strong><p>{c.signedIn}</p></div><form action="/auth/sign-out" method="post"><input type="hidden" name="locale" value={locale} /><Button variant="outline" type="submit">{c.signOut}</Button></form></div></section>

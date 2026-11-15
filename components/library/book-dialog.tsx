@@ -12,6 +12,11 @@ import type { BookSearchResult, LibraryBook } from "@/lib/books/types";
 import { seasons } from "@/lib/seasons";
 import type { Locale } from "@/lib/shelf-seasons";
 
+export type ClubBookPrefill = Pick<LibraryBook,
+  "title" | "authors" | "isbn" | "publishedYear" | "pageCount" | "format" | "readingLanguage"> & {
+  coverUrl: string | null;
+};
+
 type Draft = {
   title: string; authors: string; description: string; coverUrl: string; isbn: string;
   publishedYear: string; pageCount: string; format: LibraryBook["format"]; status: LibraryBook["status"];
@@ -65,13 +70,26 @@ function fromResult(book: BookSearchResult): Draft {
   return { title: book.title, authors: book.authors.join(", "), description: book.description ?? "", coverUrl: book.coverUrl ?? "", isbn: book.isbn ?? "", publishedYear: book.publishedYear?.toString() ?? "", pageCount: book.pageCount?.toString() ?? "", format: "print", status: "want", readingLanguage: providerLanguageToReadingLanguage(book.language), season: "", provider: book.provider, providerId: book.providerId, removeCover: false };
 }
 
-export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale; book?: LibraryBook; onSaved: (book: LibraryBook) => void; trigger?: React.ReactNode }) {
+function fromClubPrefill(prefill: ClubBookPrefill): Draft {
+  return {
+    ...blank,
+    title: prefill.title, authors: prefill.authors.join(", "),
+    coverUrl: prefill.coverUrl ?? "", isbn: prefill.isbn ?? "",
+    publishedYear: prefill.publishedYear?.toString() ?? "",
+    pageCount: prefill.pageCount?.toString() ?? "",
+    format: prefill.format, readingLanguage: prefill.readingLanguage,
+    status: "reading", season: "", description: "",
+    provider: "manual", providerId: "",
+  };
+}
+
+export function BookDialog({ locale, book, prefill, onSaved, trigger }: { locale: Locale; book?: LibraryBook; prefill?: ClubBookPrefill; onSaved: (book: LibraryBook) => void; trigger?: React.ReactNode }) {
   const c = appCopy[locale];
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<Draft>(book ? fromBook(book) : blank);
+  const [draft, setDraft] = useState<Draft>(book ? fromBook(book) : prefill ? fromClubPrefill(prefill) : blank);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookSearchResult[]>([]);
-  const [showForm, setShowForm] = useState(Boolean(book));
+  const [showForm, setShowForm] = useState(Boolean(book || prefill));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -82,8 +100,8 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
-      setDraft(book ? fromBook(book) : blank);
-      setShowForm(Boolean(book));
+      setDraft(book ? fromBook(book) : prefill ? fromClubPrefill(prefill) : blank);
+      setShowForm(Boolean(book || prefill));
       setResults([]);
       setQuery("");
       setError(null);
@@ -173,7 +191,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger ?? <Button className="primary-button"><Plus />{c.addBook}</Button>}</DialogTrigger>
       <DialogContent className="book-editor-dialog">
-        <DialogHeader><DialogTitle>{book ? c.editTitle : c.addTitle}</DialogTitle><DialogDescription>{book ? c.libraryLead : c.findBook}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>{book ? c.editTitle : c.addTitle}</DialogTitle><DialogDescription>{book ? c.libraryLead : prefill ? c.clubAddBookDescription : c.findBook}</DialogDescription></DialogHeader>
         {!showForm ? <div className="book-search-step">
           <form className="book-search-box" onSubmit={searchBooks}><Search aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={c.findBook} autoFocus /><Button type="submit" disabled={busy || query.trim().length < 2}>{busy ? c.searching : c.search}</Button></form>
           {searchError && <p className="form-error" role="alert">{searchError}</p>}
@@ -183,7 +201,7 @@ export function BookDialog({ locale, book, onSaved, trigger }: { locale: Locale;
           {hasSearched && !results.length && !error && <p className="search-empty" role="status">{c.noSearchResults}</p>}
           <Button type="button" variant="outline" onClick={() => { setDraft(blank); setShowForm(true); }}><Plus />{c.manual}</Button>
         </div> : <form className="book-editor-form" onSubmit={saveBook}>
-          {!book && <button className="back-to-search" type="button" onClick={() => setShowForm(false)}><X />{c.cancel}</button>}
+          {!book && !prefill && <button className="back-to-search" type="button" onClick={() => setShowForm(false)}><X />{c.cancel}</button>}
           <div className="editor-grid">
             <label className="span-two"><span>{c.title}</span><input name="title" required maxLength={300} value={draft.title} onChange={(event) => field("title", event.target.value)} /></label>
             <label className="span-two"><span>{c.authors}</span><input name="authors" maxLength={1000} value={draft.authors} onChange={(event) => field("authors", event.target.value)} placeholder={c.authorsHint} /></label>
