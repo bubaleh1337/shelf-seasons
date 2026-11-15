@@ -68,3 +68,16 @@
 .club-invite-actions { display: flex; gap: 9px; flex-wrap: wrap; }
 .club-danger { color: var(--destructive); }
 @media (max-width: 600px) { .club-invite-actions { display: grid; width: 100%; } }
+
+/* Distinct organizer actions: neutral book changes and an isolated finish action. */
+.club-organizer-actions { display: grid; gap: 26px; min-width: 0; }
+.club-organizer-manage { display: grid; align-content: start; justify-items: start; gap: 14px; min-width: 0; }
+.club-organizer-manage > .club-secondary { justify-self: start; }
+.club-replace-form { width: 100%; min-width: 0; padding: 18px; background: color-mix(in srgb,var(--surface-quiet),transparent 42%); border: 1px solid var(--border); border-radius: 14px; }
+.club-replace-form > .club-primary { width: 100%; }
+.club-organizer-complete { display: grid; justify-items: start; gap: 13px; min-width: 0; padding-top: 24px; border-top: 1px solid var(--border); }
+.club-organizer-complete > .club-muted { max-width: 56ch; line-height: 1.55; }
+.club-secondary.club-finish-danger { color: var(--destructive); border-color: color-mix(in srgb,var(--destructive),transparent 48%); background: color-mix(in srgb,var(--destructive),transparent 95%); }
+.club-secondary.club-finish-danger:focus-visible { outline-color: var(--destructive); }
+@media (hover: hover) { .club-secondary.club-finish-danger:not(:disabled):hover { background: color-mix(in srgb,var(--destructive),transparent 87%); border-color: var(--destructive); } }
+@media (max-width: 600px) { .club-organizer-manage,.club-organizer-complete { justify-items: stretch; } .club-organizer-manage > .club-secondary,.club-organizer-complete > .club-secondary { width: 100%; } .club-replace-form { padding: 14px; } }

@@ -13,6 +13,16 @@
 - Display names are edited in Settings and synchronized to existing club memberships, without changing account identity.
 - Both locales are supported, including mobile navigation under **More** for secondary sections.
 
+## Changing the club-selected book
+
+- The organizer can replace an active club read with another personally owned book.
+- A confirmation explains that the previous read is marked `replaced`, not `finished`.
+- Replacement is an atomic, owner-authorized PostgreSQL RPC under a row lock.
+- Existing club progress snapshots for the old read remain historical and stop syncing.
+- Every member independently connects or adds their edition of the new book; nobody's private library, reading runs or reading sessions are deleted.
+- Replacing a book does not count as finishing it; the club history distinguishes `replaced` from `finished`.
+- The replacement migration must be applied **before** deploying the new endpoint.
+
 ## Implementation
 
 Forward migrations: `supabase/migrations/202611150001_book_clubs.sql`, `202611150002_book_clubs_owner_select_rls_fix.sql`, and `202611150003_club_book_template_profile_names.sql` in order. Deploy only to the development Supabase project, validate RLS with separate user accounts, then explicitly approve production rollout.

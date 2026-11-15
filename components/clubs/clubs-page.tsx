@@ -33,6 +33,7 @@ export function ClubsPage({ locale, books, today, onBookSaved }: { locale: Local
   const [pendingBookId, setPendingBookId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [replacing, setReplacing] = useState(false);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -123,6 +124,7 @@ export function ClubsPage({ locale, books, today, onBookSaved }: { locale: Local
     setCopied(false);
     setDetail(null);
     setPendingBookId(null);
+    setReplacing(false);
     setLoading(Boolean(id));
     setSelectedId(id);
     window.history.replaceState(null, "", `/${locale}/app/clubs${id ? `?club=${encodeURIComponent(id)}` : ""}`);
@@ -173,6 +175,26 @@ export function ClubsPage({ locale, books, today, onBookSaved }: { locale: Local
       });
       setSelectedBook("");
       setTargetOn("");
+      await loadDetail(detail.club.id);
+    });
+  }
+
+  function replaceRead(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!owner || !detail || !activeRead || !selectedBook) return;
+    const nextBook = books.find((item) => item.id === selectedBook);
+    if (!nextBook || !window.confirm(c.clubReplaceConfirm
+      .replace("{old}", activeRead.title)
+      .replace("{new}", nextBook.title))) return;
+    void act(async () => {
+      await requestJson<{ readId: string }>(`/api/clubs/${detail.club.id}/reads/${activeRead.id}/replace`, {
+        method: "POST", headers: jsonHeaders,
+        body: JSON.stringify({ bookId: selectedBook, startedOn: today, targetOn: targetOn || null }),
+      });
+      setReplacing(false);
+      setSelectedBook("");
+      setTargetOn("");
+      setPendingBookId(null);
       await loadDetail(detail.club.id);
     });
   }
@@ -308,7 +330,37 @@ export function ClubsPage({ locale, books, today, onBookSaved }: { locale: Local
                 <p className="club-muted">{c.clubLinkHint}</p>
               </>}
             </div>
-            {owner && <button className="club-secondary" type="button" disabled={busy} onClick={() => finishRead(activeRead.id)}>{c.clubFinishRead}</button>}
+            {owner && <div className="club-organizer-actions">
+              <div className="club-organizer-manage">
+                <button className="club-secondary club-change-action" type="button" disabled={busy}
+                aria-expanded={replacing}
+                onClick={() => {
+                  setReplacing((current) => !current);
+                  setSelectedBook("");
+                  setTargetOn(activeRead.targetOn ?? "");
+                }}>{c.clubReplaceBook}</button>
+              {replacing && <form className="club-create-read club-replace-form" onSubmit={replaceRead}>
+                <p className="club-muted">{c.clubReplaceHint}</p>
+                <label htmlFor="club-replace-book">{c.clubSelectBook}</label>
+                <select id="club-replace-book" required value={selectedBook}
+                  onChange={(event) => setSelectedBook(event.target.value)}>
+                  <option value="">{c.clubChooseBook}</option>
+                  {books.map((book) => <option key={book.id} value={book.id}>{book.title}</option>)}
+                </select>
+                <label htmlFor="club-replace-target">{c.clubTargetOptional}</label>
+                <input type="date" id="club-replace-target" min={today} value={targetOn}
+                  onChange={(event) => setTargetOn(event.target.value)} />
+                <button className="club-primary" type="submit" disabled={busy || !selectedBook}>
+                  {busy ? c.saving : c.clubConfirmReplace}
+                </button>
+              </form>}
+              </div>
+              <div className="club-organizer-complete">
+                <p className="club-muted">{c.clubFinishHint}</p>
+                <button className="club-secondary club-finish-danger" type="button" disabled={busy}
+                  onClick={() => finishRead(activeRead.id)}>{c.clubFinishRead}</button>
+              </div>
+            </div>}
           </> : owner ? <form className="club-create-read" onSubmit={startRead}>
             <p className="club-muted">{c.clubNewReadLead}</p>
             <label htmlFor="club-book">{c.clubSelectBook}</label>
@@ -322,7 +374,7 @@ export function ClubsPage({ locale, books, today, onBookSaved }: { locale: Local
           <h2><UsersRound />{c.clubMembers} · {detail.members.length}</h2>
           <ul className="club-member-list">{detail.members.map((member) => <li key={member.userId}>{member.name}{member.userId === detail.club.ownerId && <small>{c.clubOwner}</small>}</li>)}</ul>
           <h2>{c.clubPastReads}</h2>
-          {detail.reads.filter((read) => read.status === "finished").length ? <ul className="club-history-list">{detail.reads.filter((read) => read.status === "finished").map((read) => <li key={read.id}>{read.title}</li>)}</ul> : <p className="club-muted">{c.clubNoPastReads}</p>}
+          {detail.reads.filter((read) => read.status !== "active").length ? <ul className="club-history-list">{detail.reads.filter((read) => read.status !== "active").map((read) => <li key={read.id}>{read.title}{read.status === "replaced" && <small> · {c.clubReplaced}</small>}</li>)}</ul> : <p className="club-muted">{c.clubNoPastReads}</p>}
         </aside>
       </div>
     </>}

@@ -9,6 +9,20 @@
 - Added RLS-protected club schema and an isolated development migration.
 
 
+## 0.20.2
+
+- Separated club book replacement from finishing the current shared reading.
+- Styled the completion button in an accessible muted-red outline with a clear explanatory hint.
+- Improved responsive spacing and styling for the replacement form in RU/EN and light/dark themes.
+- No database changes.
+
+## 0.20.1
+
+- Club owners can replace an active shared book with a different book from their library, with confirmation.
+- Replaced selections remain visible in club history without counting as completed reads.
+- Members link the new book independently; old personal books, pages, and notes are untouched.
+- Added an atomic, owner-authorized Supabase migration and regression tests.
+
 ## 0.20.0
 
 - Club members add the club-selected book through the existing full editor, with edition metadata prefilled and personal fields editable.

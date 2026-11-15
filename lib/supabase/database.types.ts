@@ -325,6 +325,16 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       join_book_club: { Args: { p_invite_token: string }; Returns: string };
+      replace_book_club_read: {
+        Args: {
+          p_club_id: string;
+          p_previous_read_id: string;
+          p_book_id: string;
+          p_started_on: string;
+          p_target_on?: string | null;
+        };
+        Returns: string;
+      };
       complete_onboarding: {
         Args: {
           p_locale: Database["public"]["Enums"]["app_locale"];
